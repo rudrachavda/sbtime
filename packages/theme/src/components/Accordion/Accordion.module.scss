@@ -1,0 +1,95 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.header {
+  display: flex;
+}
+
+.trigger {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  font-size: var(--text-18);
+  font-weight: var(--font-medium);
+  color: var(--heading-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 150ms ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &[data-state="open"] .icon {
+    transform: rotate(180deg);
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--paragraph-color);
+  transition: transform 200ms ease;
+}
+
+.content {
+  overflow: hidden;
+
+  &[data-state="open"] {
+    animation: slideDown 200ms ease-out;
+  }
+
+  &[data-state="closed"] {
+    animation: slideUp 200ms ease-out;
+  }
+}
+
+.contentInner {
+  padding-bottom: 16px;
+  font-size: var(--text-16);
+  line-height: 1.6;
+  color: var(--paragraph-color);
+
+  a {
+    color: var(--blue-500);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--blue-hover);
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}

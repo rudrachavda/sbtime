@@ -1,0 +1,167 @@
+# Local Development
+
+## Quickstart
+
+After cloning the repo, run bootstrap script from the repo root:
+
+```sh
+# ./berkeleytime
+bash apps/docs/src/getting-started/bootstrap-local.sh      
+```
+
+Optional flags:
+
+```sh
+# Skip database seeding 
+bash apps/docs/src/getting-started/bootstrap-local.sh --no-seed-db
+
+# Don't start Docker services
+bash apps/docs/src/getting-started/bootstrap-local.sh --no-docker
+```
+
+If the script completes successfully, your local development environment is fully set up. You don't need to run any of the manual steps below until GraphQL typedefs change or a new dependency is added.
+
+> **Note:** The script is for **macOS and Linux/WSL**.
+
+## Starting up the Application
+
+The steps below are the manual alternative to the bootstrap script. Use them only if you prefer to set up manually or if the script fails.
+
+Local development has a few local dependencies:
+- [Git](https://git-scm.com/install/)
+- Node version manager
+    - [With download script](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
+    - [With brew](https://formulae.brew.sh/formula/nvm)
+- [Docker Desktop](https://www.docker.com/)
+- pre-commit
+    - [(Preferred for MacOS users): With brew](https://formulae.brew.sh/formula/pre-commit)
+    - [With pip](https://pre-commit.com/#install)
+
+First, set up Node locally:
+```sh
+nvm install --lts
+```
+
+After installing these dependencies, make sure you are on the `main` branch:
+```sh
+# ./berkeleytime
+git pull
+git switch main
+
+# Continue installation of dependencies.
+pre-commit install
+
+# Create .env from template file and generate local database credentials
+cp .env.template .env
+node scripts/initialize-local-env.mjs
+
+# Setup local code editor intellisense.
+npm install
+npx turbo run generate
+```
+
+Open the docker desktop application, then run:
+```sh
+# Start up application
+docker compose up -d
+```
+
+The Berkeleytime application should now be running locally at `http://localhost:3000`! Make sure that each page (catalog, grades, etc.) is working as expected.
+
+### Applying the database-security upgrade to an existing checkout
+
+MongoDB creates its initial authenticated user only when its local data volume is first initialized. If you already have a Berkeleytime MongoDB volume, export any local-only work you need, then recreate the local services and reseed the redacted public backup:
+
+```sh
+docker compose down --volumes
+bash apps/docs/src/getting-started/bootstrap-local.sh
+```
+
+This removes local Docker volumes only; it does not affect production or staging data.
+
+## Common Commands
+
+Upon changing any [GraphQL](https://www.graphql-js.org/docs/) typedefs in the backend, the generated types must be regenerated:
+```sh
+# ./berkeleytime
+npx turbo run generate
+```
+
+Errors can occur when installing new `npm` packages. If they aren't automatically reflected in an already running docker compose:
+```sh
+docker compose down
+docker compose up --build -d
+```
+
+## Docker Compose Profiles
+
+By default, running `docker compose up -d` starts only the **core stack** (backend, frontend, MongoDB, Redis). Additional services are **opt-in** and can be enabled using Docker Compose profiles.
+
+Profiles allow you to start only the services you need for your workflow, keeping local development less resource-intensive.
+
+- `ag` — AG frontend  
+  → http://localhost:3001  
+
+- `staff` — Staff dashboard  
+  → http://localhost:3002  
+
+- `semantic-search` — Semantic course search  
+  → http://localhost:3010  
+
+- `docs` — Docs + Storybook  
+  → http://localhost:3003 / http://localhost:3005  
+
+- `dev` — MinIO (staff photo uploads)  
+  → http://localhost:3006  
+
+```sh
+# Start core + staff dashboard
+docker compose --profile staff up -d
+
+# Start multiple profiles
+docker compose --profile ag --profile staff up -d
+```
+
+## Ports
+`docker compose up` publishes local development services only on `127.0.0.1`; they are not reachable from your Wi-Fi or other network interfaces. By default, `DEV_PORT_PREFIX` is set to `30`, which means services will be available on ports starting with `30XX`. You can adjust this by setting the `DEV_PORT_PREFIX` environment variable if you need to run multiple instances of the repository in parallel (e.g., for git worktree setups). Do not change `DEV_BIND_ADDRESS` unless you have separately configured network controls and service authentication.
+
+The following ports are used by default (`DEV_PORT_PREFIX=30`):
+
+- **3000**: Main frontend and backend API (via nginx)
+- **3001**: AG frontend (via nginx)
+- **3002**: Staff frontend (via nginx)
+- **3003**: Docs
+- **3004**: Redis
+- **3005**: Storybook
+- **3006**: MinIO API (requires `--profile dev`)
+- **3007**: MinIO Console (requires `--profile dev`)
+- **3008**: MongoDB
+- **3009**: API Sandbox (requires SIS API keys)
+
+To use a different port prefix, set the `DEV_PORT_PREFIX` environment variable before running `docker compose up`:
+```sh
+DEV_PORT_PREFIX=80 docker compose up -d
+```
+
+> **Note:** Currently only `DEV_PORT_PREFIX=30` (default) and `DEV_PORT_PREFIX=80` are fully supported. Additional port prefixes require updating the Google Cloud OAuth authorized redirect URIs.
+
+## Seeding Local Database
+
+A seeded database is required for some pages on the frontend. The bootstrap script handles this by default (use `--no-seed-db` to skip). The steps below are the manual alternative:
+
+```sh
+# ./berkeleytime
+
+# Ensure the MongoDB instance is already running.
+docker compose up -d
+
+# Download the public data
+curl -f -o "prod-backup.gz" "https://backups.berkeleytime.com/public/daily/prod_public_backup-$(TZ=America/Los_Angeles date -v -6H +%Y%m%d).gz"
+
+# Copy the data, restore, and seed fake user
+docker cp ./prod-backup.gz berkeleytime-mongodb-1:/tmp/prod-backup.gz
+docker exec berkeleytime-mongodb-1 mongorestore --drop --gzip --archive=/tmp/prod-backup.gz
+docker exec berkeleytime-mongodb-1 mongosh bt --eval 'const r = db.users.findOneAndUpdate({ email: "dev@berkeleytime.local" }, { $setOnInsert: { googleId: "dev-fake-public-backup", email: "dev@berkeleytime.local", name: "Dev User", staff: false, lastSeenAt: new Date() } }, { upsert: true, returnDocument: "after" }); print("Dev user id: " + r._id); print("Login URL: http://localhost:3000/api/dev/login?userId=" + r._id + "&redirect_uri=/");'
+```
+
+> **Note:** Public backups are redacted and are not a comprehensive dataset. Use private backups (Cloudflare Access required) for [full data](../core/infrastructure/runbooks.md#fetch-mongo-backups).

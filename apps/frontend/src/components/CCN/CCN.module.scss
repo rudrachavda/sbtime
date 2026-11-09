@@ -1,0 +1,11 @@
+.trigger {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--label-color);
+  font-size: var(--text-14);
+  line-height: 1;
+  cursor: pointer;
+  max-width: fit-content;
+  white-space: nowrap;
+}

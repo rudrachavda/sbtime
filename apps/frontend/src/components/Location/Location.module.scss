@@ -1,0 +1,21 @@
+.placeholder {
+  color: var(--paragraph-color);
+}
+
+.root {
+  color: var(--blue-500);
+  transition: all 100ms ease-in-out;
+  font-weight: var(--font-medium);
+
+  &:hover {
+    color: var(--blue-hover);
+  }
+}
+
+.root,
+.placeholder {
+  font-weight: var(--font-normal);
+  font-size: var(--text-14);
+  line-height: 1.5;
+  width: fit-content;
+}

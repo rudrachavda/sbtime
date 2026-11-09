@@ -1,0 +1,21 @@
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.root {
+  display: block;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  height: var(--skeleton-height, 1em);
+  min-width: 1em;
+}

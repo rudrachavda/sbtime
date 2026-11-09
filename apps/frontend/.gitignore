@@ -1,0 +1,11 @@
+dist/
+node_modules/
+tmpaddon
+
+.eslintcache
+.DS_Store
+
+.vscode/*
+!.vscode/launch.json
+
+src/lib/generated/*

@@ -1,0 +1,16 @@
+redis:
+  commonLabels:
+    env: prod
+
+  architecture: standalone
+
+  auth:
+    enabled: false
+
+  master:
+    persistence:
+      enabled: false
+    configuration: |
+      maxmemory 140mb
+      maxmemory-policy volatile-lru
+      save ""

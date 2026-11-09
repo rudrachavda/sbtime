@@ -1,0 +1,371 @@
+import { ApolloServer } from "@apollo/server";
+import type { ApolloServerPlugin } from "@apollo/server";
+import responseCachePlugin from "@apollo/server-plugin-response-cache";
+import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
+import { ApolloServerPluginLandingPageDisabled } from "@apollo/server/plugin/disabled";
+import {
+  KeyValueCache,
+  KeyValueCacheSetOptions,
+} from "@apollo/utils.keyvaluecache";
+import { ApolloArmor } from "@escape.tech/graphql-armor";
+import { SpanStatusCode, trace } from "@opentelemetry/api";
+import { createHash } from "crypto";
+import type { GraphQLFormattedError } from "graphql";
+import { RedisClientType } from "redis";
+import { gunzipSync, gzipSync } from "zlib";
+
+import { config } from "../../../../../packages/common/src/utils/config";
+import log from "../../lib/logger";
+import {
+  cacheHitCount,
+  cacheMissCount,
+  featureUsageCount,
+  graphqlErrorCount,
+  graphqlOperationCount,
+  graphqlOperationDuration,
+  redisCacheOpDuration,
+} from "../../lib/metrics";
+import { timeToNextPull } from "../../utils/cache";
+import { buildSchema } from "../graphql/buildSchema";
+
+/** Map GraphQL operation names → high-level feature names for usage metrics. */
+const OPERATION_FEATURE: Record<string, string> = {
+  // Catalog / course browsing
+  GetCanonicalCatalog: "catalog",
+  GetClass: "catalog",
+  GetClassDetails: "catalog",
+  GetCourse: "catalog",
+  GetCourseTitle: "catalog",
+  GetCourseUnits: "catalog",
+  GetClassOverview: "catalog",
+  GetCourseOverviewById: "catalog",
+  GetCourseNames: "catalog",
+  GetCourses: "catalog",
+  GetAllClassesForCourse: "catalog",
+  TrackClassView: "catalog",
+  // Sections
+  GetClassSections: "catalog",
+  // Enrollment
+  GetClassEnrollment: "enrollment",
+  GetEnrollment: "enrollment",
+  GetEnrollmentTimeframes: "enrollment",
+  ReadEnrollmentTimeframes: "enrollment",
+  // Grades
+  GetClassGrades: "grades",
+  GetCourseGradeDist: "grades",
+  GetGradeDistribution: "grades",
+  // Ratings
+  GetClassRatings: "ratings",
+  GetCourseRatings: "ratings",
+  GetAggregatedRatings: "ratings",
+  GetSemestersWithRatings: "ratings",
+  GetUserRatings: "ratings",
+  GetAllRatingsData: "ratings",
+  GetClassRatingsData: "ratings",
+  CreateRatings: "ratings",
+  DeleteRatings: "ratings",
+  // Schedules
+  ReadSchedule: "schedules",
+  ReadSchedules: "schedules",
+  CreateSchedule: "schedules",
+  UpdateSchedule: "schedules",
+  DeleteSchedule: "schedules",
+  // GradTrak
+  GetPlan: "gradtrak",
+  GetPlans: "gradtrak",
+  CreateNewPlan: "gradtrak",
+  EditPlan: "gradtrak",
+  SetSelectedCourses: "gradtrak",
+  CreateNewPlanTerm: "gradtrak",
+  RemovePlanTermByID: "gradtrak",
+  EditPlanTerm: "gradtrak",
+  // Collections
+  GetCollectionById: "collections",
+  GetAllCollections: "collections",
+  GetAllCollectionsWithPreview: "collections",
+  AddClassToCollection: "collections",
+  RemoveClassFromCollection: "collections",
+  CreateCollection: "collections",
+  UpdateCollection: "collections",
+  DeleteCollection: "collections",
+  // Curated
+  GetCuratedClass: "curated",
+  GetCuratedClasses: "curated",
+  CreateCuratedClass: "curated",
+  UpdateCuratedClass: "curated",
+  DeleteCuratedClass: "curated",
+  // User / profile
+  GetUser: "profile",
+  UpdateUser: "profile",
+  DeleteAccount: "profile",
+  // Banners
+  GetAllBanners: "banners",
+  IncrementBannerClick: "banners",
+  IncrementBannerDismiss: "banners",
+  TrackBannerView: "banners",
+  // Terms
+  GetTerms: "terms",
+  GetTerm: "terms",
+};
+
+/**
+ * Apollo Server plugin that creates a span per GraphQL operation with
+ * operation name and type as span attributes. When OTel is not initialised
+ * the tracer returned by the API is a no-op, so this plugin is always safe
+ * to register.
+ */
+function createOtelPlugin(): ApolloServerPlugin {
+  const tracer = trace.getTracer("berkeleytime-graphql");
+  return {
+    async requestDidStart() {
+      const startTime = performance.now();
+      const span = tracer.startSpan("graphql.operation");
+      let operationName = "anonymous";
+      let operationType = "query";
+
+      return {
+        async didResolveOperation(ctx) {
+          operationName = ctx.request.operationName || "anonymous";
+          operationType = ctx.operation?.operation || "query";
+          span.updateName(`graphql.${operationType} ${operationName}`);
+          span.setAttribute("graphql.operation.name", operationName);
+          span.setAttribute("graphql.operation.type", operationType);
+
+          graphqlOperationCount.add(1, {
+            "graphql.operation.name": operationName,
+            "graphql.operation.type": operationType,
+          });
+
+          const feature = OPERATION_FEATURE[operationName];
+          if (feature) {
+            featureUsageCount.add(1, { feature });
+            span.setAttribute("app.feature", feature);
+          }
+        },
+
+        async didEncounterErrors(ctx) {
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: ctx.errors?.[0]?.message,
+          });
+          for (const err of ctx.errors || []) {
+            const code = (err.extensions?.code as string) || "UNKNOWN";
+            span.addEvent("graphql.error", {
+              "error.message": err.message,
+              "error.code": code,
+            });
+            graphqlErrorCount.add(1, {
+              "graphql.operation.name": operationName,
+              "graphql.operation.type": operationType,
+              "error.code": code,
+            });
+            log.error(
+              {
+                operationName,
+                operationType,
+                errorCode: code,
+                err: err.message,
+              },
+              "GraphQL error"
+            );
+          }
+        },
+
+        async willSendResponse() {
+          const duration = performance.now() - startTime;
+          graphqlOperationDuration.record(duration, {
+            "graphql.operation.name": operationName,
+            "graphql.operation.type": operationType,
+          });
+          span.setAttribute("graphql.duration_ms", Math.round(duration));
+          span.end();
+        },
+      };
+    },
+  };
+}
+
+/** 
+
+ * Extracts the first query name from a GraphQL operation.
+ * For example, if the query is "query { catalog(...) { ... } }", this returns "catalog".
+ *
+ * @param operation - The parsed GraphQL operation from the request context
+ * @returns The name of the first query field, or null if not found
+ 
+function getOperationName(
+  operation: OperationDefinitionNode | undefined
+): string | null {
+  const firstSelection = operation?.selectionSet?.selections?.[0];
+  if (firstSelection && "name" in firstSelection)
+    return firstSelection.name.value;
+  return null;
+}
+*/
+
+const SESSION_COOKIE_NAME = "bt.sid";
+
+function getSessionCacheIdFromCookie(
+  cookieHeader: string | null
+): string | null {
+  if (!cookieHeader) return null;
+
+  const encodedSessionId = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${SESSION_COOKIE_NAME}=`))
+    ?.slice(SESSION_COOKIE_NAME.length + 1);
+
+  if (!encodedSessionId) return null;
+
+  return createHash("sha256").update(encodedSessionId).digest("hex");
+}
+
+class RedisCache implements KeyValueCache {
+  client: RedisClientType;
+
+  prefix = "apollo-cache:";
+
+  constructor(client: RedisClientType) {
+    this.client = client;
+  }
+
+  async get(key: string) {
+    const start = performance.now();
+    const value = await this.client.get(this.prefix + key);
+    const duration = performance.now() - start;
+    redisCacheOpDuration.record(duration, { operation: "get" });
+
+    if (!value) {
+      cacheMissCount.add(1);
+      trace.getActiveSpan()?.addEvent("cache.miss", { "cache.key": key });
+      return undefined;
+    }
+
+    cacheHitCount.add(1);
+    trace.getActiveSpan()?.addEvent("cache.hit", { "cache.key": key });
+
+    const buffer = Buffer.from(value, "base64");
+    return gunzipSync(buffer).toString("utf-8");
+  }
+
+  /**
+   * Sets the value in the cache. Accepts a TTL. If no TTL is provided, the ApolloServerPluginCacheControl
+   * default maxAge is used, and we use the minimum of the default and the time
+   * until the next datapuller run (determined by timeToNextPull).
+   */
+  async set(
+    key: string,
+    value: string | null,
+    options?: KeyValueCacheSetOptions
+  ) {
+    if (!value) return;
+
+    const start = performance.now();
+    const ttl = Math.max(
+      1,
+      Math.min(options?.ttl ?? 24 * 60 * 60, timeToNextPull())
+    );
+    await this.client.set(
+      this.prefix + key,
+      gzipSync(value).toString("base64"),
+      { EX: ttl }
+    );
+    const duration = performance.now() - start;
+    redisCacheOpDuration.record(duration, { operation: "set" });
+    trace.getActiveSpan()?.addEvent("cache.set", {
+      "cache.key": key,
+      "cache.ttl": ttl,
+    });
+  }
+
+  async delete(key: string) {
+    const start = performance.now();
+    const success = await this.client.del(this.prefix + key);
+    const duration = performance.now() - start;
+    redisCacheOpDuration.record(duration, { operation: "delete" });
+    return success === 1;
+  }
+}
+
+// Limit GraphQL query depth to 3
+const armor = new ApolloArmor({
+  maxDepth: {
+    enabled: true,
+    n: 10,
+  },
+});
+
+const protection = armor.protect();
+
+export function formatGraphQLError(
+  formattedError: GraphQLFormattedError
+): GraphQLFormattedError {
+  const code = String(formattedError.extensions?.code ?? "");
+  const clientErrorStatuses: Record<string, number> = {
+    BAD_USER_INPUT: 400,
+    GRAPHQL_PARSE_FAILED: 400,
+    GRAPHQL_VALIDATION_FAILED: 400,
+    UNAUTHENTICATED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+  };
+  const status = clientErrorStatuses[code];
+
+  if (status) {
+    return {
+      ...formattedError,
+      extensions: {
+        ...formattedError.extensions,
+        http: { status },
+      },
+    };
+  }
+
+  return {
+    message: "Internal server error",
+    extensions: {
+      code: "INTERNAL_SERVER_ERROR",
+      http: { status: 500 },
+    },
+  };
+}
+
+export default async (redis: RedisClientType) => {
+  const schema = buildSchema();
+
+  const server = new ApolloServer({
+    schema,
+    validationRules: [...protection.validationRules],
+    plugins: [
+      ...protection.plugins,
+      createOtelPlugin(),
+      ApolloServerPluginLandingPageDisabled(),
+      ApolloServerPluginCacheControl({
+        calculateHttpHeaders: false,
+        // Fail closed: only fields with an explicit positive cache hint may be
+        // shared. Personalized and staff operations are uncached by default.
+        defaultMaxAge: 0,
+      }),
+      responseCachePlugin({
+        sessionId: async (req) => {
+          const cookieHeader = req.request.http?.headers.get("cookie") ?? null;
+          return getSessionCacheIdFromCookie(cookieHeader);
+        },
+
+        generateCacheKey: (_requestContext, keyData) => {
+          return createHash("sha256")
+            .update(JSON.stringify(keyData))
+            .digest("hex");
+        },
+      }),
+    ],
+    introspection: config.isDev,
+    cache: new RedisCache(redis),
+    formatError: formatGraphQLError,
+  });
+
+  await server.start();
+
+  return { server, redis };
+};

@@ -1,0 +1,40 @@
+*.DS_Store
+
+# database seed files
+*.dump
+*.gz
+*.sql
+mdb.archive
+
+# helm chart packages
+*.tgz
+*.rdb
+
+# IDEs and editors
+.vscode
+.idea
+
+# build outputs
+*.log
+.env
+.turbo
+node_modules
+dist/
+/db
+/data
+generated-types/
+generated-typedefs/
+
+# others
+*.cert
+*.key
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Claude Code
+.claude/

@@ -1,0 +1,42 @@
+.trigger {
+  height: 32px;
+  border-radius: 16px;
+  background-color: var(--button-hover-color);
+  color: var(--paragraph-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  user-select: none;
+
+  .text {
+    font-size: var(--text-14);
+    line-height: 1;
+
+    .value {
+      color: var(--paragraph-color);
+    }
+  }
+}
+.card {
+  width: 256px;
+
+  .divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 12px 0;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-14);
+    line-height: 1.4;
+    color: var(--neutral-400);
+
+    .key {
+      font-weight: var(--font-semibold);
+      color: var(--tooltip-heading-color);
+    }
+  }
+}

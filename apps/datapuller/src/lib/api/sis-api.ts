@@ -1,0 +1,124 @@
+import { Logger } from "tslog";
+
+import { HttpResponse } from "@repo/sis-api/courses";
+
+export async function fetchPaginatedData<
+  T,
+  R,
+  API extends Record<string, (...args: any[]) => Promise<HttpResponse<any>>>,
+  Method extends keyof API,
+>(
+  logger: Logger<unknown>,
+  api: API,
+  termIds: string[] | null,
+  method: Method,
+  headers: Record<string, string>,
+  responseProcessor: (data: Awaited<ReturnType<API[Method]>>["data"]) => R[],
+  itemFilter: (item: R) => boolean,
+  itemProcessor: (item: R) => T
+): Promise<T[]> {
+  const results: T[] = [];
+  const queryBatchSize = 50;
+  const maxAttempts = 3;
+  let page = 1;
+  let totalErrorCount = 0;
+
+  const failedPages: number[] = [];
+
+  const isEndOfData = (error: any) =>
+    error?.status === 404 || error?.response?.status === 404;
+
+  const fetchPage = async (params: Record<string, any>): Promise<R[]> => {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const response: any = await api[method](params, { headers });
+        return responseProcessor(await response.json());
+      } catch (error: any) {
+        if (isEndOfData(error)) return [];
+        if (attempt >= maxAttempts) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+      }
+    }
+  };
+
+  const fetchBatch = async (termId?: string) => {
+    const promises = [];
+    let errorCount = 0;
+
+    for (let i = 0; i < queryBatchSize; i++) {
+      const params: Record<string, any> = {
+        "page-number": (page + i).toString(),
+        "page-size": "50",
+      };
+      if (termId) {
+        params["term-id"] = termId;
+      }
+
+      const pageNumber = page + i;
+
+      promises.push(
+        fetchPage(params).catch((error: any) => {
+          logger.warn(`Error fetching page ${pageNumber}: ${error.message}`);
+          failedPages.push(pageNumber);
+          errorCount++;
+          return [];
+        })
+      );
+    }
+
+    const batchResults = await Promise.all(promises);
+    const flattenedResults = batchResults.flat();
+
+    return [flattenedResults, errorCount] as const;
+  };
+
+  const processBatch = async (termId?: string) => {
+    const [batchData, errorCount] = await fetchBatch(termId);
+    if (batchData.length === 0) return false;
+
+    const transformedData = batchData.reduce((acc, item, index) => {
+      try {
+        if (itemFilter(item)) {
+          const processedItem = itemProcessor(item);
+          acc.push(processedItem);
+        }
+      } catch (error: any) {
+        totalErrorCount++;
+        logger.error(`Error processing item at index ${index}:`, error);
+        logger.error("Problematic item:", JSON.stringify(item, null, 2));
+      }
+      return acc;
+    }, [] as T[]);
+
+    results.push(...transformedData);
+    page += queryBatchSize;
+
+    return errorCount < queryBatchSize / 10; // allow 10% error rate
+  };
+
+  if (termIds && termIds.length > 0) {
+    for (const termId of termIds) {
+      logger.info(`Fetching for term ${termId}`);
+      let hasMoreData = true;
+      while (hasMoreData) {
+        hasMoreData = await processBatch(termId);
+      }
+      page = 1;
+    }
+  } else {
+    let hasMoreData = true;
+    while (hasMoreData) {
+      hasMoreData = await processBatch();
+    }
+  }
+
+  logger.warn(`Total errors encountered: ${totalErrorCount}`);
+
+  if (failedPages.length > 0) {
+    throw new Error(
+      `Incomplete fetch: ${failedPages.length} page(s) failed after ${maxAttempts} attempts: ${failedPages.join(", ")}`
+    );
+  }
+
+  return results;
+}

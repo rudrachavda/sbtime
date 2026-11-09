@@ -1,0 +1,26 @@
+.infoItem {
+  display: flex;
+  height: 50px;
+  color: var(--paragraph-color);
+  align-items: center;
+}
+
+.infoItem label {
+  color: var(--text-gray);
+  margin-bottom: 8px;
+  width: 250px;
+  max-width: 30%;
+  flex: 0 0 auto;
+  display: inline-block;
+  margin: 0;
+}
+
+.infoValue {
+  font-size: var(--text-16);
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}

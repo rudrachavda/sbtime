@@ -1,0 +1,76 @@
+import { useMemo } from "react";
+
+import { useQuery } from "@apollo/client/react";
+
+import { MINIMUM_RESPONSES_THRESHOLD } from "@repo/shared";
+
+import {
+  GetClassRatingsDataDocument,
+  GetClassRatingsDataQuery,
+  GetClassRatingsDataQueryVariables,
+} from "@/lib/generated/graphql";
+
+interface UseGetRatingsOptions {
+  subject: string;
+  courseNumber: string;
+}
+
+export const useGetClassRatingsData = ({
+  subject,
+  courseNumber,
+}: UseGetRatingsOptions) => {
+  const { data, loading, error, refetch } = useQuery<
+    GetClassRatingsDataQuery,
+    GetClassRatingsDataQueryVariables
+  >(GetClassRatingsDataDocument, {
+    variables: {
+      subject,
+      courseNumber,
+      courseNumberTyped: courseNumber,
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const courseClasses = useMemo(
+    () =>
+      data?.course?.classes?.filter((courseClass) => Boolean(courseClass)) ??
+      [],
+    [data?.course?.classes]
+  );
+
+  const semestersWithRatings = useMemo(() => {
+    if (!data?.semestersWithRatings) return [];
+    return data.semestersWithRatings.filter((sem) => sem.maxMetricCount > 0);
+  }, [data?.semestersWithRatings]);
+
+  const hasRatings = useMemo(() => {
+    const metrics =
+      data?.course?.aggregatedRatings?.metrics?.filter((metric) =>
+        Boolean(metric)
+      ) ?? [];
+    const totalRatings = metrics.reduce(
+      (total, metric) => total + (metric.count ?? 0),
+      0
+    );
+    return totalRatings >= MINIMUM_RESPONSES_THRESHOLD;
+  }, [data?.course?.aggregatedRatings?.metrics]);
+
+  const instructorAggregatedRatings = useMemo(() => {
+    if (!data?.course?.instructorAggregatedRatings) return [];
+    return data.course.instructorAggregatedRatings.filter((rating) =>
+      Boolean(rating)
+    );
+  }, [data?.course?.instructorAggregatedRatings]);
+
+  return {
+    data,
+    aggregatedRatings: data?.course?.aggregatedRatings,
+    instructorAggregatedRatings,
+    semestersWithRatings,
+    courseClasses,
+    hasRatings,
+    loading,
+    error,
+    refetch,
+  };
+};

@@ -1,0 +1,287 @@
+import { connection } from "mongoose";
+
+import { parseTermName } from "@repo/common";
+import { ClassModel, TermModel } from "@repo/common/models";
+
+import {
+  refreshAllCatalogClasses,
+  refreshCatalogClasses,
+} from "../lib/catalog-denormalize";
+import { getClasses } from "../lib/classes";
+import { Config } from "../shared/config";
+import {
+  type TermSelector,
+  getActiveTerms,
+  getLastFiveYearsTerms,
+} from "../shared/term-selectors";
+
+// /**
+//  * Refreshes the semantic search index for a single term.
+//  * Returns true if successful, false otherwise.
+//  */
+// const refreshSemanticSearchForTerm = async (
+//   config: Config,
+//   term: Pick<ITermItem, "name">
+// ): Promise<boolean> => {
+//   const { log, SEMANTIC_SEARCH_URL } = config;
+//
+//   const [yearStr, semester] = term.name.split(" ");
+//   const year = parseInt(yearStr);
+//
+//   if (!year || !semester) {
+//     log.warn(`[Semantic Search] Failed to parse term name: ${term.name}`);
+//     return false;
+//   }
+//
+//   try {
+//     log.info(`[Semantic Search] Refreshing index for ${term.name}...`);
+//
+//     const response = await fetch(`${SEMANTIC_SEARCH_URL}/refresh`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ year, semester }),
+//     });
+//
+//     if (!response.ok) {
+//       const errorText = await response.text();
+//       log.warn(
+//         `[Semantic Search] Failed to refresh ${term.name}: HTTP ${response.status} - ${errorText}`
+//       );
+//       return false;
+//     }
+//
+//     const result = (await response.json()) as { size?: number };
+//     log.info(
+//       `[Semantic Search] Refreshed ${term.name}: ${result.size ?? "unknown"} courses indexed`
+//     );
+//     return true;
+//   } catch (error: any) {
+//     log.warn(
+//       `[Semantic Search] Failed to refresh ${term.name}: ${error.message}`
+//     );
+//     return false;
+//   }
+// };
+//
+// /**
+//  * Refreshes the semantic search index for the given terms.
+//  * Processes terms sequentially and continues even if some fail.
+//  */
+// const refreshSemanticSearchForTerms = async (
+//   config: Config,
+//   terms: Pick<ITermItem, "name">[]
+// ) => {
+//   const { log } = config;
+//
+//   if (terms.length === 0) {
+//     log.info("[Semantic Search] No terms to refresh.");
+//     return;
+//   }
+//
+//   log.info(`[Semantic Search] Refreshing index for ${terms.length} term(s)...`);
+//
+//   let successCount = 0;
+//   for (const term of terms) {
+//     const success = await refreshSemanticSearchForTerm(config, term);
+//     if (success) {
+//       successCount++;
+//     }
+//   }
+//
+//   log.info(
+//     `[Semantic Search] Completed: ${successCount}/${terms.length} succeeded`
+//   );
+// };
+
+const TERMS_PER_API_BATCH = 4;
+
+// Note: We scan ALL terms in the database rather than just the affected ones.
+// This is intentional to ensure data consistency, as class data may be modified
+// by sources other than the datapuller. Since the query is fast, the overhead
+// is minimal. Future optimization could track only affected terms if needed.
+export const updateTermsCatalogDataFlags = async (log: Config["log"]) => {
+  log.trace("Updating hasCatalogData flags for all terms...");
+
+  const allTerms = await TermModel.find({}).select({ _id: 1, name: 1 }).lean();
+
+  // Single aggregation query to get all year+semester combinations with catalog data
+  const termsWithClasses = await ClassModel.aggregate<{
+    _id: { year: number; semester: string };
+  }>([
+    {
+      $match: {
+        anyPrintInScheduleOfClasses: true,
+      },
+    },
+    {
+      $group: {
+        _id: { year: "$year", semester: "$semester" },
+      },
+    },
+  ]);
+
+  const catalogDataSet = new Set(
+    termsWithClasses.map(
+      (t: { _id: { year: number; semester: string } }) =>
+        `${t._id.year} ${t._id.semester}`
+    )
+  );
+
+  const bulkOps = allTerms
+    .map((term) => {
+      const parsed = parseTermName(term.name);
+      if (!parsed) {
+        log.warn(`Invalid term name format: ${term.name}`);
+        return null;
+      }
+
+      const { year, semester } = parsed;
+      const hasCatalogData = catalogDataSet.has(`${year} ${semester}`);
+
+      return {
+        updateOne: {
+          filter: { _id: term._id },
+          update: { $set: { hasCatalogData } },
+        },
+      };
+    })
+    .filter((op): op is NonNullable<typeof op> => op !== null);
+
+  if (bulkOps.length > 0) {
+    const result = await TermModel.bulkWrite(bulkOps);
+    log.info(
+      `Updated hasCatalogData flag for ${result.modifiedCount.toLocaleString()} / ${allTerms.length.toLocaleString()} terms.`
+    );
+    log.info(
+      `Found ${catalogDataSet.size.toLocaleString()} terms with catalog data.`
+    );
+  }
+};
+
+const updateClasses = async (
+  config: Config,
+  termSelector: TermSelector,
+  opts?: { rebuildEntireCatalog?: boolean }
+) => {
+  const {
+    log,
+    sis: { CLASS_APP_ID, CLASS_APP_KEY },
+  } = config;
+
+  log.trace(`Fetching terms....`);
+
+  const allTerms = await termSelector(); // includes LAW, Graduate, etc. which are duplicates of Undergraduate
+  const terms = allTerms.filter((term) => term.academicCareerCode === "UGRD");
+
+  log.info(
+    `Fetched ${terms.length.toLocaleString()} undergraduate terms: ${terms.map((term) => term.name).toLocaleString()}.`
+  );
+  if (terms.length == 0) {
+    log.warn(`No terms found, skipping update.`);
+    return;
+  }
+
+  let totalClasses = 0;
+  let totalInserted = 0;
+  let totalDeleted = 0;
+
+  // Insert classes in batches of 4 terms
+  for (let i = 0; i < terms.length; i += TERMS_PER_API_BATCH) {
+    const termsBatch = terms.slice(i, i + TERMS_PER_API_BATCH);
+    const termsBatchIds = termsBatch.map((term) => term.id);
+    const session = await connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        log.trace(
+          `Fetching classes for terms ${termsBatch.map((term) => term.name).toLocaleString()}...`
+        );
+        const classes = await getClasses(
+          log,
+          CLASS_APP_ID,
+          CLASS_APP_KEY,
+          termsBatchIds
+        );
+
+        if (classes.length === 0) {
+          throw new Error(`No classes found, skipping update.`);
+        }
+
+        log.trace(`Deleting classes in batch ${i}...`);
+
+        const { deletedCount } = await ClassModel.deleteMany(
+          { termId: { $in: termsBatchIds } },
+          { session }
+        );
+
+        log.trace(`Inserting batch ${i}`);
+
+        const { insertedCount } = await ClassModel.insertMany(classes, {
+          ordered: false,
+          rawResult: true,
+          session,
+        });
+
+        // avoid replacing data if a non-negligible amount is deleted
+        if (insertedCount / deletedCount <= 0.9) {
+          throw new Error(
+            `Deleted ${deletedCount} classes and inserted only ${insertedCount} in batch ${i}; aborting data insertion process`
+          );
+        }
+
+        totalClasses += classes.length;
+        totalDeleted += deletedCount;
+        totalInserted += insertedCount;
+      });
+    } catch (error: any) {
+      log.error(`Error inserting batch: ${error.message}`);
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  log.info(`Deleted ${totalDeleted.toLocaleString()} total classes`);
+  log.info(
+    `Inserted ${totalInserted.toLocaleString()} classes, after fetching ${totalClasses.toLocaleString()} classes.`
+  );
+
+  await updateTermsCatalogDataFlags(log);
+
+  if (opts?.rebuildEntireCatalog) {
+    // Rebuild catalog for all terms (covers terms beyond what was just pulled)
+    await refreshAllCatalogClasses(log);
+  } else {
+    // Rebuild denormalized catalog_classes only for the terms we just pulled
+    const pulledTermNames = [
+      ...new Set(terms.map((term) => term.name as string)),
+    ];
+    const pulledTermsParsed = pulledTermNames
+      .map(parseTermName)
+      .filter((t): t is NonNullable<typeof t> => t !== null);
+
+    for (const term of pulledTermsParsed) {
+      await refreshCatalogClasses(log, term.year, term.semester);
+    }
+  }
+
+  // Refresh semantic search index only for current/future terms
+  // Past terms don't change, so no need to rebuild their indexes
+  // const nonPastTerms = terms
+  //   .filter((term) => term.temporalPosition !== "Past")
+  //   .map((term) => ({ name: term.name }));
+  // await refreshSemanticSearchForTerms(config, nonPastTerms);
+};
+
+const activeTerms = async (config: Config) => {
+  return updateClasses(config, getActiveTerms);
+};
+
+const lastFiveYearsTerms = async (config: Config) => {
+  return updateClasses(config, getLastFiveYearsTerms, {
+    rebuildEntireCatalog: true,
+  });
+};
+
+export default {
+  activeTerms,
+  lastFiveYearsTerms,
+};

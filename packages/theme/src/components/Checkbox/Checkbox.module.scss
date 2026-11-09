@@ -1,0 +1,22 @@
+.root {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+
+  &[data-disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  &[data-state="checked"] {
+    background-color: var(--blue-500);
+    color: white;
+  }
+
+  &[data-state="unchecked"] {
+    border: 2px solid var(--paragraph-color);
+  }
+}

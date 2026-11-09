@@ -1,0 +1,308 @@
+---
+networks:
+  bt:
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
+      target: backend-dev
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      redis-preflight:
+        condition: service_completed_successfully
+    networks:
+      - bt
+    restart: always
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - require("http").get("http://localhost:5001/healthz",r=>process.exit(r.statusCode===200?0:1)).on("error",()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      start_period: 20s
+      retries: 20
+    volumes:
+      - ./.env:/backend/apps/backend/.env
+      - ./apps/backend:/backend/apps/backend
+      - ./packages:/backend/packages
+  semantic-search:
+    profiles:
+      - semantic-search
+    build:
+      context: ./apps/semantic-search
+      dockerfile: Dockerfile
+    networks:
+      - bt
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}10:8000"
+    restart: always
+    volumes:
+      - ./apps/semantic-search/app:/app/app
+    environment:
+      - SEMANTIC_SEARCH_YEAR=2026
+      - SEMANTIC_SEARCH_SEMESTER=Spring
+      - BACKEND_URL=http://backend:5001
+      - REDIS_URI=redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379
+  frontend:
+    build:
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile
+      target: frontend-dev
+    networks:
+      - bt
+    restart: always
+    volumes:
+      - ./apps/frontend:/frontend/apps/frontend
+      - ./packages:/frontend/packages
+  ag-frontend:
+    profiles:
+      - ag
+    build:
+      context: .
+      dockerfile: ./apps/ag-frontend/Dockerfile
+      target: ag-frontend-dev
+    networks:
+      - bt
+    restart: always
+    volumes:
+      - ./apps/ag-frontend:/ag-frontend/apps/ag-frontend
+      - ./packages:/ag-frontend/packages
+  staff-frontend:
+    profiles:
+      - staff
+    build:
+      context: .
+      dockerfile: ./apps/staff-frontend/Dockerfile
+      target: staff-frontend-dev
+    networks:
+      - bt
+    restart: always
+    volumes:
+      - ./apps/staff-frontend:/staff-frontend/apps/staff-frontend
+      - ./packages:/staff-frontend/packages
+  mongodb-preflight:
+    image: alpine:3.22
+    networks:
+      - bt
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+    command:
+      - -ec
+      - |
+        mkdir -p /data/db /data/configdb
+
+        # Ensure mongod can read/write persisted paths across host OSes.
+        chown -R 1000:1000 /data/db /data/configdb || true
+        chmod 700 /data/configdb || true
+
+        # Recover from an interrupted bootstrap where lock files exist but
+        # WiredTiger metadata was never fully initialized.
+        if [ -f /data/db/WiredTiger.lock ] && [ ! -f /data/db/WiredTiger ]; then
+          echo "Detected incomplete WiredTiger state. Resetting /data/db."
+          rm -rf /data/db/*
+        fi
+
+        rm -f /data/db/mongod.lock || true
+
+        # Let Atlas local create/rotate its own keyfile, but clear obviously
+        # invalid leftovers so startup can recover.
+        if [ -f /data/configdb/keyfile ] && ( [ ! -s /data/configdb/keyfile ] || ! tr -d '\r\n' < /data/configdb/keyfile | grep -Eq '^[A-Za-z0-9+/=][A-Za-z0-9+/=]*$' ); then
+          echo "Removing invalid MongoDB keyfile."
+          rm -f /data/configdb/keyfile
+        fi
+
+        # On first boot, seed a valid keyfile so Atlas local can start even
+        # when /data/configdb is an empty mounted volume.
+        if [ ! -f /data/configdb/keyfile ]; then
+          echo "Generating MongoDB keyfile for fresh volume."
+          head -c 756 /dev/urandom | base64 | tr -d '\n' > /data/configdb/keyfile
+        fi
+
+        if [ -f /data/configdb/keyfile ]; then
+          chmod 600 /data/configdb/keyfile || true
+          chown 1000:1000 /data/configdb/keyfile || true
+        fi
+    volumes:
+      - mongodb-db:/data/db
+      - mongodb-configdb:/data/configdb
+  mongodb:
+    image: ${MONGODB_IMAGE:?Set MONGODB_IMAGE in .env}
+    pull_policy: always
+    hostname: rs0
+    depends_on:
+      mongodb-preflight:
+        condition: service_completed_successfully
+    networks:
+      - bt
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}08:27017"
+    environment:
+      MONGODB_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME:?Set MONGODB_ROOT_USERNAME in .env}
+      MONGODB_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:?Set MONGODB_ROOT_PASSWORD in .env}
+    healthcheck:
+      test: '/usr/bin/mongosh --host localhost --port 27017 --username "$$MONGODB_INITDB_ROOT_USERNAME" --password "$$MONGODB_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "db.runCommand({ ping: 1 }).ok"'
+      interval: 5s
+      timeout: 10s
+      start_period: 15s
+      retries: 10
+    volumes:
+      - mongodb-db:/data/db
+      - mongodb-configdb:/data/configdb
+      - ./infra/mongo/migrations:/migrations
+  mongodb-init:
+    image: ${MONGODB_IMAGE:?Set MONGODB_IMAGE in .env}
+    pull_policy: always
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - bt
+    environment:
+      MONGODB_INIT_URI: mongodb://${MONGODB_ROOT_USERNAME:?Set MONGODB_ROOT_USERNAME in .env}:${MONGODB_ROOT_PASSWORD:?Set MONGODB_ROOT_PASSWORD in .env}@mongodb:27017/bt?authSource=admin&replicaSet=rs0
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+    command:
+      - -ec
+      - |
+        attempts=0
+        until mongosh "$$MONGODB_INIT_URI" /scripts/01-create-search-indexes.js; do
+          attempts=$$((attempts + 1))
+          if [ "$$attempts" -ge 30 ]; then
+            echo "mongodb-init failed after $$attempts attempts."
+            exit 1
+          fi
+          echo "mongodb-init retry $$attempts/30..."
+          sleep 2
+        done
+    volumes:
+      - ./docker/mongodb/init:/scripts:ro
+  nginx:
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    image: nginx:1.21
+    networks:
+      - bt
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}00:8080"
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}01:8081"
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}02:8082"
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  redis:
+    image: redis/redis-stack-server:7.2.0-v14
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}04:6379"
+    environment:
+      REDIS_ARGS: "--requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    networks:
+      - bt
+    restart: always
+  redis-preflight:
+    image: redis/redis-stack-server:7.2.0-v14
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - bt
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+    command:
+      - -ec
+      - |
+        attempts=0
+        until [ "$$(redis-cli --no-auth-warning -h redis -a "$$REDIS_PASSWORD" ping)" = "PONG" ]; do
+          attempts=$$((attempts + 1))
+          if [ "$$attempts" -ge 30 ]; then
+            echo "redis-preflight failed waiting for redis."
+            exit 1
+          fi
+          sleep 1
+        done
+
+        redis-cli --no-auth-warning -h redis -a "$$REDIS_PASSWORD" FLUSHALL
+        echo "Flushed redis cache on startup."
+  storybook:
+    profiles:
+      - docs
+    build:
+      context: .
+      dockerfile: ./apps/storybook/Dockerfile
+      target: storybook-dev
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}05:6006"
+    networks:
+      - bt
+    restart: always
+    volumes:
+      - ./packages/theme:/storybook/packages/theme
+      - ./apps/storybook:/storybook/apps/storybook
+  docs:
+    profiles:
+      - docs
+    build:
+      context: .
+      dockerfile: ./apps/docs/Dockerfile
+      target: docs-dev
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}03:3000"
+    networks:
+      - bt
+    restart: always
+    volumes:
+      - ./apps/docs:/apps/docs
+      
+  # if using staff photos in dev, use --profile dev
+  minio:
+    image: ${MINIO_IMAGE:?Set MINIO_IMAGE in .env}
+    profiles:
+      - dev
+    ports:
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}06:9000"
+      - "${DEV_BIND_ADDRESS:-127.0.0.1}:${DEV_PORT_PREFIX:-30}07:9090"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+    networks:
+      - bt
+    volumes:
+      - 'minio:/data/minio'
+    command: minio server /data/minio --console-address ":9090"
+  createbuckets:
+    image: ${MINIO_MC_IMAGE:?Set MINIO_MC_IMAGE in .env}
+    profiles:
+      - dev
+    depends_on:
+      - minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD";
+      /usr/bin/mc mb myminio/images; 
+      /usr/bin/mc anonymous set public myminio/images;
+      exit 0;
+      "
+volumes:
+  minio:
+    driver: local
+  mongodb-db:
+    driver: local
+  mongodb-configdb:
+    driver: local

@@ -1,0 +1,304 @@
+import { useState } from "react";
+
+import styles from "./Analytics.module.scss";
+import {
+  TotalRequestsBlock,
+  UniqueVisitorsBlock,
+} from "./components/CloudflareAnalytics";
+import {
+  CollectionNamesBlock,
+  CustomCollectionsBlock,
+  DailyBookmarksBlock,
+  TotalBookmarksBlock,
+  UsersWithBookmarksBlock,
+  UsersWithCustomCollectionsBlock,
+} from "./components/CollectionAnalytics";
+import {
+  CourseResultsClickedBlock,
+  DataLoadFailuresBlock,
+  PageErrorsBlock,
+  SchedulesGeneratedBlock,
+  SchedulesSavedBlock,
+  SearchFailuresBlock,
+  SearchFiltersAppliedBlock,
+} from "./components/EngagementAnalytics";
+import {
+  CourseCountHistogramBlock,
+  DailyGradTraksBlock,
+  MajorDistributionBlock,
+  StartYearDistributionBlock,
+  TopUsersTableBlock,
+  TotalGradTraksBlock,
+  UtilizationRatioBlock,
+} from "./components/GradTrakAnalytics";
+import { OutreachPanelBlock } from "./components/OutreachAnalytics";
+import {
+  AverageScoresOverTimeBlock,
+  ClassesWithReviewsBlock,
+  CourseDistributionBlock,
+  CourseRatingsDistributionBlock,
+  OptionalResponseRatioBlock,
+  RatingsCountBlock,
+  RatingsDayHistogramBlock,
+  RecentRatingsBlock,
+  ScoreDistributionBlock,
+  UniqueUsersGrowthBlock,
+  WrittenReviewsCountBlock,
+} from "./components/RatingsAnalytics";
+import {
+  ClassesPerScheduleBlock,
+  DailySchedulesBlock,
+  SchedulerUtilizationRatioBlock,
+  SchedulesBySemesterBlock,
+  TopSchedulerUsersBlock,
+  TotalSchedulesBlock,
+} from "./components/SchedulerAnalytics";
+import {
+  ActivityScoreDistributionBlock,
+  DailyActivityBlock,
+  SignupDayHistogramBlock,
+  UserActivityRecencyBlock,
+  UserGrowthBlock,
+} from "./components/UserAnalytics";
+
+type Tab =
+  | "all"
+  | "general"
+  | "ratings"
+  | "bookmarks"
+  | "gradtrak"
+  | "scheduler"
+  | "outreach"
+  | "engagement";
+
+export default function Analytics() {
+  const [activeTab, setActiveTab] = useState<Tab>("general");
+
+  const showGeneral = activeTab === "all" || activeTab === "general";
+  const showScheduler = activeTab === "all" || activeTab === "scheduler";
+  const showRatings = activeTab === "all" || activeTab === "ratings";
+  const showGradTrak = activeTab === "all" || activeTab === "gradtrak";
+  const showBookmarks = activeTab === "all" || activeTab === "bookmarks";
+  const showOutreach = activeTab === "all" || activeTab === "outreach";
+  const showEngagement = activeTab === "all" || activeTab === "engagement";
+
+  return (
+    <div className={styles.root}>
+      <div className={styles.toolbar}>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === "all" ? styles.active : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            All
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "general" ? styles.active : ""}`}
+            onClick={() => setActiveTab("general")}
+          >
+            General
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "scheduler" ? styles.active : ""}`}
+            onClick={() => setActiveTab("scheduler")}
+          >
+            Scheduler
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "ratings" ? styles.active : ""}`}
+            onClick={() => setActiveTab("ratings")}
+          >
+            Ratings
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "gradtrak" ? styles.active : ""}`}
+            onClick={() => setActiveTab("gradtrak")}
+          >
+            GradTrak
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "bookmarks" ? styles.active : ""}`}
+            onClick={() => setActiveTab("bookmarks")}
+          >
+            Bookmarks
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "outreach" ? styles.active : ""}`}
+            onClick={() => setActiveTab("outreach")}
+          >
+            Outreach
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "engagement" ? styles.active : ""}`}
+            onClick={() => setActiveTab("engagement")}
+          >
+            Engagement
+          </button>
+        </div>
+      </div>
+      <div className={styles.grid}>
+        {showGeneral && (
+          <>
+            <div className={styles.cell}>
+              <UniqueVisitorsBlock />
+            </div>
+            <div className={styles.cell}>
+              <TotalRequestsBlock />
+            </div>
+            <div className={styles.cell}>
+              <UserGrowthBlock />
+            </div>
+            <div className={styles.cell}>
+              <SignupDayHistogramBlock />
+            </div>
+            <div className={styles.cell}>
+              <UserActivityRecencyBlock />
+            </div>
+            <div className={styles.cell}>
+              <DailyActivityBlock />
+            </div>
+            <div className={styles.cell}>
+              <ActivityScoreDistributionBlock />
+            </div>
+          </>
+        )}
+        {showScheduler && (
+          <>
+            <div className={styles.cell}>
+              <TotalSchedulesBlock />
+            </div>
+            <div className={styles.cell}>
+              <DailySchedulesBlock />
+            </div>
+            <div className={styles.cell}>
+              <SchedulerUtilizationRatioBlock />
+            </div>
+            <div className={styles.cell}>
+              <ClassesPerScheduleBlock />
+            </div>
+            <div className={styles.cell}>
+              <SchedulesBySemesterBlock />
+            </div>
+            <div className={styles.cell}>
+              <TopSchedulerUsersBlock />
+            </div>
+          </>
+        )}
+        {showRatings && (
+          <>
+            <div className={styles.cell}>
+              <UniqueUsersGrowthBlock />
+            </div>
+            <div className={styles.cell}>
+              <RatingsCountBlock />
+            </div>
+            <div className={styles.cell}>
+              <RatingsDayHistogramBlock />
+            </div>
+            <div className={styles.cell}>
+              <CourseDistributionBlock />
+            </div>
+            <div className={styles.cell}>
+              <CourseRatingsDistributionBlock />
+            </div>
+            <div className={styles.cell}>
+              <OptionalResponseRatioBlock />
+            </div>
+            <div className={styles.cell}>
+              <AverageScoresOverTimeBlock />
+            </div>
+            <div className={styles.cell}>
+              <ScoreDistributionBlock />
+            </div>
+            <div className={styles.cell}>
+              <RecentRatingsBlock />
+            </div>
+            <div className={styles.cell}>
+              <WrittenReviewsCountBlock />
+            </div>
+            <div className={styles.cell}>
+              <ClassesWithReviewsBlock />
+            </div>
+          </>
+        )}
+        {showGradTrak && (
+          <>
+            <div className={styles.cell}>
+              <TotalGradTraksBlock />
+            </div>
+            <div className={styles.cell}>
+              <DailyGradTraksBlock />
+            </div>
+            <div className={styles.cell}>
+              <UtilizationRatioBlock />
+            </div>
+            <div className={styles.cell}>
+              <CourseCountHistogramBlock />
+            </div>
+            <div className={styles.cell}>
+              <MajorDistributionBlock />
+            </div>
+            <div className={styles.cell}>
+              <StartYearDistributionBlock />
+            </div>
+            <div className={styles.cell}>
+              <TopUsersTableBlock />
+            </div>
+          </>
+        )}
+        {showBookmarks && (
+          <>
+            <div className={styles.cell}>
+              <UsersWithBookmarksBlock />
+            </div>
+            <div className={styles.cell}>
+              <TotalBookmarksBlock />
+            </div>
+            <div className={styles.cell}>
+              <DailyBookmarksBlock />
+            </div>
+            <div className={styles.cell}>
+              <CustomCollectionsBlock />
+            </div>
+            <div className={styles.cell}>
+              <UsersWithCustomCollectionsBlock />
+            </div>
+            <div className={styles.cell}>
+              <CollectionNamesBlock />
+            </div>
+          </>
+        )}
+        {showOutreach && (
+          <div className={styles.cell}>
+            <OutreachPanelBlock />
+          </div>
+        )}
+        {showEngagement && (
+          <>
+            <div className={styles.cell}>
+              <SchedulesSavedBlock />
+            </div>
+            <div className={styles.cell}>
+              <SchedulesGeneratedBlock />
+            </div>
+            <div className={styles.cell}>
+              <CourseResultsClickedBlock />
+            </div>
+            <div className={styles.cell}>
+              <SearchFiltersAppliedBlock />
+            </div>
+            <div className={styles.cell}>
+              <PageErrorsBlock />
+            </div>
+            <div className={styles.cell}>
+              <DataLoadFailuresBlock />
+            </div>
+            <div className={styles.cell}>
+              <SearchFailuresBlock />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,50 @@
+.trigger {
+  font-weight: var(--font-normal);
+  font-size: var(--text-14);
+  color: var(--paragraph-color);
+  line-height: 1.5;
+  width: fit-content;
+}
+
+.tooltipCard {
+  display: flex;
+  gap: 4px;
+  color: var(--neutral-400);
+  font-size: var(--text-14);
+  line-height: 1.4;
+
+  .day {
+    width: 24px;
+    height: 240px; // 24 hours * 10px/hour
+    position: relative;
+
+    .label {
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .noonReference {
+      position: absolute;
+      bottom: 120px; // 12 PM: 12 hours from midnight * 10px/hour = 120px from bottom (middle of 240px)
+      left: 0;
+      width: 100%;
+      height: 1px;
+      border-top: 1px dashed var(--neutral-600);
+      opacity: 0.6;
+    }
+
+    .event {
+      width: 100%;
+      border-radius: 1px;
+      background-color: var(--blue-500);
+      position: absolute;
+      left: 0;
+    }
+  }
+
+  .divider {
+    width: 1px;
+    background-color: var(--border-color);
+  }
+}

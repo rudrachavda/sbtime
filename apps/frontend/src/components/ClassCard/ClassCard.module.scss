@@ -1,0 +1,95 @@
+.sectionNumber {
+  color: var(--paragraph-color);
+}
+
+.headingWithPrefix {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.headingPrefix {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titleDescription {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gradeContainer {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 8px;
+}
+
+.reservedSeating {
+  font-size: var(--text-14);
+  color: var(--paragraph-color);
+  line-height: 1;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.reservedSeatingIcon {
+  color: var(--paragraph-color);
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  vertical-align: baseline;
+  display: inline-block;
+}
+
+.semester {
+  display: block;
+  color: var(--paragraph-color);
+  line-height: 1.5;
+}
+
+.ratingsCount {
+  font-size: var(--text-14);
+  color: var(--paragraph-color);
+  line-height: 1;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ratingsIcon {
+  color: var(--paragraph-color);
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  vertical-align: baseline;
+  display: inline-block;
+}

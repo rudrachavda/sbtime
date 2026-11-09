@@ -1,0 +1,63 @@
+.root {
+  width: 100%;
+  color: var(--secondary-color);
+  padding: 8px 12px;
+  font-size: var(--text-14);
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+  transition: all 100ms ease-in-out;
+
+  &:hover:not([data-disabled="true"]):not([data-selected="true"]) {
+    background-color: var(--button-hover-color);
+  }
+
+  &:active,
+  &:focus-visible {
+    background-color: var(--blue-500-20);
+    color: var(--blue-500);
+  }
+
+  &[data-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &[data-selected="true"] {
+    background-color: var(--blue-500-20);
+    color: var(--blue-500);
+
+    &:hover:not([data-disabled="true"]) {
+      background-color: var(--blue-500-20);
+    }
+
+    .meta {
+      color: var(--blue-500);
+    }
+  }
+
+  &.checkbox {
+    &:hover:not([data-disabled="true"]) {
+      background-color: var(--button-hover-color);
+    }
+
+    &:active,
+    &:focus-visible {
+      background-color: var(--button-hover-color);
+      color: var(--secondary-color);
+    }
+  }
+
+  .meta {
+    font-size: var(--text-12);
+    color: var(--label-color);
+  }
+}
+
+.label {
+  white-space: pre-line;
+}
+
+.selected {
+  font-weight: var(--font-medium);
+}

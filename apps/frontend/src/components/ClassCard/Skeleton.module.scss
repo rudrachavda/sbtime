@@ -1,0 +1,33 @@
+.root {
+  pointer-events: none;
+  user-select: none;
+  cursor: default;
+  height: auto;
+  border: 1px solid var(--border-color);
+}
+
+.title {
+  width: 40%;
+  --skeleton-height: var(--text-16);
+  margin-bottom: 8px;
+}
+
+.description {
+  width: 65%;
+  margin-bottom: 4px;
+}
+
+.grade {
+  width: 10px;
+  font-size: var(--text-14);
+}
+
+.enrolled {
+  width: 88px;
+  font-size: var(--text-14);
+}
+
+.units {
+  width: 44px;
+  font-size: var(--text-14);
+}

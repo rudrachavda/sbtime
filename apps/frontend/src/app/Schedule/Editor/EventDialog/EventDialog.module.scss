@@ -1,0 +1,18 @@
+.time {
+  color: var(--paragraph-color);
+  display: flex;
+  justify-content: space-between;
+
+  .time-select {
+    width: 180px;
+    input {
+      width: 70px;
+      margin-left: 10px;
+      display: inline;
+      color: var(--paragraph-color);
+    }
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+  }
+}

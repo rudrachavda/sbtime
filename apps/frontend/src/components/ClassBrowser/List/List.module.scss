@@ -1,0 +1,143 @@
+.root {
+  width: 384px;
+  flex-shrink: 0;
+  background-color: var(--foreground-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .topSection {
+    position: relative;
+    z-index: 2;
+    background-color: var(--foreground-color);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -18px;
+      height: 18px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 140ms ease-in-out;
+      background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--foreground-color) 100%, transparent) 0%,
+        color-mix(in srgb, var(--foreground-color) 0%, transparent) 100%
+      );
+    }
+  }
+
+  .topSectionScrolled {
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  .catalogScroll {
+    overflow: auto;
+    scrollbar-width: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  [data-mode="compact"] > & {
+    width: 100%;
+  }
+
+  .placeholder {
+    color: var(--paragraph-color);
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 24px;
+    gap: 16px;
+    font-size: var(--text-16);
+
+    .heading {
+      font-weight: var(--font-medium);
+      color: var(--heading-color);
+      margin-bottom: 8px;
+    }
+
+    .description {
+      line-height: 1.5;
+    }
+  }
+
+  .view {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .body {
+      padding: 0 12px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 12px;
+    font-size: var(--text-14);
+    color: var(--paragraph-color);
+
+    .paginationButton {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--foreground-color);
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: var(--text-14);
+      color: var(--heading-color);
+      transition: background-color 100ms ease-in-out;
+
+      &:hover:not(:disabled) {
+        background-color: var(--button-hover-color);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .paginationInfo {
+      white-space: nowrap;
+    }
+  }
+
+  .skeletonContainer {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .loadMoreSkeletons {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}

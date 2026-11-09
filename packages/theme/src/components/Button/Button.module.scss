@@ -1,0 +1,126 @@
+.root {
+  height: 32px;
+  border-radius: 4px;
+  padding: 0 12px;
+  display: inline-flex;
+  width: max-content;
+  flex-shrink: 0;
+  align-items: center;
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  line-height: 1;
+  cursor: pointer;
+  gap: 8px;
+  user-select: none;
+  border: none;
+  background: unset;
+  outline: none;
+  transition:
+    border-color 100ms ease-in-out,
+    background-color 100ms ease-in-out,
+    color 100ms ease-in-out;
+
+  &:focus-visible {
+    outline: 2px solid var(--blue-500);
+    outline-offset: 2px;
+  }
+
+  &[data-disabled] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &[data-variant="primary"] {
+    background-color: var(--blue-500);
+    color: white;
+
+    &:hover {
+      background-color: var(--blue-hover);
+    }
+
+    &:active {
+      background-color: var(--blue-700);
+    }
+  }
+  &[data-variant="primary"][data-delete] {
+    background-color: var(--red-500);
+
+    &:hover {
+      background-color: var(--red-600);
+    }
+
+    &:active {
+      background-color: var(--red-700);
+    }
+  }
+
+  &[data-variant="secondary"] {
+    border: 1px solid var(--border-color);
+    color: var(--paragraph-color);
+
+    &:hover {
+      background-color: var(--button-hover-color);
+      color: var(--heading-color);
+    }
+
+    &:active {
+      background-color: var(--button-active-color);
+    }
+
+    &:focus-visible {
+      border-color: var(--blue-500);
+    }
+  }
+  &[data-variant="secondary"][data-delete] {
+    color: var(--red-500);
+
+    &:hover {
+      color: var(--red-600);
+    }
+
+    &:active {
+      color: var(--red-700);
+    }
+  }
+  &[data-variant="secondary"][data-disabled] {
+    opacity: 1;
+    background-color: var(--button-hover-color);
+    color: var(--paragraph-color-50);
+  }
+
+  &[data-variant="tertiary"] {
+    border: 1px solid var(--border-color);
+    color: var(--blue-500);
+
+    &:hover {
+      background-color: var(--button-hover-color);
+      color: var(--blue-hover);
+    }
+
+    &:active {
+      background-color: var(--button-active-color);
+      color: var(--blue-700);
+    }
+  }
+  &[data-variant="tertiary"][data-delete] {
+    color: var(--red-500);
+
+    &:hover {
+      color: var(--red-600);
+    }
+
+    &:active {
+      color: var(--red-700);
+    }
+  }
+  &[data-variant="tertiary"][data-disabled] {
+    opacity: 1;
+    background-color: var(--button-hover-color);
+    color: var(--paragraph-color-50);
+  }
+
+  &[data-nofill] {
+    border: none;
+    background-color: transparent !important;
+  }
+}

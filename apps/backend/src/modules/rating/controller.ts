@@ -1,0 +1,1510 @@
+import { createHash } from "crypto";
+import { GraphQLError } from "graphql";
+import { type ClientSession, connection } from "mongoose";
+
+import {
+  AggregatedMetricsModel,
+  ClassModel,
+  CourseModel,
+  RatingModel,
+  RatingType,
+  ReviewModel,
+  SectionModel,
+} from "@repo/common/models";
+import { METRIC_MAPPINGS, REQUIRED_METRICS } from "@repo/shared";
+
+import {
+  InputMaybe,
+  MetricName,
+  Semester,
+} from "../../generated-types/graphql";
+import {
+  formatAggregatedRatings,
+  formatSemesterRatings,
+  formatUserClassRatings,
+  formatUserRatings,
+} from "./formatter";
+import {
+  courseRatingAggregator,
+  instructorRatingsAggregator,
+  ratingAggregator,
+  semestersWithRatingsAggregator,
+  termRatingsAggregator,
+  userClassRatingsAggregator,
+  userRatingsAggregator,
+} from "./helper/aggregator";
+import {
+  checkRatingExists,
+  checkUserMaxRatingsConstraint,
+  checkValueConstraint,
+} from "./helper/checkConstraints";
+import {
+  buildEmptyAggregatedRatings,
+  getShadowBannedCourseIds,
+  isShadowBanCrossListedEnabled,
+  isSubjectShadowBanned,
+  shouldShadowBanRatings,
+} from "./helper/shadowBanPolicy";
+
+export interface RequestContext {
+  user: {
+    _id: string;
+  };
+}
+
+interface RatingData {
+  classId: unknown; // ObjectId
+  courseId: string;
+  year: number;
+  semester: Semester;
+  subject: string;
+  courseNumber: string;
+  classNumber: string;
+  metricName: MetricName;
+  value: number;
+}
+
+type FormattedAggregatedRatings = ReturnType<typeof formatAggregatedRatings>;
+type FormattedSemesterRatings = ReturnType<typeof formatSemesterRatings>;
+type InstructorAggregatedRatingsResult = Array<{
+  instructor: {
+    givenName: string;
+    familyName: string;
+  };
+  aggregatedRatings: FormattedAggregatedRatings;
+  classesTaught: { semester: Semester; year: number; classNumber: string }[];
+}>;
+
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
+
+const COURSE_AGGREGATED_RATINGS_TTL_MS = 2 * 60 * 1000;
+const SEMESTER_RATINGS_TTL_MS = 5 * 60 * 1000;
+const INSTRUCTOR_RATINGS_TTL_MS = 5 * 60 * 1000;
+
+const courseAggregatedRatingsCache = new Map<
+  string,
+  CacheEntry<FormattedAggregatedRatings>
+>();
+const semestersWithRatingsCache = new Map<
+  string,
+  CacheEntry<FormattedSemesterRatings>
+>();
+const instructorAggregatedRatingsCache = new Map<
+  string,
+  CacheEntry<InstructorAggregatedRatingsResult>
+>();
+
+const getCachedValue = <T>(cache: Map<string, CacheEntry<T>>, key: string) => {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.value;
+};
+
+const setCachedValue = <T>(
+  cache: Map<string, CacheEntry<T>>,
+  key: string,
+  value: T,
+  ttlMs: number
+) => {
+  cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+};
+
+const sweepExpiredEntries = <T>(cache: Map<string, CacheEntry<T>>) => {
+  const now = Date.now();
+  for (const [key, entry] of cache) {
+    if (now > entry.expiresAt) cache.delete(key);
+  }
+};
+
+setInterval(
+  () => {
+    sweepExpiredEntries(courseAggregatedRatingsCache);
+    sweepExpiredEntries(semestersWithRatingsCache);
+    sweepExpiredEntries(instructorAggregatedRatingsCache);
+  },
+  10 * 60 * 1000
+).unref();
+
+const getMetricNamesKey = (metricNames?: InputMaybe<MetricName[]>) => {
+  if (!metricNames || metricNames.length === 0) return "all";
+  return metricNames
+    .map((metric) => String(metric))
+    .sort((a, b) => a.localeCompare(b))
+    .join(",");
+};
+
+const invalidateRatingsCaches = (courseId: string) => {
+  const courseKeyPrefix = `${courseId}:`;
+  for (const cacheKey of courseAggregatedRatingsCache.keys()) {
+    if (cacheKey.startsWith(courseKeyPrefix)) {
+      courseAggregatedRatingsCache.delete(cacheKey);
+    }
+  }
+  semestersWithRatingsCache.delete(courseId);
+  instructorAggregatedRatingsCache.delete(courseId);
+};
+
+const getClassDocument = async (
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string
+) => {
+  const classDoc = await ClassModel.findOne({
+    year,
+    semester,
+    subject,
+    courseNumber,
+    number: classNumber,
+  });
+
+  if (!classDoc) {
+    throw new GraphQLError(
+      `Class not found: ${subject} ${courseNumber} ${semester} ${year} #${classNumber}`,
+      {
+        extensions: { code: "NOT_FOUND" },
+      }
+    );
+  }
+
+  return classDoc;
+};
+
+const getCourseId = async (
+  subject: string,
+  courseNumber: string
+): Promise<string | null> => {
+  const course = await CourseModel.findOne({
+    subject,
+    number: courseNumber,
+  }).select("courseId");
+
+  return course?.courseId ?? null;
+};
+
+export const numberScaleMetrics = Object.entries(METRIC_MAPPINGS)
+  .filter(([, config]) => config.isRating)
+  .map(([metric]) => metric) as MetricName[];
+
+export const booleanScaleMetrics = Object.entries(METRIC_MAPPINGS)
+  .filter(([, config]) => !config.isRating)
+  .map(([metric]) => metric) as MetricName[];
+
+// const getSemestersByInstructor = async (
+//   professorName: string,
+//   subject: string,
+//   courseNumber: string
+// ): Promise<string[]> => {
+//   const semesterInstances = await semestersByInstructorAggregator(
+//     professorName,
+//     subject,
+//     courseNumber
+//   );
+//   const result = semesterInstances.map((i: any) => i._id);
+//   return result;
+// };
+
+// not fully implemented
+// export const getRatingByInstructor = async (
+//   professorName: string,
+//   subject: string,
+//   courseNumber: string
+// ) => {
+//   const semesters = await getSemestersByInstructor(
+//     professorName,
+//     subject,
+//     courseNumber
+//   );
+//   return semesters;
+// };
+
+export const createRating = async (
+  context: RequestContext,
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string,
+  metricName: MetricName,
+  value: number
+) => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+  checkValueConstraint(metricName, value);
+
+  // Get class document to obtain classId and courseId
+  const classDoc = await getClassDocument(
+    year,
+    semester,
+    subject,
+    courseNumber,
+    classNumber
+  );
+  const classId = classDoc._id;
+  const courseId = classDoc.courseId;
+
+  // Get current user ratings before making any changes
+  const userRatings = await getUserRatings(context);
+  checkUserMaxRatingsConstraint(
+    userRatings,
+    year,
+    semester as Semester,
+    subject,
+    courseNumber
+  );
+
+  // check for user ratings count total + for this semester instance.
+
+  const session = await connection.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const existingRating = await checkRatingExists(
+        context,
+        subject,
+        courseNumber,
+        metricName
+      );
+      if (!existingRating) {
+        await createNewRating(
+          context,
+          {
+            classId,
+            courseId,
+            year,
+            semester,
+            subject,
+            courseNumber,
+            classNumber,
+            metricName,
+            value,
+          },
+          session
+        );
+        return;
+      }
+
+      if (
+        existingRating.semester !== semester ||
+        existingRating.year !== year ||
+        existingRating.classNumber !== classNumber
+      ) {
+        await deleteRating(
+          context,
+          Number(existingRating.year),
+          existingRating.semester as Semester,
+          existingRating.subject,
+          existingRating.courseNumber,
+          existingRating.classNumber,
+          existingRating.metricName as MetricName,
+          session
+        );
+        await createNewRating(
+          context,
+          {
+            classId,
+            courseId,
+            year,
+            semester,
+            subject,
+            courseNumber,
+            classNumber,
+            metricName,
+            value,
+          },
+          session
+        );
+      } else {
+        await handleExistingRating(existingRating, value, session);
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  invalidateRatingsCaches(courseId);
+  return true;
+};
+
+const deleteRatingOperations = async (
+  context: RequestContext,
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string,
+  metricName: MetricName,
+  session: ClientSession
+) => {
+  const rating = await RatingModel.findOne({
+    createdBy: context.user._id,
+    subject,
+    courseNumber,
+    semester,
+    year,
+    classNumber,
+    metricName,
+  });
+
+  if (!rating) {
+    throw new GraphQLError("Rating not found", {
+      extensions: { code: "NOT_FOUND" },
+    });
+  }
+
+  await Promise.all([
+    RatingModel.deleteOne(
+      {
+        _id: rating._id,
+      },
+      { session }
+    ),
+    handleCategoryCountChange(
+      rating.classId,
+      rating.courseId,
+      year,
+      semester,
+      subject,
+      courseNumber,
+      classNumber,
+      metricName,
+      rating.value,
+      false,
+      session
+    ),
+  ]);
+
+  return rating;
+};
+
+export const deleteRating = async (
+  context: RequestContext,
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string,
+  metricName: MetricName,
+  existingSession?: ClientSession // for nested transactions only
+) => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+
+  let deletedCourseId: string | null = null;
+
+  if (existingSession) {
+    // Just run the operations without starting a new transaction
+    const deletedRating = await deleteRatingOperations(
+      context,
+      year,
+      semester,
+      subject,
+      courseNumber,
+      classNumber,
+      metricName,
+      existingSession
+    );
+    deletedCourseId = deletedRating.courseId;
+  } else {
+    // Start a new transaction only if we don't have an existing session
+    const session = await connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const deletedRating = await deleteRatingOperations(
+          context,
+          year,
+          semester,
+          subject,
+          courseNumber,
+          classNumber,
+          metricName,
+          session
+        );
+        deletedCourseId = deletedRating.courseId;
+      });
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  if (deletedCourseId) {
+    invalidateRatingsCaches(deletedCourseId);
+  }
+
+  return true;
+};
+
+export const getUserClassRatings = async (
+  context: RequestContext,
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string
+) => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+  const userRatings = await userClassRatingsAggregator(
+    context,
+    subject,
+    courseNumber,
+    semester,
+    year,
+    classNumber
+  );
+  if (!userRatings.length)
+    return {
+      subject,
+      courseNumber,
+      semester,
+      year,
+      classNumber,
+      metrics: [],
+    };
+  return formatUserClassRatings(userRatings[0]);
+};
+
+const buildInstructorNamesByClassKey = (
+  sections: {
+    semester?: unknown;
+    year?: unknown;
+    classNumber?: unknown;
+    number?: unknown;
+    meetings?: {
+      instructors?: {
+        role?: string;
+        givenName?: string;
+        familyName?: string;
+      }[];
+    }[];
+  }[]
+): Map<string, string> => {
+  const namesByKey = new Map<string, Set<string>>();
+  sections.forEach((section) => {
+    const classNumber = section.classNumber ?? section.number;
+    if (!classNumber) return;
+    const classKey = `${section.semester}|${section.year}|${classNumber}`;
+    const names = namesByKey.get(classKey) ?? new Set<string>();
+    section.meetings?.forEach((meeting) => {
+      meeting.instructors?.forEach((instructor) => {
+        if (
+          instructor.role === "PI" &&
+          instructor.givenName &&
+          instructor.familyName
+        ) {
+          names.add(`${instructor.givenName} ${instructor.familyName}`);
+        }
+      });
+    });
+    namesByKey.set(classKey, names);
+  });
+  return new Map(
+    Array.from(namesByKey.entries()).map(([key, names]) => [
+      key,
+      Array.from(names).join(", "),
+    ])
+  );
+};
+
+export const getUserRatings = async (context: RequestContext) => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+
+  const userRatings = await userRatingsAggregator(context);
+  if (!userRatings.length)
+    return {
+      createdBy: context.user._id,
+      count: 0,
+      classes: [],
+    };
+  const formattedUserRatings = formatUserRatings(userRatings[0]);
+  const activeReviews = await ReviewModel.find({
+    createdBy: context.user._id,
+    $or: [{ valid: true }, { valid: { $exists: false } }],
+  })
+    .select(
+      "subject courseNumber reviewTitle reviewContent reviewerGrade updatedAt"
+    )
+    .sort({ updatedAt: -1 })
+    .lean();
+
+  const reviewByCourse = new Map<
+    string,
+    {
+      reviewTitle?: string | null;
+      reviewContent?: string | null;
+      reviewerGrade?: string | null;
+    }
+  >();
+  activeReviews.forEach((review) => {
+    const key = `${review.subject}|${review.courseNumber}`;
+    if (!reviewByCourse.has(key)) {
+      reviewByCourse.set(key, {
+        reviewTitle: review.reviewTitle ?? null,
+        reviewContent: review.reviewContent ?? null,
+        reviewerGrade: (review.reviewerGrade as string | null) ?? "n/a",
+      });
+    }
+  });
+
+  const classNumbers = formattedUserRatings.classes.map((c) => c.classNumber);
+  const sections = await SectionModel.find({
+    $or: formattedUserRatings.classes.map((c) => ({
+      subject: c.subject,
+      courseNumber: c.courseNumber,
+    })),
+    classNumber: { $in: classNumbers },
+  }).select("semester year classNumber meetings");
+
+  const instructorNamesByClassKey = buildInstructorNamesByClassKey(sections);
+
+  return {
+    ...formattedUserRatings,
+    classes: formattedUserRatings.classes.map((ratedClass) => {
+      const review = reviewByCourse.get(
+        `${ratedClass.subject}|${ratedClass.courseNumber}`
+      );
+      const classKey = `${ratedClass.semester}|${ratedClass.year}|${ratedClass.classNumber}`;
+      return {
+        ...ratedClass,
+        professorName: instructorNamesByClassKey.get(classKey) ?? null,
+        reviewTitle: review?.reviewTitle ?? null,
+        reviewContent: review?.reviewContent ?? null,
+        reviewerGrade: review?.reviewerGrade ?? "n/a",
+      };
+    }),
+  };
+};
+
+const filterAggregatedMetrics = (
+  aggregated: ReturnType<typeof formatAggregatedRatings>,
+  metricNames?: InputMaybe<MetricName[]>
+) => {
+  if (!metricNames || metricNames.length === 0) {
+    return aggregated;
+  }
+
+  const allowedMetrics = new Set(metricNames);
+  return {
+    ...aggregated,
+    metrics: aggregated.metrics.filter((metric) =>
+      allowedMetrics.has(metric.metricName as MetricName)
+    ),
+  };
+};
+
+export const getClassAggregatedRatings = async (
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber?: InputMaybe<string>,
+  metricNames?: InputMaybe<MetricName[]>
+) => {
+  if (
+    await shouldShadowBanRatings({
+      subject,
+      courseNumber,
+      resolveCourseId: getCourseId,
+    })
+  ) {
+    return buildEmptyAggregatedRatings(subject, courseNumber, {
+      semester,
+      year,
+      classNumber: classNumber ?? null,
+    });
+  }
+
+  const aggregated = classNumber
+    ? await ratingAggregator({
+        subject,
+        courseNumber,
+        classNumber,
+        semester,
+        year,
+      })
+    : await termRatingsAggregator(subject, courseNumber, semester, year);
+  if (!aggregated || !aggregated[0]) {
+    return buildEmptyAggregatedRatings(subject, courseNumber, {
+      semester,
+      year,
+      classNumber: classNumber ?? null,
+    });
+  }
+
+  return filterAggregatedMetrics(
+    formatAggregatedRatings(aggregated[0]),
+    metricNames
+  );
+};
+
+export const getCourseAggregatedRatings = async (
+  subject: string,
+  courseNumber: string,
+  metricNames?: InputMaybe<MetricName[]>
+) => {
+  if (isSubjectShadowBanned(subject)) {
+    return buildEmptyAggregatedRatings(subject, courseNumber);
+  }
+
+  const courseId = await getCourseId(subject, courseNumber);
+  if (!courseId) {
+    return buildEmptyAggregatedRatings(subject, courseNumber);
+  }
+
+  if (
+    await shouldShadowBanRatings({
+      subject,
+      courseNumber,
+      courseId,
+      resolveCourseId: getCourseId,
+    })
+  ) {
+    return buildEmptyAggregatedRatings(subject, courseNumber);
+  }
+
+  const cacheKey = `${courseId}:${getMetricNamesKey(metricNames)}`;
+  const cached = getCachedValue(courseAggregatedRatingsCache, cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const aggregated = await courseRatingAggregator(courseId);
+
+  const result =
+    !aggregated || !aggregated[0]
+      ? buildEmptyAggregatedRatings(subject, courseNumber)
+      : filterAggregatedMetrics(
+          formatAggregatedRatings(aggregated[0]),
+          metricNames
+        );
+
+  setCachedValue(
+    courseAggregatedRatingsCache,
+    cacheKey,
+    result,
+    COURSE_AGGREGATED_RATINGS_TTL_MS
+  );
+  return result;
+};
+
+export const getSemestersWithRatings = async (
+  subject: string,
+  courseNumber: string
+) => {
+  if (isSubjectShadowBanned(subject)) {
+    return [];
+  }
+
+  const courseId = await getCourseId(subject, courseNumber);
+  if (!courseId) {
+    return [];
+  }
+
+  if (
+    await shouldShadowBanRatings({
+      subject,
+      courseNumber,
+      courseId,
+      resolveCourseId: getCourseId,
+    })
+  ) {
+    return [];
+  }
+
+  const cached = getCachedValue(semestersWithRatingsCache, courseId);
+  if (cached) {
+    return cached;
+  }
+
+  const semesters = await semestersWithRatingsAggregator(courseId);
+  const result = formatSemesterRatings(semesters);
+  setCachedValue(
+    semestersWithRatingsCache,
+    courseId,
+    result,
+    SEMESTER_RATINGS_TTL_MS
+  );
+  return result;
+};
+
+export const getInstructorAggregatedRatings = async (
+  subject: string,
+  courseNumber: string
+) => {
+  if (isSubjectShadowBanned(subject)) {
+    return [];
+  }
+
+  const courseId = await getCourseId(subject, courseNumber);
+  if (!courseId) {
+    return [];
+  }
+
+  if (
+    await shouldShadowBanRatings({
+      subject,
+      courseNumber,
+      courseId,
+      resolveCourseId: getCourseId,
+    })
+  ) {
+    return [];
+  }
+
+  const cached = getCachedValue(instructorAggregatedRatingsCache, courseId);
+  if (cached) {
+    return cached;
+  }
+
+  const sections = await SectionModel.find({ courseId }).select(
+    "semester year number classNumber meetings"
+  );
+
+  const instructorMap = new Map<
+    string,
+    {
+      givenName: string;
+      familyName: string;
+      classes: { semester: Semester; year: number; classNumber: string }[];
+    }
+  >();
+
+  sections.forEach((section) => {
+    section.meetings?.forEach((meeting) => {
+      meeting.instructors?.forEach((instructor) => {
+        // Only include Primary Instructors (PI role)
+        if (
+          instructor.givenName &&
+          instructor.familyName &&
+          instructor.role === "PI"
+        ) {
+          const key = `${instructor.givenName}_${instructor.familyName}`;
+
+          if (!instructorMap.has(key)) {
+            instructorMap.set(key, {
+              givenName: instructor.givenName,
+              familyName: instructor.familyName,
+              classes: [],
+            });
+          }
+
+          const instructorData = instructorMap.get(key)!;
+          const classInfo = {
+            semester: section.semester as Semester,
+            year: section.year,
+            classNumber: section.classNumber ?? section.number,
+          };
+
+          // Avoid duplicates
+          const exists = instructorData.classes.some(
+            (c) =>
+              c.semester === classInfo.semester &&
+              c.year === classInfo.year &&
+              c.classNumber === classInfo.classNumber
+          );
+
+          if (!exists) {
+            instructorData.classes.push(classInfo);
+          }
+        }
+      });
+    });
+  });
+
+  // For each instructor, aggregate their ratings
+  const instructorRatings = await Promise.all(
+    Array.from(instructorMap.values()).map(async (instructorData) => {
+      const aggregated = await instructorRatingsAggregator(
+        courseId,
+        instructorData.classes
+      );
+
+      return {
+        instructor: {
+          givenName: instructorData.givenName,
+          familyName: instructorData.familyName,
+        },
+        aggregatedRatings: formatAggregatedRatings(aggregated),
+        classesTaught: instructorData.classes,
+      };
+    })
+  );
+
+  // Only return instructors who have ratings
+  const instructorsWithRatings = instructorRatings.filter((rating) => {
+    const hasRatings = rating.aggregatedRatings.metrics.some(
+      (metric) => metric && metric.count > 0
+    );
+    return hasRatings;
+  });
+
+  setCachedValue(
+    instructorAggregatedRatingsCache,
+    courseId,
+    instructorsWithRatings,
+    INSTRUCTOR_RATINGS_TTL_MS
+  );
+  return instructorsWithRatings;
+};
+
+// Helper functions
+
+const createNewRating = async (
+  context: RequestContext,
+  ratingData: RatingData,
+  session: ClientSession
+) => {
+  const {
+    classId,
+    courseId,
+    subject,
+    courseNumber,
+    semester,
+    year,
+    classNumber,
+    metricName,
+    value,
+  } = ratingData;
+
+  await Promise.all([
+    RatingModel.create(
+      [
+        {
+          createdBy: context.user._id,
+          ...ratingData,
+        },
+      ],
+      { session }
+    ),
+    handleCategoryCountChange(
+      classId,
+      courseId,
+      year,
+      semester,
+      subject,
+      courseNumber,
+      classNumber,
+      metricName,
+      value,
+      true,
+      session
+    ),
+  ]);
+};
+
+const handleExistingRating = async (
+  existingRating: RatingType,
+  newValue: number,
+  session: ClientSession
+) => {
+  const oldValue = existingRating.value;
+  if (oldValue === newValue) return;
+
+  await RatingModel.updateOne(
+    { _id: existingRating._id },
+    { value: newValue },
+    { session }
+  );
+
+  await Promise.all([
+    handleCategoryCountChange(
+      existingRating.classId,
+      existingRating.courseId,
+      Number(existingRating.year),
+      existingRating.semester as Semester,
+      existingRating.subject,
+      existingRating.courseNumber,
+      existingRating.classNumber,
+      existingRating.metricName as MetricName,
+      oldValue,
+      false,
+      session
+    ),
+    handleCategoryCountChange(
+      existingRating.classId,
+      existingRating.courseId,
+      Number(existingRating.year),
+      existingRating.semester as Semester,
+      existingRating.subject,
+      existingRating.courseNumber,
+      existingRating.classNumber,
+      existingRating.metricName as MetricName,
+      newValue,
+      true,
+      session
+    ),
+  ]);
+};
+
+const handleCategoryCountChange = async (
+  classId: unknown, // ObjectId
+  courseId: string,
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string,
+  metricName: MetricName,
+  categoryValue: number,
+  isIncrement: boolean, // false means is decrement
+  session?: ClientSession
+) => {
+  const delta = isIncrement ? 1 : -1;
+  const metric = await AggregatedMetricsModel.findOne({
+    classId,
+    metricName,
+    categoryValue,
+  }).session(session ?? null);
+  if (metric) {
+    metric.categoryCount += delta;
+    await metric.save({ session });
+  } else if (isIncrement) {
+    let valueRange: number[] = [];
+    switch (true) {
+      case numberScaleMetrics.includes(metricName):
+        valueRange = [1, 2, 3, 4, 5];
+        break;
+      case booleanScaleMetrics.includes(metricName):
+        valueRange = [0, 1];
+        break;
+      default:
+        throw new GraphQLError("Invalid metric name", {
+          extensions: { code: "INVALID_ARGUMENT" },
+        });
+    }
+    for (const v of valueRange) {
+      await AggregatedMetricsModel.create(
+        [
+          {
+            classId,
+            courseId,
+            subject,
+            courseNumber,
+            semester,
+            year,
+            classNumber,
+            metricName,
+            categoryValue: v,
+            categoryCount: v == categoryValue ? 1 : 0,
+          },
+        ],
+        { session }
+      );
+    }
+  } else {
+    throw new GraphQLError(
+      "Aggregated Rating does not exist, cannot decrement",
+      {
+        extensions: { code: "NOT_FOUND" },
+      }
+    );
+  }
+};
+
+interface MetricInput {
+  metricName: MetricName;
+  value: number;
+}
+
+export const createRatings = async (
+  context: RequestContext,
+  year: number,
+  semester: Semester,
+  subject: string,
+  courseNumber: string,
+  classNumber: string,
+  metrics: MetricInput[],
+  reviewTitle?: string | null,
+  reviewContent?: string | null,
+  reviewerGrade?: string | null
+) => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+
+  // Validate required metrics are present
+  const providedMetrics = new Set(metrics.map((m) => m.metricName));
+  const missingRequired = REQUIRED_METRICS.filter(
+    (m) => !providedMetrics.has(m as MetricName)
+  );
+  if (missingRequired.length > 0) {
+    throw new GraphQLError(
+      `Missing required metrics: ${missingRequired.join(", ")}`,
+      {
+        extensions: { code: "BAD_USER_INPUT" },
+      }
+    );
+  }
+
+  // Validate all metric values
+  for (const metric of metrics) {
+    checkValueConstraint(metric.metricName, metric.value);
+  }
+
+  // Get class document to obtain classId and courseId
+  const classDoc = await getClassDocument(
+    year,
+    semester,
+    subject,
+    courseNumber,
+    classNumber
+  );
+  const classId = classDoc._id;
+  const courseId = classDoc.courseId;
+
+  // Get current user ratings for constraint checking
+  const userRatings = await getUserRatings(context);
+  checkUserMaxRatingsConstraint(
+    userRatings,
+    year,
+    semester as Semester,
+    subject,
+    courseNumber
+  );
+
+  // Find all existing ratings for this course by this user (using courseId for cross-listing support)
+  const existingRatings = await RatingModel.find({
+    createdBy: context.user._id,
+    courseId,
+  });
+
+  const session = await connection.startSession();
+  try {
+    await session.withTransaction(async () => {
+      // Step 1: Delete all existing ratings and decrement their aggregated counts
+      for (const existingRating of existingRatings) {
+        await Promise.all([
+          RatingModel.deleteOne({ _id: existingRating._id }, { session }),
+          handleCategoryCountChange(
+            existingRating.classId,
+            existingRating.courseId,
+            Number(existingRating.year),
+            existingRating.semester as Semester,
+            existingRating.subject,
+            existingRating.courseNumber,
+            existingRating.classNumber,
+            existingRating.metricName as MetricName,
+            existingRating.value,
+            false,
+            session
+          ),
+        ]);
+      }
+
+      // Step 2: Soft-delete and create review snapshots
+      // Update or create the review for this user/course.
+      if (
+        reviewTitle !== undefined ||
+        reviewContent !== undefined ||
+        reviewerGrade !== undefined
+      ) {
+        const normalizedTitle = (reviewTitle ?? "").trim();
+        const normalizedContent = (reviewContent ?? "").trim();
+        const normalizedReviewerGrade =
+          (reviewerGrade ?? "n/a").trim() || "n/a";
+        const hasReviewPayload =
+          normalizedTitle.length > 0 || normalizedContent.length > 0;
+
+        const existingReview = await ReviewModel.findOne({
+          createdBy: context.user._id,
+          courseId,
+          $or: [{ valid: true }, { valid: { $exists: false } }],
+        }).session(session);
+
+        if (!hasReviewPayload) {
+          if (existingReview) {
+            await ReviewModel.updateOne(
+              { _id: existingReview._id },
+              { $set: { valid: false } },
+              { session }
+            );
+          }
+        } else if (existingReview) {
+          await ReviewModel.updateOne(
+            { _id: existingReview._id },
+            {
+              $set: {
+                reviewTitle: normalizedTitle,
+                reviewContent: normalizedContent,
+                reviewerGrade: normalizedReviewerGrade,
+                classId,
+                subject,
+                courseNumber,
+                semester,
+                year,
+                classNumber,
+                valid: true,
+              },
+            },
+            { session }
+          );
+        } else {
+          await ReviewModel.create(
+            [
+              {
+                createdBy: context.user._id,
+                courseId,
+                reviewTitle: normalizedTitle,
+                reviewContent: normalizedContent,
+                reviewerGrade: normalizedReviewerGrade,
+                classId,
+                subject,
+                courseNumber,
+                semester,
+                year,
+                classNumber,
+                valid: true,
+              },
+            ],
+            { session }
+          );
+        }
+      }
+
+      // Step 3: Create all new ratings and increment their aggregated counts
+      for (const metric of metrics) {
+        await Promise.all([
+          RatingModel.create(
+            [
+              {
+                createdBy: context.user._id,
+                classId,
+                courseId,
+                subject,
+                courseNumber,
+                semester,
+                year,
+                classNumber,
+                metricName: metric.metricName,
+                value: metric.value,
+              },
+            ],
+            { session }
+          ),
+          handleCategoryCountChange(
+            classId,
+            courseId,
+            year,
+            semester,
+            subject,
+            courseNumber,
+            classNumber,
+            metric.metricName,
+            metric.value,
+            true,
+            session
+          ),
+        ]);
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  invalidateRatingsCaches(courseId);
+  return true;
+};
+
+export const deleteRatings = async (
+  context: RequestContext,
+  subject: string,
+  courseNumber: string
+) => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+
+  // Find all existing ratings for this course by this user
+  const existingRatings = await RatingModel.find({
+    createdBy: context.user._id,
+    subject,
+    courseNumber,
+  });
+  const affectedCourseIds = new Set(
+    existingRatings
+      .map((rating) => rating.courseId)
+      .filter((courseId): courseId is string => Boolean(courseId))
+  );
+
+  if (existingRatings.length === 0) {
+    return true; // Nothing to delete
+  }
+
+  const session = await connection.startSession();
+  try {
+    await session.withTransaction(async () => {
+      // Delete reviews for all affected courseIds
+      await ReviewModel.deleteMany(
+        {
+          createdBy: context.user._id,
+          courseId: { $in: Array.from(affectedCourseIds) },
+        },
+        { session }
+      );
+
+      // Delete all ratings and decrement their aggregated counts
+      for (const existingRating of existingRatings) {
+        await Promise.all([
+          RatingModel.deleteOne({ _id: existingRating._id }, { session }),
+          handleCategoryCountChange(
+            existingRating.classId,
+            existingRating.courseId,
+            Number(existingRating.year),
+            existingRating.semester as Semester,
+            existingRating.subject,
+            existingRating.courseNumber,
+            existingRating.classNumber,
+            existingRating.metricName as MetricName,
+            existingRating.value,
+            false,
+            session
+          ),
+        ]);
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  affectedCourseIds.forEach((courseId) => {
+    invalidateRatingsCaches(courseId);
+  });
+  return true;
+};
+
+const anonymizeUserId = (userId: string): string => {
+  return createHash("sha256").update(userId).digest("hex").slice(0, 16);
+};
+
+export const voteReviewHelpful = async (
+  context: RequestContext,
+  reviewId: string
+): Promise<number> => {
+  if (!context.user._id) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+
+  const review = await ReviewModel.findById(reviewId);
+  if (!review) {
+    throw new GraphQLError("Review not found", {
+      extensions: { code: "NOT_FOUND" },
+    });
+  }
+
+  const userId = context.user._id;
+  const alreadyVoted =
+    (review.helpfulVoters as string[] | undefined)?.includes(userId) ?? false;
+
+  if (alreadyVoted) {
+    await ReviewModel.updateOne(
+      { _id: review._id },
+      { $pull: { helpfulVoters: userId }, $inc: { helpfulCount: -1 } }
+    );
+    return Math.max(0, ((review.helpfulCount as number | undefined) ?? 0) - 1);
+  } else {
+    await ReviewModel.updateOne(
+      { _id: review._id },
+      { $addToSet: { helpfulVoters: userId }, $inc: { helpfulCount: 1 } }
+    );
+    return ((review.helpfulCount as number | undefined) ?? 0) + 1;
+  }
+};
+
+export const getAllRatings = async () => {
+  const ratings = await RatingModel.find({}).lean();
+  const shadowBannedCourseIds = await getShadowBannedCourseIds();
+  const crossListedShadowBanEnabled = isShadowBanCrossListedEnabled();
+
+  const visibleRatings = ratings.filter((rating) => {
+    if (isSubjectShadowBanned(rating.subject)) {
+      return false;
+    }
+
+    if (
+      crossListedShadowBanEnabled &&
+      typeof rating.courseId === "string" &&
+      shadowBannedCourseIds.has(rating.courseId)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return visibleRatings.map((rating) => ({
+    anonymousUserId: anonymizeUserId(rating.createdBy),
+    subject: rating.subject,
+    courseNumber: rating.courseNumber,
+    semester: rating.semester as Semester,
+    year: rating.year,
+    classNumber: rating.classNumber,
+    metricName: rating.metricName as MetricName,
+    value: rating.value,
+    createdAt:
+      "createdAt" in rating && rating.createdAt instanceof Date
+        ? rating.createdAt.toISOString()
+        : new Date().toISOString(),
+  }));
+};
+
+export const getClassRatings = async (
+  subject: string,
+  courseNumber: string
+) => {
+  const ratings = await RatingModel.find({ subject, courseNumber }).lean();
+  const sections = await SectionModel.find({ subject, courseNumber })
+    .select("semester year classNumber number meetings")
+    .lean();
+  const shadowBannedCourseIds = await getShadowBannedCourseIds();
+  const crossListedShadowBanEnabled = isShadowBanCrossListedEnabled();
+
+  const visibleRatings = ratings.filter((rating) => {
+    if (isSubjectShadowBanned(rating.subject)) {
+      return false;
+    }
+
+    if (
+      crossListedShadowBanEnabled &&
+      typeof rating.courseId === "string" &&
+      shadowBannedCourseIds.has(rating.courseId)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+  const activeReviews = await ReviewModel.find({
+    subject,
+    courseNumber,
+    $or: [{ valid: true }, { valid: { $exists: false } }],
+  })
+    .sort({ updatedAt: -1 })
+    .lean();
+
+  const reviewByUser = new Map<
+    string,
+    {
+      reviewId: string;
+      reviewTitle?: string | null;
+      reviewContent?: string | null;
+      reviewerGrade?: string | null;
+      helpfulCount: number;
+    }
+  >();
+  activeReviews.forEach((review) => {
+    if (reviewByUser.has(review.createdBy)) return;
+    reviewByUser.set(review.createdBy, {
+      reviewId: review._id?.toString() ?? "",
+      reviewTitle: review.reviewTitle ?? null,
+      reviewContent: review.reviewContent ?? null,
+      reviewerGrade: (review.reviewerGrade as string | null) ?? "n/a",
+      helpfulCount: (review.helpfulCount as number | undefined) ?? 0,
+    });
+  });
+
+  const instructorNamesByClassKey = buildInstructorNamesByClassKey(sections);
+
+  type UserClassEntry = {
+    subject: string;
+    courseNumber: string;
+    semester: Semester;
+    year: number;
+    classNumber: string;
+    professorName?: string | null;
+    metrics: { metricName: MetricName; value: number }[];
+    reviewTitle?: string | null;
+    reviewContent?: string | null;
+    reviewerGrade?: string | null;
+    lastUpdated: string;
+    reviewId?: string | null;
+    helpfulCount: number;
+  };
+
+  const userClassesById = new Map<string, Map<string, UserClassEntry>>();
+  visibleRatings.forEach((rating) => {
+    const userId = rating.createdBy;
+    const classKey = `${rating.semester}|${rating.year}|${rating.classNumber}`;
+    const userClasses = userClassesById.get(userId) ?? new Map();
+    const existingClass = userClasses.get(classKey);
+    const timestamp =
+      "updatedAt" in rating && rating.updatedAt instanceof Date
+        ? rating.updatedAt
+        : "createdAt" in rating && rating.createdAt instanceof Date
+          ? rating.createdAt
+          : new Date(0);
+
+    if (!existingClass) {
+      const review = reviewByUser.get(userId);
+      userClasses.set(classKey, {
+        subject: rating.subject,
+        courseNumber: rating.courseNumber,
+        semester: rating.semester as Semester,
+        year: rating.year,
+        classNumber: rating.classNumber,
+        professorName: instructorNamesByClassKey.get(classKey) ?? null,
+        metrics: [
+          {
+            metricName: rating.metricName as MetricName,
+            value: rating.value,
+          },
+        ],
+        reviewTitle: review?.reviewTitle ?? null,
+        reviewContent: review?.reviewContent ?? null,
+        reviewerGrade: review?.reviewerGrade ?? "n/a",
+        lastUpdated: timestamp.toISOString(),
+        reviewId: review?.reviewId ?? null,
+        helpfulCount: review?.helpfulCount ?? 0,
+      });
+      userClassesById.set(userId, userClasses);
+      return;
+    }
+
+    existingClass.metrics.push({
+      metricName: rating.metricName as MetricName,
+      value: rating.value,
+    });
+    if (timestamp.toISOString() > existingClass.lastUpdated) {
+      existingClass.lastUpdated = timestamp.toISOString();
+    }
+  });
+
+  const users = Array.from(userClassesById.entries()).map(
+    ([userId, classes]) => ({
+      anonymousUserId: anonymizeUserId(userId),
+      classes: Array.from(classes.values()),
+    })
+  );
+
+  return {
+    subject,
+    courseNumber,
+    count: users.length,
+    users,
+  };
+};

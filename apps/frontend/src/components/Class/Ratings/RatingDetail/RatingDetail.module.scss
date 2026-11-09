@@ -1,0 +1,172 @@
+@use "../../../../mixins" as *;
+
+.root {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 36px;
+    padding: 4px 0;
+    cursor: pointer;
+
+    .titleAndStatusSection {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 0;
+
+      .titleSection {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 140px;
+
+        .title {
+          margin: 0;
+          color: var(--secondary-color);
+          font-size: var(--text-14);
+          font-weight: var(--font-normal);
+          line-height: 1.25;
+        }
+      }
+
+      .metricAverage {
+        color: var(--label-color);
+        padding-left: 8px;
+        font-size: var(--text-12);
+        line-height: 1.25;
+      }
+    }
+    .statusSection {
+      text-align: left;
+      margin: 0; /* Remove unnecessary margin */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+
+      .arrow {
+        color: var(--label-color);
+        transition: transform 0.2s ease;
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  .ratingContent {
+    margin-top: 16px;
+    margin-left: 161px;
+    animation: slideDown 200ms ease forwards;
+    color: var(--paragraph-color);
+
+    .statRow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeIn 250ms ease forwards;
+      animation-delay: var(--delay);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .metric {
+        width: 24px;
+        color: var(--paragraph-color);
+        font-weight: var(--font-medium);
+        text-align: center;
+        opacity: 0;
+        gap: 10px;
+        font-size: var(--text-16);
+        animation: fadeIn 200ms ease forwards;
+        animation-delay: calc(var(--delay) + 50ms);
+        user-select: none;
+      }
+
+      .barContainer {
+        flex-grow: 1;
+        height: 9px;
+        background-color: var(--slate-200);
+        border-radius: 4px;
+        overflow: hidden;
+
+        @include dark-mode {
+          background-color: var(--zinc-600);
+        }
+
+        .bar {
+          height: 100%;
+          background-color: var(--slate-600);
+          border-radius: 4px;
+          width: 0;
+          transform-origin: left;
+          transition-property: width, background-color;
+          transition-duration: 400ms, 200ms;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1), ease;
+          transition-delay: var(--width-delay, 0ms), 0ms;
+          will-change: width, background-color;
+
+          @include dark-mode {
+            background-color: var(--zinc-200);
+          }
+        }
+        .inactiveBar {
+          background-color: var(--slate-400);
+
+          @include dark-mode {
+            background-color: var(--zinc-500);
+          }
+        }
+      }
+
+      .count {
+        width: 24px;
+        color: var(--paragraph-color);
+        font-size: var(--text-16);
+        text-align: center;
+        opacity: 0;
+        animation: fadeIn 200ms ease forwards;
+        animation-delay: calc(var(--delay) + 100ms);
+        user-select: none;
+
+        &.empty {
+          color: var(--label-color);
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes barFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}

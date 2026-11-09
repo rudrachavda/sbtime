@@ -1,0 +1,155 @@
+.root {
+  background-color: var(--background-color);
+  min-height: 0;
+
+  .contentScroll {
+    min-height: 0;
+  }
+}
+
+.catalogScrollable {
+  height: 100%;
+  overflow: hidden;
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .contentScroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+  }
+
+  .disableOverscrollY {
+    overscroll-behavior-y: none;
+  }
+}
+
+.header {
+  background-color: var(--foreground-color);
+  border-bottom: 1px solid var(--border-color);
+
+  .heading {
+    font-size: 24px;
+    font-weight: 660;
+    font-feature-settings:
+      "cv05" on,
+      "cv13" on,
+      "ss07" on,
+      "cv12" on,
+      "cv06" on;
+    color: var(--heading-color);
+
+    .sectionNumber {
+      color: var(--paragraph-color);
+    }
+  }
+
+  .description {
+    font-size: var(--text-16);
+    line-height: 1.5;
+    color: var(--secondary-color);
+  }
+
+  .reservedSeatingBadgeContainer {
+    white-space: nowrap;
+  }
+
+  .tabList {
+    position: relative;
+  }
+
+  .classTabMenuItem {
+    &::before {
+      display: none;
+    }
+  }
+
+  .tabIndicator {
+    position: absolute;
+    left: 0;
+    bottom: -12px;
+    height: 2px;
+    border-radius: 999px;
+    background-color: var(--blue-500);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .ratingsMenuItem {
+    padding: 0 12px;
+  }
+
+  .ratingsTabContent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .ratingsLockIcon {
+    flex-shrink: 0;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background-color: var(--blue-500);
+    color: white;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 6px;
+    background-color: var(--blue-500);
+  }
+}
+
+.tooltipContent {
+  border-radius: 4px;
+  padding: 12px;
+  background-color: var(--tooltip-color);
+  color: var(--description-color);
+  max-width: 256px;
+  font-size: var(--text-14);
+  animation: fadeIn 100ms ease-in;
+  z-index: var(--z-tooltip);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  .tooltipArrow {
+    fill: var(--tooltip-color);
+  }
+
+  .tooltipTitle {
+    font-weight: var(--font-semibold);
+    color: var(--tooltip-heading-color);
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .tooltipDescription {
+    line-height: 1.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

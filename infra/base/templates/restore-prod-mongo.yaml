@@ -1,0 +1,124 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-restore-prod-mongo
+  namespace: bt
+spec:
+  schedule: "0 5 * * *" # Daily at 5 AM
+  timeZone: America/Los_Angeles
+  concurrencyPolicy: Forbid
+  suspend: true # disable scheduled runs
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 180
+      template:
+        spec:
+          serviceAccountName: bt-k8s-role
+          containers:
+            - name: backup-prod-mongo
+              image: alpine/k8s:1.29.11
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e # Exit immediately if a command fails
+
+                  # Cleanup on exit (success or failure)
+                  cleanup() {
+                    rm -f /tmp/prod_backup.gz
+                  }
+                  trap cleanup EXIT
+
+                  # Find production MongoDB pod
+                  prod_pod=$(kubectl get pods -o custom-columns=NAME:.metadata.name --no-headers -n bt | grep 'bt-prod-mongo')
+
+                  # Download production MongoDB backup
+                  echo "Downloading backup from s3 bucket..."
+                  restore_date=${RESTORE_DATE}
+
+                  endpoint_url="https://$ACCOUNT_ID.r2.cloudflarestorage.com"
+
+                  if [ ${#restore_date} -eq 10 ]; then
+                    primary_key="hourly/prod_backup-${restore_date}.gz"
+                  elif [ ${#restore_date} -eq 8 ]; then
+                    # Prefer the latest hourly backup of that day; once hourly
+                    # backups expire (1d), fall back to the longer-lived tiers
+                    date_prefix="${restore_date}"
+                    latest_hourly_obj=$(
+                      aws s3 ls "s3://$BUCKET_NAME/hourly/" \
+                        --endpoint-url="$endpoint_url" | \
+                        awk '{print $4}' | \
+                        grep "^prod_backup-${date_prefix}" | \
+                        sort | \
+                        tail -n 1
+                    ) || true
+
+                    primary_key=""
+                    if [ -n "$latest_hourly_obj" ]; then
+                      primary_key="hourly/${latest_hourly_obj}"
+                    else
+                      for tier in daily weekly persistent; do
+                        key="$tier/prod_backup-${restore_date}.gz"
+                        if aws s3 ls "s3://$BUCKET_NAME/$key" \
+                          --endpoint-url="$endpoint_url" > /dev/null 2>&1; then
+                          primary_key="$key"
+                          break
+                        fi
+                      done
+                    fi
+
+                    if [ -z "$primary_key" ]; then
+                      echo "No backups found for RESTORE_DATE=$restore_date"
+                      echo "Available daily/weekly/persistent backups:"
+                      for tier in daily weekly persistent; do
+                        aws s3 ls "s3://$BUCKET_NAME/$tier/" \
+                          --endpoint-url="$endpoint_url" | awk -v t="$tier" '{print "  " t "/" $4}'
+                      done
+                      exit 1
+                    fi
+                  else
+                    echo "Invalid RESTORE_DATE: expected YYYYMMDD or YYYYMMDDHH"
+                    exit 1
+                  fi
+
+                  if aws s3 cp "s3://$BUCKET_NAME/$primary_key" /tmp/prod_backup.gz \
+                    --endpoint-url="$endpoint_url"; then
+                    echo "Backup downloaded successfully from $primary_key"
+                  else
+                    echo "Backup download failed for key $primary_key"
+                    exit 1
+                  fi
+
+                  # Restore dump into production MongoDB
+                  echo "Restoring production MongoDB from backup..."
+                  kubectl cp --namespace=bt \
+                    /tmp/prod_backup.gz "$prod_pod:/tmp/prod_backup.gz"
+                  kubectl exec --namespace=bt \
+                    "$prod_pod" -- mongosh bt --eval "db.dropDatabase()"
+                  kubectl exec --namespace=bt \
+                    "$prod_pod" -- mongorestore --archive=/tmp/prod_backup.gz --gzip --drop
+                  kubectl exec --namespace=bt \
+                    "$prod_pod" -- rm /tmp/prod_backup.gz
+
+                  echo "MongoDB restore completed successfully!"
+              env:
+                - name: ACCOUNT_ID
+                  value: ff660bd2dac18c00551ed509d24ef4d7
+                - name: BUCKET_NAME
+                  value: prod-mongo-backups
+              envFrom:
+                - secretRef:
+                    name: cloudflare-prod-mongo-secret
+              resources:
+                requests:
+                  ephemeral-storage: "256Mi"
+                limits:
+                  ephemeral-storage: "1Gi"
+              volumeMounts:
+                - name: tmp-storage
+                  mountPath: /tmp
+          volumes:
+            - name: tmp-storage
+              emptyDir:
+                sizeLimit: 5Gi
+          restartPolicy: Never

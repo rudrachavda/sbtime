@@ -1,0 +1,96 @@
+.root {
+  cursor: default;
+  height: 340px;
+}
+
+.lastUpdated {
+  font-size: var(--text-12);
+  color: var(--label-color);
+  margin-top: auto;
+}
+
+.metricsBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .metricRow {
+    display: flex;
+    align-items: center;
+    padding: 24px 0;
+    gap: 20px;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .metricName {
+      font-size: var(--text-14);
+      font-weight: var(--font-medium);
+      color: var(--paragraph-color);
+      min-width: 120px;
+    }
+  }
+}
+.body {
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.classInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.className {
+  font-size: var(--text-16);
+  font-weight: var(--font-semibold);
+  color: var(--heading-color);
+}
+
+.semester {
+  font-size: var(--text-14);
+  font-weight: var(--font-normal);
+  color: var(--label-color);
+}
+
+.addCard {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 320px;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--button-hover-color);
+  }
+}
+
+.addIcon {
+  color: var(--paragraph-color);
+  width: 32px;
+  height: 32px;
+}

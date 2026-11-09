@@ -1,0 +1,24 @@
+{{ if eq .Values.env "dev" }}
+# only run cleanup job in dev environment
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "bt-app.cleanupName" . }}
+  labels:
+    {{- include "bt-app.cleanupLabels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: bt-k8s-role
+      containers:
+        - name: cleanup
+          image: alpine/helm
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cleaning up {{ .Release.Name }} in {{ .Values.ttl }} hours"
+              sleep {{ .Values.ttl }}h
+              helm uninstall {{ .Release.Name }}
+      restartPolicy: Never
+{{ end }}

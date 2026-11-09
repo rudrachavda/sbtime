@@ -1,0 +1,269 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { useQuery } from "@apollo/client/react";
+import { Search } from "iconoir-react";
+
+import { Badge, Color, LoadingIndicator } from "@repo/theme";
+
+import { useTracking } from "@/hooks/api/tracking/useTracking";
+import { ICourse } from "@/lib/api";
+import { GetCourseNamesDocument } from "@/lib/generated/graphql";
+import { Recent, RecentType, getRecents } from "@/lib/recent";
+
+import styles from "./CourseSearch.module.scss";
+import { initialize } from "./browser";
+
+interface CourseSearchProps {
+  onSelect?: (course: Pick<ICourse, "subject" | "number">) => void;
+  onClear?: () => void;
+  selectedCourse: ICourse | null;
+  inputStyle?: React.CSSProperties;
+  minimal?: boolean;
+  ratedCourses?: Array<{ subject: string; courseNumber: string }>;
+}
+
+export default function CourseSearch({
+  onSelect,
+  onClear,
+  selectedCourse,
+  inputStyle,
+  minimal = false,
+  ratedCourses = [],
+}: CourseSearchProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { trackSearch, trackSearchClick, trackEvent } = useTracking();
+
+  const [recentCourses, setRecentCourses] = useState<
+    Recent<RecentType.Course>[]
+  >([]);
+
+  const { data, loading, error } = useQuery(GetCourseNamesDocument);
+
+  // The fuzzy search below can't function without this course list, so a
+  // failed fetch here is a real search failure, not just an empty result.
+  const trackedCourseNamesErrorRef = useRef<typeof error>(undefined);
+  useEffect(() => {
+    if (error && trackedCourseNamesErrorRef.current !== error) {
+      trackedCourseNamesErrorRef.current = error;
+      trackEvent("search_failed", "course-discovery", undefined, {
+        query: "GetCourseNames",
+        message: error.message?.slice(0, 200),
+      });
+    }
+  }, [error, trackEvent]);
+
+  const catalogCourses = useMemo(() => {
+    if (!data?.courses) return [];
+
+    // Deduplicate: keep course with highest courseId for each subject-number
+    // Not ideal behavior. This only happen if data is wrong.
+    const seen = new Map<string, (typeof data.courses)[0]>();
+    for (const course of data.courses) {
+      const key = `${course.subject}-${course.number}`;
+      const existing = seen.get(key);
+      if (!existing || course.courseId > existing.courseId) {
+        seen.set(key, course);
+      }
+    }
+
+    if (seen.size < data.courses.length) {
+      console.error(
+        `[CourseSearch] Deduplicated ${data.courses.length - seen.size} duplicate courses`
+      );
+    }
+
+    return Array.from(seen.values());
+  }, [data]);
+
+  const index = useMemo(() => initialize(catalogCourses), [catalogCourses]);
+  const currentCourses = useMemo(() => {
+    if (!searchQuery) return catalogCourses.slice(0, 50);
+
+    return index
+      .search(searchQuery.slice(0, 24))
+      .slice(0, 50) // Limit to first 50 results for performance
+      .map(({ refIndex }) => catalogCourses[refIndex]);
+  }, [catalogCourses, index, searchQuery]);
+
+  // Track search queries with a 1s debounce
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!searchQuery) return;
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      trackSearch(searchQuery, currentCourses.length);
+    }, 1000);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchQuery, currentCourses.length, trackSearch]);
+
+  const handleResultClick = useCallback(
+    (course: Pick<ICourse, "subject" | "number">, resultIndex: number) => {
+      if (searchQuery) {
+        trackSearchClick(
+          searchQuery,
+          `${course.subject}-${course.number}`,
+          resultIndex
+        );
+      }
+      onSelect?.(course);
+      setSearchQuery("");
+      setIsOpen(false);
+    },
+    [searchQuery, trackSearchClick, onSelect]
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setRecentCourses(getRecents(RecentType.Course));
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (selectedCourse && !isOpen) {
+      setSearchQuery("");
+    }
+  }, [selectedCourse, isOpen]);
+
+  const isCourseRated = (subject: string, number: string) => {
+    return ratedCourses.some(
+      (rated) => rated.subject === subject && rated.courseNumber === number
+    );
+  };
+
+  const handleFocus = () => {
+    if (!searchQuery && selectedCourse) {
+      setSearchQuery(`${selectedCourse.subject} ${selectedCourse.number}`);
+    }
+    setIsOpen(true);
+  };
+
+  return (
+    <div ref={wrapperRef} style={{ position: "relative" }}>
+      <div className={styles.inputWrapper}>
+        <Search className={styles.searchIcon} />
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="Select a class"
+          value={
+            searchQuery ||
+            (selectedCourse
+              ? `${selectedCourse.subject} ${selectedCourse.number}`
+              : "")
+          }
+          onFocus={handleFocus}
+          onClick={() => setIsOpen(true)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            if (onClear) onClear();
+          }}
+          style={inputStyle}
+        />
+      </div>
+
+      {isOpen && (
+        <div className={styles.dropdownPanel}>
+          {loading ? (
+            <LoadingIndicator className={styles.loading} size="md" />
+          ) : (
+            <div>
+              {!minimal && recentCourses.length > 0 && (
+                <section className={styles.section}>
+                  <h2>RECENT</h2>
+                  <div className={styles.recentCourses}>
+                    {recentCourses.map((course, index) => (
+                      <Badge
+                        key={`grades-${course.subject}-${course.number}-${index}`}
+                        onClick={() => {
+                          const full = data?.courses.find(
+                            (c) =>
+                              c.subject === course.subject &&
+                              c.number === course.number
+                          );
+                          if (full) {
+                            handleResultClick(full, index);
+                          } else {
+                            setIsOpen(false);
+                          }
+                        }}
+                        label={`${course.subject} ${course.number}`}
+                        color={Color.Zinc}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {currentCourses.length > 0 && (
+                <section
+                  className={styles.section}
+                  style={minimal ? { paddingTop: 0 } : undefined}
+                >
+                  {!minimal && <h2>CATALOG</h2>}
+                  <div className={styles.catalogList}>
+                    {currentCourses.map((course, resultIndex) => {
+                      const isRated = isCourseRated(
+                        course.subject,
+                        course.number
+                      );
+                      return (
+                        <button
+                          key={course.courseId}
+                          className={`${styles.catalogItem} ${isRated ? styles.ratedItem : ""}`}
+                          onClick={() => {
+                            if (!isRated) {
+                              handleResultClick(course, resultIndex);
+                            }
+                          }}
+                          disabled={isRated}
+                        >
+                          <span>
+                            {course.subject} {course.number}
+                            {isRated && (
+                              <span className={styles.ratedLabel}>
+                                {" "}
+                                (Rated)
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {!searchQuery && catalogCourses.length > 50 && (
+                      <div className={styles.moreCoursesHint}>
+                        +{catalogCourses.length - 50} more courses. Search and
+                        narrow results.
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

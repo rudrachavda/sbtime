@@ -1,0 +1,107 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+
+  &:hover:not(.blocked):not(.noHover) .title {
+    color: var(--heading-color);
+  }
+
+  &.active:not(.blocked) .title {
+    color: var(--heading-color);
+  }
+
+  &.active:not(.blocked) .radioButton {
+    border-color: var(--blue-500);
+
+    &::after {
+      opacity: 1;
+      background-color: var(--blue-500);
+    }
+  }
+
+  &.blocked {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+
+    .radioButton {
+      opacity: 0.5;
+    }
+
+    .title,
+    .time {
+      opacity: 0.5;
+    }
+
+    .blockButton {
+      pointer-events: auto;
+      opacity: 1;
+      color: var(--paragraph-color);
+    }
+  }
+
+  &.noHover {
+    // Prevents hover effects when editing is disabled
+  }
+
+  .radioButton {
+    height: 16px;
+    width: 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--gray-400);
+    position: relative;
+
+    &::after {
+      height: 10px;
+      width: 10px;
+      border-radius: 5px;
+      background-color: var(--gray-400);
+      content: "";
+      position: absolute;
+      top: 1.5px;
+      left: 1.5px;
+      opacity: 0;
+      transition: all 100ms ease-in-out;
+    }
+  }
+
+  .time {
+    margin-left: auto;
+    line-height: 1;
+  }
+
+  .title {
+    font-size: var(--text-14);
+    line-height: 1;
+    color: var(--paragraph-color);
+    font-weight: var(--font-medium);
+    transition: all 100ms ease-in-out;
+  }
+
+  .blockButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    border-radius: 4px;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var(--hover-background);
+      color: var(--text-color);
+    }
+
+    &:active {
+      background-color: var(--active-background);
+    }
+  }
+}

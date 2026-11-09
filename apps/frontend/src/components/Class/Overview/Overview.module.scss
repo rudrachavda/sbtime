@@ -1,0 +1,23 @@
+.label {
+  font-weight: var(--font-medium);
+  font-size: var(--text-14);
+  line-height: 20px;
+  color: var(--heading-color);
+}
+
+.description {
+  font-weight: var(--font-normal);
+  font-size: var(--text-14);
+  color: var(--paragraph-color);
+  line-height: 1.5;
+}
+
+.link {
+  color: var(--blue-500);
+  text-decoration: underline;
+  transition: color 100ms ease-in-out;
+
+  &:hover {
+    color: var(--blue-hover);
+  }
+}

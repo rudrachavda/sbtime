@@ -1,0 +1,76 @@
+:root {
+  --header-height: 90px; /* Default, overridden by JS */
+
+  /* Z-index layers
+  For elements in the <body> stacking context (position: fixed, Radix portals).
+  For local stacking within a component, use plain integers (1, 2, 3) instead. */
+  --z-fixed: 100;
+  --z-nav: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+  --z-menu-overlay: 800; /* Mobile nav menu overlay (above all page content) */
+  --z-nav-header: 900; /* Sticky navigation header (above menu overlay) */
+  --z-nav-dropdown: 1000; /* Nav bar dropdowns (above nav header) */
+  --z-dev: 9999;
+}
+
+html {
+  /* Prevent double-tap zoom on mobile while preserving pinch-to-zoom feel */
+  touch-action: manipulation;
+  /* Prevent text size adjustment on orientation change */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+p,
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+input,
+button {
+  font-family: unset;
+  border: unset;
+  background-color: unset;
+  padding: unset;
+}
+
+input {
+  width: 100%;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+/* Prevent iOS Safari from zooming in on input focus (requires 16px+) */
+/* Only apply on mobile/touch devices to avoid affecting desktop styling */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+body {
+  scrollbar-color: var(--label-color) transparent;
+}

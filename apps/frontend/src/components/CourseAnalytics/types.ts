@@ -1,0 +1,148 @@
+import { Semester } from "@/lib/generated/graphql";
+
+export enum InputType {
+  Term = "T",
+  Instructor = "P",
+}
+
+interface BaseInput {
+  subject: string;
+  courseId: string;
+  courseNumber: string; // For display purposes only
+  type?: InputType;
+}
+
+export interface CourseInput extends BaseInput {
+  type?: never;
+}
+
+interface BaseTermInput extends BaseInput {
+  year: number;
+  semester: Semester;
+  type: InputType.Term;
+  sessionId: string;
+}
+
+export interface InstructorTermInput extends BaseTermInput {
+  givenName: string;
+  familyName: string;
+}
+
+export interface NoInstructorTermInput extends BaseTermInput {
+  givenName?: never;
+  familyName?: never;
+}
+
+export type TermInput = InstructorTermInput | NoInstructorTermInput;
+
+interface BaseInstructorInput extends BaseInput {
+  givenName: string;
+  familyName: string;
+  type: InputType.Instructor;
+}
+
+export interface TermInstructorInput extends BaseInstructorInput {
+  year: number;
+  semester: Semester;
+  sessionId: string;
+}
+
+export interface NoTermInstructorInput extends BaseInstructorInput {
+  year?: never;
+  semester?: never;
+  sessionId?: never;
+}
+
+export type InstructorInput = TermInstructorInput | NoTermInstructorInput;
+
+export type Input = CourseInput | TermInput | InstructorInput;
+
+// Generic output type - T represents the data type (gradeDistribution or enrollmentHistory)
+export interface CourseOutput<I, T> {
+  data: T;
+  input: I;
+  color: string;
+  darkColor: string;
+  hidden: boolean;
+  active: boolean;
+}
+
+export const LIGHT_COLORS = [
+  "#4EA6FA", // Blue
+  "#6ADF86", // Green
+  "#EC5186", // Pink
+  "#F9E151", // Yellow
+  "#FF8C42", // Orange
+  "#A855F7", // Purple
+];
+export const DARK_COLORS = [
+  "#132a3e", // Blue (dimmed)
+  "#1a3721", // Green (dimmed)
+  "#3b1621", // Pink (dimmed)
+  "#3e3844", // Yellow (dimmed)
+  "#3d2a1a", // Orange (dimmed)
+  "#2d1f3d", // Purple (dimmed)
+];
+export const MAX_COURSES = 6;
+
+export const getInputSearchParam = (input: Input) => {
+  // Course input
+  if (!input.type) return `${input.subject};${input.courseId}`;
+
+  // Term input
+  if (input.type === InputType.Term) {
+    const termSegment = `${input.year}:${input.semester}:${input.sessionId}`;
+    if (!input.givenName && !input.familyName) {
+      return `${input.subject};${input.courseId};T;${termSegment}`;
+    }
+
+    return `${input.subject};${input.courseId};T;${termSegment};${input.givenName}:${input.familyName}`;
+  }
+
+  // Instructor input
+  if (!input.year && !input.semester) {
+    return `${input.subject};${input.courseId};P;${input.givenName}:${input.familyName}`;
+  }
+
+  const termSegment = `${input.year}:${input.semester}:${input.sessionId}`;
+
+  return `${input.subject};${input.courseId};P;${input.givenName}:${input.familyName};${termSegment}`;
+};
+
+export const isInputEqual = (a: Input, b: Input) => {
+  if (!a.type && !b.type)
+    return b.courseId === a.courseId && b.subject === a.subject;
+
+  if (a.type !== b.type) return false;
+
+  if (a.type === InputType.Term && b.type === InputType.Term) {
+    return (
+      b.subject === a.subject &&
+      b.courseId === a.courseId &&
+      b.givenName === a.givenName &&
+      b.familyName === a.familyName &&
+      b.year === a.year &&
+      b.semester === a.semester &&
+      b.sessionId === a.sessionId
+    );
+  }
+
+  if (a.type === InputType.Instructor && b.type === InputType.Instructor) {
+    const baseMatch =
+      b.subject === a.subject &&
+      b.courseId === a.courseId &&
+      b.givenName === a.givenName &&
+      b.familyName === a.familyName;
+    if (a.year && a.semester && b.year && b.semester) {
+      return (
+        baseMatch &&
+        b.year === a.year &&
+        b.semester === a.semester &&
+        b.sessionId === a.sessionId
+      );
+    }
+    return baseMatch && !a.year && !b.year;
+  }
+
+  return false;
+};

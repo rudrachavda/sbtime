@@ -1,0 +1,78 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+  min-width: 1080px;
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    font-size: var(--text-12);
+    line-height: 1;
+    z-index: 2;
+
+    .legend {
+      display: flex;
+      padding: 0 12px;
+      height: 32px;
+      gap: 12px;
+      align-items: center;
+      background-color: var(--backdrop-color);
+      border-bottom: 1px solid var(--border-color);
+      color: var(--paragraph-color);
+
+      .timezone {
+        margin-left: auto;
+      }
+
+      .category {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+    }
+
+    .week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      color: var(--label-color);
+      background-color: var(--background-color);
+      flex-grow: 1;
+
+      .day {
+        height: 32px;
+        display: grid;
+        place-items: center;
+
+        &:not(:last-child) {
+          border-right: 1px solid var(--border-color);
+        }
+      }
+    }
+  }
+
+  .view {
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+  }
+
+  .monthHeader {
+    position: sticky;
+    top: 64px; // Below the Calendar header (32px legend + 32px week header)
+    z-index: 2;
+    font-size: var(--text-14);
+    line-height: 1;
+    height: 32px;
+    color: var(--label-color);
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    background-color: var(--backdrop-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+}

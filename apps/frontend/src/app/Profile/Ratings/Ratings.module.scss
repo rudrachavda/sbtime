@@ -1,0 +1,36 @@
+.searchGroup {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 48px;
+  max-width: 345px;
+  background-color: var(--foreground-color);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+
+  &:has(.searchInput:focus) {
+    outline: 4px solid color-mix(in srgb, var(--blue-500) 25%, transparent);
+    border-color: var(--blue-500);
+  }
+
+  .searchIcon {
+    color: var(--label-color);
+    display: grid;
+    place-items: center;
+  }
+
+  .searchInput {
+    color: var(--heading-color);
+    font-size: var(--text-14);
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+
+    &::placeholder {
+      color: var(--paragraph-color);
+    }
+  }
+}

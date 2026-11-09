@@ -1,0 +1,41 @@
+import { gql } from "@apollo/client";
+
+import { GetGradeDistributionQuery } from "../generated/graphql";
+
+export type IGrade = NonNullable<
+  NonNullable<GetGradeDistributionQuery["grade"]>["distribution"]
+>[number];
+
+export type IGradeDistribution = GetGradeDistributionQuery["grade"];
+
+export const READ_GRADE_DISTRIBUTION = gql`
+  query GetGradeDistribution(
+    $year: Int
+    $semester: Semester
+    $sessionId: SessionIdentifier
+    $subject: String!
+    $courseId: String!
+    $classNumber: ClassNumber
+    $familyName: String
+    $givenName: String
+  ) {
+    grade(
+      year: $year
+      semester: $semester
+      sessionId: $sessionId
+      subject: $subject
+      courseId: $courseId
+      classNumber: $classNumber
+      familyName: $familyName
+      givenName: $givenName
+    ) {
+      average
+      pnpPercentage
+      distribution {
+        letter
+        percentage
+        count
+      }
+    }
+  }
+`;

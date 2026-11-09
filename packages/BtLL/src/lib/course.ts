@@ -1,0 +1,187 @@
+import { argSplit } from "../helper";
+import { evaluate } from "../interpreter";
+import { BtLLConfig, Data, FunctionMapEntry, Variables } from "../types";
+
+export type Course = {
+  subject: Data<string>;
+  number: Data<string>;
+  units: Data<number>;
+  breadthRequirements: Data<string[]>;
+  universityRequirement: Data<string>;
+  languageLevel: Data<string>;
+};
+
+export const definedFields = [
+  "subject",
+  "number",
+  "units",
+  "universityRequirement",
+  "breadthRequirements",
+  "languageLevel",
+];
+
+const makeCourse = (
+  subject: Data<string>,
+  number: Data<string>
+): Data<Course> => ({
+  data: {
+    subject,
+    number,
+    units: {
+      data: 0,
+      type: "number",
+    },
+    universityRequirement: {
+      data: "",
+      type: "string",
+    },
+    breadthRequirements: {
+      data: [],
+      type: "List<string>",
+    },
+    languageLevel: {
+      data: "",
+      type: "string",
+    },
+  },
+  type: "Course",
+});
+
+export const constructor = (
+  _: string,
+  v: string,
+  variables: Variables,
+  config?: BtLLConfig
+): Data<Course> => {
+  const parts = argSplit(v.substring(1, v.length - 1));
+
+  if (parts.length !== 1 && parts.length !== 2) {
+    throw new Error(
+      `Invalid course format: ${v}. Expected format: {"subject", "number"}`
+    );
+  }
+
+  if (parts.length === 1) {
+    const name = evaluate(parts[0].trim(), "string", variables, config).data;
+    return makeCourse(
+      { data: name.split(" ")[0], type: "string" },
+      { data: name.split(" ")[1], type: "string" }
+    );
+  }
+
+  return makeCourse(
+    evaluate(parts[0].trim(), "string", variables, config),
+    evaluate(parts[1].trim(), "string", variables, config)
+  );
+};
+
+export const coursesEqual = (course1: Course, course2: Course): boolean => {
+  return (
+    course1.subject.data === course2.subject.data &&
+    course1.number.data === course2.number.data
+  );
+};
+
+export const functions: FunctionMapEntry[] = [
+  [
+    "one_common_course",
+    {
+      type: "Function<boolean>(List<Course>, List<Course>)",
+      data: {
+        eval: (
+          _: Variables,
+          list1: Data<Array<Course>>,
+          list2: Data<Array<Course>>
+        ) => {
+          for (const course1 of list1.data) {
+            for (const course2 of list2.data) {
+              if (coursesEqual(course1, course2)) {
+                return { data: true, type: "boolean" };
+              }
+            }
+          }
+          return { data: false, type: "boolean" };
+        },
+        args: ["List<Course>", "List<Course>"],
+      },
+    },
+  ],
+  [
+    "all_common_courses",
+    {
+      type: "Function<boolean>(List<Course>, List<Course>)",
+      data: {
+        eval: (
+          _: Variables,
+          list1: Data<Array<Course>>,
+          list2: Data<Array<Course>>
+        ) => {
+          return {
+            data: list2.data.every((course2) =>
+              list1.data.some((course1) => coursesEqual(course1, course2))
+            ),
+            type: "boolean",
+          };
+        },
+        args: ["List<Course>", "List<Course>"],
+      },
+    },
+  ],
+  [
+    "common_course_matches",
+    {
+      type: "Function<List<boolean>>(List<Course>, List<Course>)",
+      data: {
+        eval: (
+          _: Variables,
+          list1: Data<Array<Course>>,
+          list2: Data<Array<Course>>
+        ) => {
+          return {
+            data: list1.data.map((course1) =>
+              list2.data.some((course2) => coursesEqual(course1, course2))
+            ),
+            type: "List<boolean>",
+          };
+        },
+        args: ["List<Course>", "List<Course>"],
+      },
+    },
+  ],
+  [
+    "sum_units",
+    {
+      type: "Function<number>(List<Course>)",
+      data: {
+        eval: (_: Variables, courses: Data<Array<Course>>) => ({
+          data: courses.data.reduce((acc, c) => acc + (c.units?.data ?? 0), 0),
+          type: "number" as const,
+        }),
+        args: ["List<Course>"],
+      },
+    },
+  ],
+  [
+    "take_until_units",
+    {
+      type: "Function<List<Course>>(List<Course>, number)",
+      data: {
+        eval: (
+          _: Variables,
+          list: Data<Array<Course>>,
+          targetUnits: Data<number>
+        ) => {
+          let sum = 0;
+          const result: Course[] = [];
+          for (const course of list.data) {
+            if (sum >= targetUnits.data) break;
+            result.push(course);
+            sum += course.units.data || 0;
+          }
+          return { data: result, type: list.type };
+        },
+        args: ["List<Course>", "number"],
+      },
+    },
+  ],
+];

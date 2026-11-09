@@ -1,0 +1,36 @@
+.drawer {
+  display: flex;
+  flex-direction: column;
+
+  @media (width <= 992px) {
+    width: 100%;
+  }
+
+  @media (width > 992px) {
+    border-right: 1px solid var(--border-color);
+  }
+
+  .body {
+    flex-grow: 1;
+    height: 0;
+    overflow: clip;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px;
+    background-color: var(--foreground-color);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    justify-content: space-between;
+    font-size: var(--text-14);
+    line-height: 1;
+    color: var(--heading-color);
+    font-weight: var(--font-medium);
+
+    @media (width <= 992px) {
+      border-width: 0 0 1px;
+    }
+  }
+}

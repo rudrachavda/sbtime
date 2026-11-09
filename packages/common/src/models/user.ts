@@ -1,0 +1,161 @@
+import mongoose, { Document, InferSchemaType, Schema } from "mongoose";
+
+export const userSchema = new Schema(
+  {
+    googleId: {
+      type: String,
+      trim: true,
+      required: true,
+      immutable: true,
+      select: false,
+    },
+    email: {
+      type: String,
+      trim: true,
+      required: true,
+      immutable: true,
+    },
+    name: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    staff: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    majors: {
+      type: [String],
+      required: false,
+      default: [],
+    },
+    bookmarkedClasses: {
+      required: false,
+      default: [],
+      type: [
+        {
+          year: {
+            type: Number,
+            required: true,
+          },
+          semester: {
+            type: String,
+            enum: ["Spring", "Summer", "Fall", "Winter"],
+            required: true,
+          },
+          subject: {
+            type: String,
+            required: true,
+          },
+          courseNumber: {
+            type: String,
+            required: true,
+          },
+          number: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+    },
+    bookmarkedCourses: {
+      required: false,
+      default: [],
+      type: [
+        {
+          subject: {
+            type: String,
+            required: true,
+          },
+          number: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+    },
+    monitoredClasses: {
+      required: false,
+      default: [],
+      type: [
+        {
+          class: {
+            year: {
+              type: Number,
+              required: true,
+            },
+            semester: {
+              type: String,
+              enum: ["Spring", "Summer", "Fall", "Winter"],
+              required: true,
+            },
+            sessionId: {
+              type: String,
+              required: false,
+            },
+            subject: {
+              type: String,
+              required: true,
+            },
+            courseNumber: {
+              type: String,
+              required: true,
+            },
+            number: {
+              type: String,
+              required: true,
+            },
+          },
+          notified: {
+            type: Boolean,
+            required: true,
+            default: false,
+          },
+        },
+      ],
+    },
+    notificationsOn: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    refresh_token: {
+      type: String,
+      required: false,
+    },
+    minors: {
+      type: [String],
+      trim: true,
+      required: false,
+    },
+    lastSeenAt: {
+      type: Date,
+      required: true,
+      default: new Date(0), // Unix epoch (1970-01-01) indicates legacy user who hasn't visited since tracking started
+    },
+    activityScore: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      max: 1,
+    },
+  },
+  {
+    timestamps: {
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
+    },
+  }
+);
+
+// for login
+userSchema.index({ email: 1 }, { unique: true });
+
+// for active user queries
+userSchema.index({ activityScore: 1 });
+
+export const UserModel = mongoose.model("users", userSchema);
+
+export type UserType = Document & InferSchemaType<typeof userSchema>;

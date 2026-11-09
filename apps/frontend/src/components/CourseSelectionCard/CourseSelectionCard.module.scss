@@ -1,0 +1,67 @@
+.card {
+  min-width: 300px;
+  max-width: 330px;
+  flex: 1 1 300px;
+  transition:
+    filter 140ms ease,
+    opacity 140ms ease;
+}
+
+.fluid {
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+.dimmed {
+  opacity: 0.7;
+}
+
+.colorBlock {
+  display: block;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.iconButton,
+.deleteIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: transparent;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--paragraph-color);
+  transition:
+    background-color 150ms ease-in-out,
+    color 150ms ease-in-out,
+    border-color 150ms ease-in-out;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--button-hover-color);
+      color: var(--heading-color);
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    background-color: var(--button-hover-color);
+  }
+}
+
+.deleteIconButton {
+  color: var(--paragraph-color);
+}

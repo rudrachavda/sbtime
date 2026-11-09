@@ -1,0 +1,11 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color);
+}
+
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav-header);
+}
