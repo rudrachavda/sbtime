@@ -69,7 +69,8 @@ export const classTypeDef = gql`
     year: Int!
     semester: Semester!
     gradingBasis: ClassGradingBasis!
-    finalExam: ClassFinalExam!
+    "Null when the source does not say whether there is a final."
+    finalExam: ClassFinalExam
     description: String
     title: String
     unitsMax: Float!

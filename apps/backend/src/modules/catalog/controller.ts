@@ -43,6 +43,7 @@ export interface CatalogQueryParams {
   filters?: {
     levels?: string[] | null;
     departments?: string[] | null;
+    subjects?: string[] | null;
     unitsMin?: number | null;
     unitsMax?: number | null;
     days?: number[] | null;
@@ -288,6 +289,15 @@ const applyInMemoryFilters = (
       return false;
     }
 
+    // Subject filter
+    if (
+      filters.subjects &&
+      filters.subjects.length > 0 &&
+      !filters.subjects.includes(item.subject)
+    ) {
+      return false;
+    }
+
     // Units range overlap
     if (filters.unitsMin != null || filters.unitsMax != null) {
       const min = filters.unitsMin ?? 0;
@@ -414,6 +424,11 @@ const buildFilterQuery = (
   // Department filter
   if (filters.departments && filters.departments.length > 0) {
     query.academicOrganization = { $in: filters.departments };
+  }
+
+  // Subject filter
+  if (filters.subjects && filters.subjects.length > 0) {
+    query.subject = { $in: filters.subjects };
   }
 
   // Units range overlap
@@ -579,6 +594,12 @@ export const getCatalogFilterOptions = async (
               name: "$academicOrganizationName",
             },
           },
+          subjects: {
+            $addToSet: {
+              code: "$subject",
+              name: "$subjectName",
+            },
+          },
           levels: { $addToSet: "$level" },
           gradingOptions: { $addToSet: "$gradingBasis" },
           breadthRequirements: { $addToSet: "$breadthRequirements" },
@@ -628,6 +649,16 @@ export const getCatalogFilterOptions = async (
       )
       .sort((a: { name: string }, b: { name: string }) =>
         a.name.localeCompare(b.name)
+      ),
+    // Sorted by code: students look subjects up by the code on the course.
+    subjects: (result?.subjects ?? [])
+      .filter((s: { code: string | null }) => s.code != null)
+      .map((s: { code: string; name: string | null }) => ({
+        code: s.code,
+        name: s.name ?? s.code,
+      }))
+      .sort((a: { code: string }, b: { code: string }) =>
+        a.code.localeCompare(b.code)
       ),
     levels: (result?.levels ?? []).filter(Boolean).sort(),
     gradingOptions: (result?.gradingOptions ?? []).filter(Boolean).sort(),

@@ -1,6 +1,8 @@
 import { parseArgs } from "node:util";
 
 import { updateCatalogGradeSummaries } from "./lib/catalog-denormalize";
+import catalogPuller from "./pullers/catalog";
+import catalogDetailsPuller from "./pullers/catalog-details";
 import classesPuller from "./pullers/classes";
 import coursesPuller from "./pullers/courses";
 import decalsPuller from "./pullers/decals";
@@ -22,6 +24,11 @@ const cliArgs = {
 const pullerMap: {
   [key: string]: (config: Config, ...arg: any) => Promise<unknown>;
 } = {
+  // UCSB: courses, classes, sections and seat counts for whole quarters.
+  "catalog-active": catalogPuller.activeTerms,
+  "catalog-backfill": catalogPuller.backfillTerms,
+  // UCSB: prerequisites and full titles from the public General Catalog.
+  "catalog-details": catalogDetailsPuller.updateCourseDetails,
   courses: coursesPuller.updateCourses,
   decals: decalsPuller.scrapeDeCals,
   "sections-active": sectionsPuller.activeTerms,

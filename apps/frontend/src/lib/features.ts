@@ -9,11 +9,11 @@ import { redirect } from "react-router-dom";
  */
 export const FEATURES = {
   /** Degree planner. Needs UCSB colleges, majors and requirements. */
-  gradtrak: false,
+  gradtrak: true,
   /** Grade distributions. Needs a UCSB grades source. */
-  grades: false,
+  grades: true,
   /** Enrollment over time. Needs the UCSB seat-count puller. */
-  enrollment: false,
+  enrollment: true,
   /** Staff-curated class lists. Berkeley content. */
   curatedClasses: false,
   /**

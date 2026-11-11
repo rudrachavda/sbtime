@@ -90,6 +90,8 @@ export default function Filters() {
     updateGradingFilters,
     department,
     updateDepartment,
+    subject,
+    updateSubject,
     updateEnrollmentFilter,
     sortBy,
     reverse,
@@ -184,6 +186,19 @@ export default function Filters() {
     [breadths, universityRequirements, coeHss]
   );
 
+  // "PSTAT · Statistics & Applied Probability", so typing either finds it.
+  const subjectOptions = useMemo(
+    () =>
+      (filterOptions?.subjects ?? []).map((option) => ({
+        value: option.code,
+        label:
+          option.name && option.name !== option.code
+            ? `${option.code} · ${option.name}`
+            : option.code,
+      })),
+    [filterOptions]
+  );
+
   const departmentOptions = useMemo(
     () =>
       (filterOptions?.departments ?? []).map((option) => ({
@@ -222,6 +237,7 @@ export default function Filters() {
     updateCoEHss(false);
     updateGradingFilters([]);
     updateDepartment(null);
+    updateSubject(null);
     updateUnits([0, 5]);
     setDaysArray([...EMPTY_DAYS]);
     updateDays([]);
@@ -309,6 +325,32 @@ export default function Filters() {
               label: `${term.semester} ${term.year}`,
             }))}
             emptyMessage="No quarters found."
+          />
+        </div>
+        <div className={styles.formControl}>
+          <p className={styles.label}>Subject</p>
+          <Select
+            combobox
+            clearable
+            disabled={!filterOptions || subjectOptions.length === 0}
+            value={subject}
+            placeholder="Select a subject"
+            side="bottom"
+            maxListHeight={280}
+            onChange={(value) => {
+              if (Array.isArray(value)) return;
+              updateSubject(value);
+              if (value) {
+                trackEvent(
+                  "search_filter_applied",
+                  "catalog_filter",
+                  "subject",
+                  { value }
+                );
+              }
+            }}
+            options={subjectOptions}
+            emptyMessage="No subjects found."
           />
         </div>
         <div className={styles.formControl}>

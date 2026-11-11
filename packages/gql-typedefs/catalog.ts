@@ -22,6 +22,7 @@ export const catalogTypeDef = gql`
   input CatalogFilters {
     levels: [String!]
     departments: [String!]
+    subjects: [String!]
     unitsMin: Float
     unitsMax: Float
     days: [Int!]
@@ -176,6 +177,13 @@ export const catalogTypeDef = gql`
     name: String!
   }
 
+  type CatalogSubject @cacheControl(inheritMaxAge: true) {
+    "Subject code as stored, without spaces, for example PSTAT"
+    code: String!
+    "Full name, for example Statistics & Applied Probability"
+    name: String!
+  }
+
   type CatalogTimeRange @cacheControl(inheritMaxAge: true) {
     minStartTime: String!
     maxEndTime: String!
@@ -183,6 +191,7 @@ export const catalogTypeDef = gql`
 
   type CatalogFilterOptions @cacheControl(inheritMaxAge: true) {
     departments: [CatalogDepartment!]!
+    subjects: [CatalogSubject!]!
     levels: [String!]!
     gradingOptions: [String!]!
     breadthRequirements: [String!]!

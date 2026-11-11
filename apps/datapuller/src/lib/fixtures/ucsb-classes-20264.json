@@ -1,0 +1,635 @@
+{
+  "pageNumber": 1,
+  "pageSize": 500,
+  "total": 7,
+  "classes": [
+    {
+      "quarter": "20264",
+      "courseId": "ANTH      3  ",
+      "title": "WORLD ARCHAEOLOGY",
+      "contactHours": 30.0,
+      "description": "An introduction to archaeology and the history of humankind from the earlie st times through the advent of literate civilization and cities, also proce sses of cultural change and the importance of archaeology to people and soc ieties today. Partly self-paced learning.",
+      "college": "L&S",
+      "objLevelCode": "U",
+      "subjectArea": "ANTH    ",
+      "unitsFixed": 5.0,
+      "unitsVariableHigh": null,
+      "unitsVariableLow": null,
+      "delayedSectioning": null,
+      "inProgressCourse": null,
+      "gradingOption": null,
+      "instructionType": "LEC",
+      "onLineCourse": false,
+      "deptCode": "ANTH ",
+      "generalEducation": [
+        {
+          "geCode": "D  ",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "D  ",
+          "geCollege": "ENGR"
+        },
+        {
+          "geCode": "NWC",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "WRT",
+          "geCollege": "ENGR"
+        },
+        {
+          "geCode": "WRT",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "NWC",
+          "geCollege": "ENGR"
+        }
+      ],
+      "classSections": [
+        {
+          "enrollCode": "00018",
+          "section": "0100",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 361,
+          "maxEnroll": 400,
+          "secondaryStatus": "R",
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "LEC",
+          "timeLocations": [
+            {
+              "room": "THEA1",
+              "building": "IV",
+              "roomCapacity": 529,
+              "days": "M W F  ",
+              "beginTime": "14:00",
+              "endTime": "14:50"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "SMITH S T",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        },
+        {
+          "enrollCode": "00026",
+          "section": "0101",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 23,
+          "maxEnroll": 28,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "DIS",
+          "timeLocations": [
+            {
+              "room": "1021",
+              "building": "HSSB",
+              "roomCapacity": null,
+              "days": "M      ",
+              "beginTime": "10:00",
+              "endTime": "10:50"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "STEHR K",
+              "functionCode": "Teaching but not in charge"
+            }
+          ]
+        },
+        {
+          "enrollCode": "00034",
+          "section": "0102",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 28,
+          "maxEnroll": 28,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "DIS",
+          "timeLocations": [
+            {
+              "room": "1021",
+              "building": "HSSB",
+              "roomCapacity": null,
+              "days": "M      ",
+              "beginTime": "13:00",
+              "endTime": "13:50"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "STEHR K",
+              "functionCode": "Teaching but not in charge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "quarter": "20264",
+      "courseId": "ANTH    195B ",
+      "title": "ANTH HNR IND STDY I",
+      "contactHours": 30.0,
+      "description": "Individual research under the supervision of an   Anthropology faculty memb er which will result in an honors  thesis. This course concentrates on read ing and gathering   of materials for thesis.",
+      "college": "L&S",
+      "objLevelCode": "U",
+      "subjectArea": "ANTH    ",
+      "unitsFixed": 4.0,
+      "unitsVariableHigh": null,
+      "unitsVariableLow": null,
+      "delayedSectioning": "I",
+      "inProgressCourse": "Y",
+      "gradingOption": "L",
+      "instructionType": "SEM",
+      "onLineCourse": false,
+      "deptCode": "ANTH ",
+      "generalEducation": [],
+      "classSections": [
+        {
+          "enrollCode": "00539",
+          "section": "0100",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": null,
+          "maxEnroll": 15,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": "S",
+          "restrictionMajor": "+ANTH",
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "SEM",
+          "timeLocations": [],
+          "instructors": []
+        },
+        {
+          "enrollCode": "78444",
+          "section": "0200",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 1,
+          "maxEnroll": 15,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": "S",
+          "restrictionMajor": "+ANTH",
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "SEM",
+          "timeLocations": [],
+          "instructors": [
+            {
+              "instructor": "JARADA M M",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "quarter": "20264",
+      "courseId": "ANTH     99  ",
+      "title": "INDEPENDENT STUDIES",
+      "contactHours": null,
+      "description": "Introduction to research in Anthropology. Independent research under the guidance of a faculty member in the department. Course offers exceptional students the opportunity to undertake independent research or work in a research group.",
+      "college": "L&S",
+      "objLevelCode": "U",
+      "subjectArea": "ANTH    ",
+      "unitsFixed": null,
+      "unitsVariableHigh": 4.0,
+      "unitsVariableLow": 1.0,
+      "delayedSectioning": "I",
+      "inProgressCourse": null,
+      "gradingOption": null,
+      "instructionType": "TUT",
+      "onLineCourse": false,
+      "deptCode": "ANTH ",
+      "generalEducation": [],
+      "classSections": [
+        {
+          "enrollCode": "00356",
+          "section": "0100",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": null,
+          "maxEnroll": 35,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": true,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "TUT",
+          "timeLocations": [],
+          "instructors": []
+        }
+      ]
+    },
+    {
+      "quarter": "20264",
+      "courseId": "CNCSP    97  ",
+      "title": "SPCL TPC APP PSYCH",
+      "contactHours": 20.0,
+      "description": "Topics vary by instructor.",
+      "college": "GSE",
+      "objLevelCode": "U",
+      "subjectArea": "CNCSP   ",
+      "unitsFixed": null,
+      "unitsVariableHigh": 4.0,
+      "unitsVariableLow": 2.0,
+      "delayedSectioning": null,
+      "inProgressCourse": null,
+      "gradingOption": null,
+      "instructionType": "LEC",
+      "onLineCourse": false,
+      "deptCode": "CNCSP",
+      "generalEducation": [],
+      "classSections": [
+        {
+          "enrollCode": "09555",
+          "section": "0100",
+          "session": null,
+          "classClosed": "Y",
+          "courseCancelled": "C         ",
+          "gradingOptionCode": null,
+          "enrolledTotal": null,
+          "maxEnroll": 10,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": ["CNCSP   197  0100"],
+          "typeInstruction": "LEC",
+          "timeLocations": [
+            {
+              "room": null,
+              "building": null,
+              "roomCapacity": null,
+              "days": null,
+              "beginTime": null,
+              "endTime": null
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "JIMERSON S R",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        },
+        {
+          "enrollCode": "09563",
+          "section": "0200",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 6,
+          "maxEnroll": 10,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": ["CNCSP   197  0200"],
+          "typeInstruction": "LEC",
+          "timeLocations": [
+            {
+              "room": "1217",
+              "building": "ED",
+              "roomCapacity": null,
+              "days": "  W    ",
+              "beginTime": "16:00",
+              "endTime": "17:50"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "JIMERSON S R",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "quarter": "20264",
+      "courseId": "AS AM   127  ",
+      "title": "FILM, TV, MEDIA",
+      "contactHours": 30.0,
+      "description": "Formal, historical, and cultural issues in the study of Asian American film , television, and digital media practices in independent, Hollywood, and tr ansnational contexts. The role of cinema and visual technology in the under standing of Asian Americans in modern and contemporary culture.",
+      "college": "L&S",
+      "objLevelCode": "U",
+      "subjectArea": "AS AM   ",
+      "unitsFixed": 4.0,
+      "unitsVariableHigh": null,
+      "unitsVariableLow": null,
+      "delayedSectioning": null,
+      "inProgressCourse": null,
+      "gradingOption": null,
+      "instructionType": "LEC",
+      "onLineCourse": false,
+      "deptCode": "ASAM ",
+      "generalEducation": [
+        {
+          "geCode": "ETH",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "ETH",
+          "geCollege": "ENGR"
+        },
+        {
+          "geCode": "ETH",
+          "geCollege": "CRST"
+        },
+        {
+          "geCode": "F  ",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "F  ",
+          "geCollege": "ENGR"
+        }
+      ],
+      "classSections": [
+        {
+          "enrollCode": "02147",
+          "section": "0100",
+          "session": null,
+          "classClosed": "Y",
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 47,
+          "maxEnroll": 45,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": "Z",
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "LEC",
+          "timeLocations": [
+            {
+              "room": "1430",
+              "building": "SH",
+              "roomCapacity": 50,
+              "days": " T R   ",
+              "beginTime": "15:30",
+              "endTime": "16:45"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "CHO A",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "quarter": "20264",
+      "courseId": "ANTH    245IA",
+      "title": "EVOANTHLAB",
+      "contactHours": 20.0,
+      "description": "Weekly discussion of IAS faculty and graduate student work in progress",
+      "college": "L&S",
+      "objLevelCode": "G",
+      "subjectArea": "ANTH    ",
+      "unitsFixed": 2.0,
+      "unitsVariableHigh": null,
+      "unitsVariableLow": null,
+      "delayedSectioning": null,
+      "inProgressCourse": null,
+      "gradingOption": "P",
+      "instructionType": "SEM",
+      "onLineCourse": false,
+      "deptCode": "ANTH ",
+      "generalEducation": [],
+      "classSections": [
+        {
+          "enrollCode": "00620",
+          "section": "0100",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 9,
+          "maxEnroll": 15,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": "G",
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "SEM",
+          "timeLocations": [
+            {
+              "room": "2018",
+              "building": "HSSB",
+              "roomCapacity": null,
+              "days": "  W    ",
+              "beginTime": "10:00",
+              "endTime": "12:00"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "STARKWEATHER",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "quarter": "20264",
+      "courseId": "BL ST     1  ",
+      "title": "INTRO AF-AM STUDIES",
+      "contactHours": 30.0,
+      "description": "Explores historical and current social conditions of Black people in the Un ited States. Topics include the following: origins of Black Studies; chatte l slavery and resistance; Reconstruction; Jim Crow segregation; Harlem Rena issance; Black Nationalism; structural racism and anti-Blackness; Civil Rig hts and Black Power Movements; racial wealth gap; critical race theory and Neo-liberalism; carcerality and the prison industrial complex; white privil ege and rage; and the intersection of race, gender, class, and sexuality in shaping Black identity and life chances. As a 5 unit course, BLST 1 is rea ding and writing intensive, with a focus on developing research skills thro ugh a Black Studies lens.",
+      "college": "L&S",
+      "objLevelCode": "U",
+      "subjectArea": "BL ST   ",
+      "unitsFixed": 5.0,
+      "unitsVariableHigh": null,
+      "unitsVariableLow": null,
+      "delayedSectioning": null,
+      "inProgressCourse": null,
+      "gradingOption": null,
+      "instructionType": "LEC",
+      "onLineCourse": false,
+      "deptCode": "BLKST",
+      "generalEducation": [
+        {
+          "geCode": "WRT",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "WRT",
+          "geCollege": "ENGR"
+        },
+        {
+          "geCode": "D  ",
+          "geCollege": "ENGR"
+        },
+        {
+          "geCode": "D  ",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "AMH",
+          "geCollege": "UCSB"
+        },
+        {
+          "geCode": "ETH",
+          "geCollege": "L&S "
+        },
+        {
+          "geCode": "ETH",
+          "geCollege": "CRST"
+        },
+        {
+          "geCode": "ETH",
+          "geCollege": "ENGR"
+        }
+      ],
+      "classSections": [
+        {
+          "enrollCode": "55806",
+          "section": "0100",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 159,
+          "maxEnroll": 160,
+          "secondaryStatus": "R",
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "LEC",
+          "timeLocations": [
+            {
+              "room": "1101",
+              "building": "ILP",
+              "roomCapacity": 175,
+              "days": "M W    ",
+              "beginTime": "12:30",
+              "endTime": "13:45"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "LYONS C D",
+              "functionCode": "Teaching and in charge"
+            }
+          ]
+        },
+        {
+          "enrollCode": "55814",
+          "section": "0101",
+          "session": null,
+          "classClosed": null,
+          "courseCancelled": null,
+          "gradingOptionCode": null,
+          "enrolledTotal": 25,
+          "maxEnroll": 26,
+          "secondaryStatus": null,
+          "departmentApprovalRequired": false,
+          "instructorApprovalRequired": false,
+          "restrictionLevel": null,
+          "restrictionMajor": null,
+          "restrictionMajorPass": null,
+          "restrictionMinor": null,
+          "restrictionMinorPass": null,
+          "concurrentCourses": [],
+          "typeInstruction": "DIS",
+          "timeLocations": [
+            {
+              "room": "3707",
+              "building": "SH",
+              "roomCapacity": null,
+              "days": " T     ",
+              "beginTime": "09:00",
+              "endTime": "09:50"
+            }
+          ],
+          "instructors": [
+            {
+              "instructor": "EVANS-WARE K",
+              "functionCode": "Teaching but not in charge"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

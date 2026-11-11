@@ -81,6 +81,8 @@ export interface ICatalogClassItem {
   academicCareer?: string;
   academicOrganization?: string;
   academicOrganizationName?: string;
+  /** Full subject name, for example "Computer Science". */
+  subjectName?: string;
   allTimeAverageGrade?: number | null;
   allTimePassCount?: number | null;
   allTimeNoPassCount?: number | null;
@@ -171,6 +173,7 @@ const catalogClassSchema = new Schema<ICatalogClassItem>(
     academicCareer: { type: String },
     academicOrganization: { type: String },
     academicOrganizationName: { type: String },
+    subjectName: { type: String },
     allTimeAverageGrade: { type: Number, default: null },
     allTimePassCount: { type: Number, default: null },
     allTimeNoPassCount: { type: Number, default: null },

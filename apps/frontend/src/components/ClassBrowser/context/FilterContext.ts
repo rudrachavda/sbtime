@@ -27,6 +27,7 @@ export interface FilterContextType {
   coeHss: boolean;
   gradingFilters: GradingFilter[];
   department: string | null;
+  subject: string | null;
   sortBy: SortBy;
   reverse: boolean;
   effectiveOrder: "asc" | "desc";
@@ -43,6 +44,7 @@ export interface FilterContextType {
   updateCoEHss: Dispatch<boolean>;
   updateGradingFilters: Dispatch<GradingFilter[]>;
   updateDepartment: Dispatch<string | null>;
+  updateSubject: Dispatch<string | null>;
   updateSortBy: Dispatch<SortBy>;
   updateEnrollmentFilter: Dispatch<EnrollmentFilter | null>;
   updateOnline: Dispatch<boolean>;

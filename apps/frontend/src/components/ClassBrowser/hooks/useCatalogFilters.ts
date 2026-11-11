@@ -114,6 +114,7 @@ export interface CatalogFilterState {
   coeHss: boolean;
   gradingFilters: GradingFilter[];
   department: string | null;
+  subject: string | null;
   sortBy: SortBy;
   reverse: boolean;
   effectiveOrder: "asc" | "desc";
@@ -135,6 +136,7 @@ export interface CatalogFilterUpdaters {
   updateCoEHss: Dispatch<boolean>;
   updateGradingFilters: Dispatch<GradingFilter[]>;
   updateDepartment: Dispatch<string | null>;
+  updateSubject: Dispatch<string | null>;
   updateSortBy: Dispatch<SortBy>;
   updateEnrollmentFilter: Dispatch<EnrollmentFilter | null>;
   updateOnline: Dispatch<boolean>;
@@ -165,6 +167,7 @@ export default function useCatalogFilters({
     GradingFilter[]
   >([]);
   const [localDepartment, setLocalDepartment] = useState<string | null>(null);
+  const [localSubject, setLocalSubject] = useState<string | null>(null);
   const [localSortBy, setLocalSortBy] = useState<SortBy>(SortBy.Relevance);
   const [localReverse, setLocalReverse] = useState<boolean>(false);
   const [localEnrollmentFilter, setLocalEnrollmentFilter] =
@@ -255,6 +258,11 @@ export default function useCatalogFilters({
     return searchParams.get("department") || null;
   }, [searchParams, localDepartment, persistent]);
 
+  const subject = useMemo(() => {
+    if (!persistent) return localSubject;
+    return searchParams.get("subject") || null;
+  }, [searchParams, localSubject, persistent]);
+
   const sortBy = useMemo(() => {
     if (persistent) {
       const parameter = searchParams.get("sortBy") as SortBy;
@@ -319,6 +327,7 @@ export default function useCatalogFilters({
     }
 
     if (department) filters.departments = [department];
+    if (subject) filters.subjects = [subject];
 
     if (breadths.length > 0) filters.breadths = breadths;
     if (universityRequirements.length > 0) {
@@ -337,6 +346,7 @@ export default function useCatalogFilters({
     enrollmentFilter,
     gradingFilters,
     department,
+    subject,
     breadths,
     universityRequirements,
     coeHss,
@@ -355,6 +365,7 @@ export default function useCatalogFilters({
     coeHss ||
     gradingFilters.length > 0 ||
     department !== null ||
+    subject !== null ||
     enrollmentFilter !== null ||
     online ||
     sortBy !== SortBy.Relevance ||
@@ -451,6 +462,7 @@ export default function useCatalogFilters({
     coeHss,
     gradingFilters,
     department,
+    subject,
     sortBy,
     reverse: localReverse,
     effectiveOrder,
@@ -492,6 +504,15 @@ export default function useCatalogFilters({
         return;
       }
       setLocalDepartment(value);
+    },
+    updateSubject: (value) => {
+      if (persistent) {
+        if (value) searchParams.set("subject", value);
+        else searchParams.delete("subject");
+        setSearchParams(searchParams);
+        return;
+      }
+      setLocalSubject(value);
     },
     updateSortBy,
     updateEnrollmentFilter: (filter) => {

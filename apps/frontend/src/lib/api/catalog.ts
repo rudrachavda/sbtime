@@ -85,6 +85,10 @@ export const GET_CATALOG_FILTER_OPTIONS = gql`
         code
         name
       }
+      subjects {
+        code
+        name
+      }
       levels
       gradingOptions
       breadthRequirements

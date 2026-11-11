@@ -375,6 +375,7 @@ export const buildCatalogClasses = async (
       academicCareer: course.academicCareer,
       academicOrganization: course.academicOrganization,
       academicOrganizationName: course.academicOrganizationName,
+      subjectName: course.subjectName,
       allTimeAverageGrade: course.allTimeAverageGrade ?? null,
       allTimePassCount: course.allTimePassCount ?? null,
       allTimeNoPassCount: course.allTimeNoPassCount ?? null,
