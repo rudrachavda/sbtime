@@ -36,6 +36,7 @@ export default function AddBlockMenu({
 
   const semesterOptions = [
     { label: "Fall", value: "Fall" },
+    { label: "Winter", value: "Winter" },
     { label: "Spring", value: "Spring" },
     { label: "Summer", value: "Summer" },
   ];

@@ -2,7 +2,6 @@ import {
   ClassModel,
   CourseCatalogDetailModel,
   CourseModel,
-  NewEnrollmentHistoryModel,
   SectionModel,
   TermModel,
 } from "@repo/common/models";
@@ -16,7 +15,7 @@ import {
 } from "@repo/ucsb-api";
 
 import { refreshCatalogClasses } from "../lib/catalog-denormalize";
-import { parseQuarterCode, shiftQuarterCode } from "../lib/terms";
+import { EARLIEST_QUARTER, parseQuarterCode } from "../lib/terms";
 import {
   CatalogNames,
   CatalogTerm,
@@ -25,13 +24,11 @@ import {
   buildCatalogNames,
   mapQuarter,
 } from "../lib/ucsb-catalog";
+import { recordEnrollment } from "../lib/ucsb-enrollment-store";
 import { Config } from "../shared/config";
 import { updateTermsCatalogDataFlags } from "./classes";
 
 const WRITE_BATCH_SIZE = 2000;
-
-/** How far back "catalog-backfill" goes: five years of quarters. */
-const BACKFILL_QUARTERS = 20;
 
 const inBatches = async <T>(
   items: T[],
@@ -80,7 +77,7 @@ const loadCatalogNames = async (
   }
 };
 
-const toCatalogTerm = (term: {
+export const toCatalogTerm = (term: {
   id: string;
   beginDate: string;
   endDate: string;
@@ -101,7 +98,7 @@ const toCatalogTerm = (term: {
  * Fetch a quarter's classes. Returns null when UCSB has not published the
  * quarter's schedule yet, which it reports as a 400.
  */
-const fetchQuarter = async (
+export const fetchQuarter = async (
   config: Config,
   client: UcsbClient,
   quarter: string
@@ -179,22 +176,8 @@ const updateQuarter = async (
     )
   );
 
-  // Append a seat-count snapshot per section.
-  await inBatches(mapped.enrollments, (batch) =>
-    NewEnrollmentHistoryModel.bulkWrite(
-      batch.map(({ snapshot, ...identity }) => ({
-        updateOne: {
-          filter: {
-            termId: identity.termId,
-            sessionId: identity.sessionId,
-            sectionId: identity.sectionId,
-          },
-          update: { $set: identity, $push: { history: snapshot } },
-          upsert: true,
-        },
-      }))
-    )
-  );
+  // Seat counts: stretch each section's latest entry, or start a new one.
+  await recordEnrollment(mapped.enrollments);
 
   log.info(
     `${label}: ${mapped.courses.length.toLocaleString()} courses, ${mapped.classes.length.toLocaleString()} classes, ${mapped.sections.length.toLocaleString()} sections.`
@@ -258,10 +241,11 @@ const activeTerms = (config: Config) =>
     temporalPosition: { $in: ["Current", "Future"] },
   }));
 
-/** The last five years, through the newest published quarter. */
+/**
+ * Every quarter the terms puller stores (Fall 2015 onward), through the
+ * newest one UCSB has published.
+ */
 const backfillTerms = (config: Config) =>
-  updateCatalog(config, (currentId) => ({
-    id: { $gte: shiftQuarterCode(currentId, -BACKFILL_QUARTERS) },
-  }));
+  updateCatalog(config, () => ({ id: { $gte: EARLIEST_QUARTER } }));
 
 export default { activeTerms, backfillTerms };

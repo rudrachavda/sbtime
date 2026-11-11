@@ -9,10 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/Tabs";
 import { useEditPlan } from "@/hooks/api";
 import { Colleges, PlanInput } from "@/lib/generated/graphql";
 
-import collegesData from "../Onboarding/AddColleges/colleges.json";
+import {
+  COLLEGE_OPTIONS,
+  collegeFromLabel,
+  labelFromCollege,
+} from "../colleges";
+import DEGREES from "../degree-programs.json";
 import { DegreeOption } from "../types";
 import styles from "./EditPlanDialog.module.scss";
-import DEGREES from "./degree-programs-types.json";
 
 type CollegeOption = {
   label: string;
@@ -53,94 +57,19 @@ export default function EditPlanDialog({
   const majorOptions = DEGREES.majors;
   const minorOptions = DEGREES.minors;
 
-  const collegeOptions = collegesData.colleges.map((college) => ({
-    label: college,
-    value: college,
-  }));
+  const collegeOptions = COLLEGE_OPTIONS;
 
   const convertCollegeOptions = (colleges: CollegeOption[]): Colleges[] => {
-    const output = colleges.map((college) => {
-      switch (college.value) {
-        case "Business":
-          return Colleges.Haas;
-        case "Letters & Science":
-          return Colleges.LnS;
-        case "Engineering":
-          return Colleges.CoE;
-        case "Chemistry":
-          return Colleges.Chem;
-        case "Computing, Data Science & Society":
-          return Colleges.Cdss;
-        case "Education":
-          return Colleges.Edu;
-        case "Environmental Design":
-          return Colleges.Envdes;
-        case "Information":
-          return Colleges.Info;
-        case "Journalism":
-          return Colleges.Journ;
-        case "Law":
-          return Colleges.Law;
-        case "Natural Resources":
-          return Colleges.Natres;
-        case "Optometry":
-          return Colleges.Optom;
-        case "Public Health":
-          return Colleges.Pubhealth;
-        case "Public Policy":
-          return Colleges.Pubpolicy;
-        case "Social Welfare":
-          return Colleges.Socwelf;
-        default:
-          return Colleges.Other;
-      }
-    });
     // prune duplicates
-    return [...new Set(output)];
+    return [
+      ...new Set(colleges.map((college) => collegeFromLabel(college.value))),
+    ];
   };
 
   const convertCollegesToOptions = (colleges: Colleges[]): CollegeOption[] => {
     return colleges.map((college) => {
-      switch (college) {
-        case Colleges.Haas:
-          return { label: "Business", value: "Business" };
-        case Colleges.LnS:
-          return { label: "Letters & Science", value: "Letters & Science" };
-        case Colleges.CoE:
-          return { label: "Engineering", value: "Engineering" };
-        case Colleges.Chem:
-          return { label: "Chemistry", value: "Chemistry" };
-        case Colleges.Cdss:
-          return {
-            label: "Computing, Data Science & Society",
-            value: "Computing, Data Science & Society",
-          };
-        case Colleges.Edu:
-          return { label: "Education", value: "Education" };
-        case Colleges.Envdes:
-          return {
-            label: "Environmental Design",
-            value: "Environmental Design",
-          };
-        case Colleges.Info:
-          return { label: "Information", value: "Information" };
-        case Colleges.Journ:
-          return { label: "Journalism", value: "Journalism" };
-        case Colleges.Law:
-          return { label: "Law", value: "Law" };
-        case Colleges.Natres:
-          return { label: "Natural Resources", value: "Natural Resources" };
-        case Colleges.Optom:
-          return { label: "Optometry", value: "Optometry" };
-        case Colleges.Pubhealth:
-          return { label: "Public Health", value: "Public Health" };
-        case Colleges.Pubpolicy:
-          return { label: "Public Policy", value: "Public Policy" };
-        case Colleges.Socwelf:
-          return { label: "Social Welfare", value: "Social Welfare" };
-        default:
-          return { label: "Other", value: "Other" };
-      }
+      const label = labelFromCollege(college);
+      return { label, value: label };
     });
   };
 

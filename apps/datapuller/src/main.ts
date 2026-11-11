@@ -12,6 +12,7 @@ import gradeDistributionsPuller from "./pullers/grade-distributions";
 import migrationsPuller from "./pullers/migrations";
 import sectionsPuller from "./pullers/sections";
 import termsPuller from "./pullers/terms";
+import ucsbEnrollmentPuller from "./pullers/ucsb-enrollment";
 import setup from "./shared";
 import { Config } from "./shared/config";
 
@@ -27,6 +28,8 @@ const pullerMap: {
   // UCSB: courses, classes, sections and seat counts for whole quarters.
   "catalog-active": catalogPuller.activeTerms,
   "catalog-backfill": catalogPuller.backfillTerms,
+  // UCSB: seat counts for current and upcoming quarters (every 15 minutes).
+  "enrollment-active": ucsbEnrollmentPuller.updateEnrollment,
   // UCSB: prerequisites and full titles from the public General Catalog.
   "catalog-details": catalogDetailsPuller.updateCourseDetails,
   courses: coursesPuller.updateCourses,

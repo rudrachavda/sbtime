@@ -6,9 +6,9 @@ import { Box, Button, Container, Flex, Select } from "@repo/theme";
 
 import { Colleges } from "@/lib/generated/graphql";
 
+import { COLLEGE_OPTIONS, collegeFromLabel } from "../../colleges";
 import DotsIndicator from "../DotsIndicator";
 import styles from "./AddCollege.module.scss";
-import colleges from "./colleges.json";
 
 type CollegeOption = {
   label: string;
@@ -25,50 +25,13 @@ export default function AddColleges({ onNext }: AddCollegesProps) {
     CollegeOption[]
   >([]);
 
-  const collegeOptions = colleges.colleges.map((college) => ({
-    label: college,
-    value: college,
-  }));
+  const collegeOptions = COLLEGE_OPTIONS;
 
   const convertCollegeOptions = (colleges: CollegeOption[]): Colleges[] => {
-    const output = colleges.map((college) => {
-      switch (college.value) {
-        case "Business":
-          return Colleges.Haas;
-        case "Letters & Science":
-          return Colleges.LnS;
-        case "Engineering":
-          return Colleges.CoE;
-        case "Chemistry":
-          return Colleges.Chem;
-        case "Computing, Data Science & Society":
-          return Colleges.Cdss;
-        case "Education":
-          return Colleges.Edu;
-        case "Environmental Design":
-          return Colleges.Envdes;
-        case "Information":
-          return Colleges.Info;
-        case "Journalism":
-          return Colleges.Journ;
-        case "Law":
-          return Colleges.Law;
-        case "Natural Resources":
-          return Colleges.Natres;
-        case "Optometry":
-          return Colleges.Optom;
-        case "Public Health":
-          return Colleges.Pubhealth;
-        case "Public Policy":
-          return Colleges.Pubpolicy;
-        case "Social Welfare":
-          return Colleges.Socwelf;
-        default:
-          return Colleges.Other;
-      }
-    });
     // prune duplicates
-    return [...new Set(output)];
+    return [
+      ...new Set(colleges.map((college) => collegeFromLabel(college.value))),
+    ];
   };
 
   const handleAddCollege = () => {

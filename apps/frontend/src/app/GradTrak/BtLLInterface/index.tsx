@@ -734,24 +734,33 @@ export default function BtLLGradTrakInterface({
 
   return (
     <>
+      {evaluatedGroups.length === 0 && (
+        <div className={classNames(styles.legend, styles.legendHint)}>
+          Requirement tracking for UCSB colleges and majors is coming soon. You
+          can still plan your courses.
+        </div>
+      )}
+
       {/* Color-code legend */}
-      <div className={styles.legend}>
-        <div className={styles.legendItem}>
-          <Check className={classNames(styles.legendCheck, styles.auto)} />
-          <span>Fulfilled</span>
+      {evaluatedGroups.length > 0 && (
+        <div className={styles.legend}>
+          <div className={styles.legendItem}>
+            <Check className={classNames(styles.legendCheck, styles.auto)} />
+            <span>Fulfilled</span>
+          </div>
+          <div className={styles.legendItem}>
+            <Check className={classNames(styles.legendCheck, styles.manual)} />
+            <span>Manually marked</span>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendEmpty} />
+            <span>Not fulfilled</span>
+          </div>
+          <div className={classNames(styles.legendItem, styles.legendHint)}>
+            Click ✓ to toggle
+          </div>
         </div>
-        <div className={styles.legendItem}>
-          <Check className={classNames(styles.legendCheck, styles.manual)} />
-          <span>Manually marked</span>
-        </div>
-        <div className={styles.legendItem}>
-          <div className={styles.legendEmpty} />
-          <span>Not fulfilled</span>
-        </div>
-        <div className={classNames(styles.legendItem, styles.legendHint)}>
-          Click ✓ to toggle
-        </div>
-      </div>
+      )}
 
       {evaluatedGroups.map((group, index) => (
         <BtLLRequirementsAccordion

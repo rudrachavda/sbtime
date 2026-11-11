@@ -219,14 +219,17 @@ export default function Dashboard() {
   }, [labels]);
 
   // helper functions for adding new block in right order
+  // Order within a calendar year: Winter, Spring, Summer, Fall.
   const getTermOrder = (term: string) => {
     switch (term) {
-      case "Spring":
+      case "Winter":
         return 1;
-      case "Summer":
+      case "Spring":
         return 2;
-      case "Fall":
+      case "Summer":
         return 3;
+      case "Fall":
+        return 4;
       default:
         return 0;
     }

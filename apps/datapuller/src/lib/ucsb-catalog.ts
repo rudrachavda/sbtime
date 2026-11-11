@@ -16,6 +16,7 @@ import {
 } from "@repo/ucsb-api";
 
 import { buildVocabulary, repairDescription } from "./ucsb-description";
+import { ENROLLMENT_GRANULARITY_SECONDS } from "./ucsb-enrollment";
 
 /**
  * Pure mapping from UCSB's class search response into the collections the
@@ -409,6 +410,42 @@ const formatCourse = (
 };
 
 /**
+ * UCSB's class search sometimes returns the same course twice (identical
+ * records, or the same course split across two records). Merge them into
+ * one, keeping each section once.
+ */
+export const mergeDuplicateClasses = (
+  ucsbClasses: UcsbClass[]
+): UcsbClass[] => {
+  const merged = new Map<string, UcsbClass>();
+
+  for (const ucsbClass of ucsbClasses) {
+    const key = trim(ucsbClass.courseId);
+    const existing = merged.get(key);
+
+    if (!existing) {
+      merged.set(key, ucsbClass);
+      continue;
+    }
+
+    const seen = new Set(
+      (existing.classSections ?? []).map((section) => trim(section.enrollCode))
+    );
+    merged.set(key, {
+      ...existing,
+      classSections: [
+        ...(existing.classSections ?? []),
+        ...(ucsbClass.classSections ?? []).filter(
+          (section) => !seen.has(trim(section.enrollCode))
+        ),
+      ],
+    });
+  }
+
+  return [...merged.values()];
+};
+
+/**
  * Convert one quarter of UCSB classes. Each lecture ("0100", "0200") becomes
  * its own class, with the sections that share its first two digits attached.
  * Cancelled sections are dropped, and a lecture group whose lecture is
@@ -436,7 +473,7 @@ export const mapQuarter = (
     ...[...details.values()].map((detail) => detail.description),
   ]);
 
-  for (const ucsbClass of ucsbClasses) {
+  for (const ucsbClass of mergeDuplicateClasses(ucsbClasses)) {
     const parsed = parseCourseId(
       ucsbClass.courseId ?? "",
       ucsbClass.subjectArea
@@ -578,7 +615,7 @@ export const mapQuarter = (
           snapshot: {
             startTime: now,
             endTime: now,
-            granularitySeconds: 0,
+            granularitySeconds: ENROLLMENT_GRANULARITY_SECONDS,
             status: closed ? "C" : "O",
             enrolledCount,
             maxEnroll,

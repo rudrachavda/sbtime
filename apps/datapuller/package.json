@@ -4,6 +4,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "main": "tsx src/main.ts",
+    "schedule": "tsx src/scheduler.ts",
     "test": "tsx --test \"src/**/*.test.ts\"",
     "lint": "eslint src/",
     "type-check": "tsc --noEmit --incremental false"

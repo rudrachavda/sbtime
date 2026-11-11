@@ -4,56 +4,21 @@ import { gql } from "graphql-tag";
 export const planTypeDef = gql`
   enum Terms {
     Fall
+    Winter
     Spring
     Summer
     Misc
   }
 
   enum Colleges {
-    "Letters & Science"
+    "College of Letters and Science"
     LnS
 
-    "Engineering"
+    "College of Engineering"
     CoE
 
-    "Business"
-    HAAS
-
-    "Chemistry"
-    CHEM
-
-    "Computing, Data Science & Society"
-    CDSS
-
-    "Education"
-    EDU
-
-    "Environmental Design"
-    ENVDES
-
-    "Information"
-    INFO
-
-    "Journalism"
-    JOURN
-
-    "Law"
-    LAW
-
-    "Natural Resources"
-    NATRES
-
-    "Optometry"
-    OPTOM
-
-    "Public Health"
-    PUBHEALTH
-
-    "Public Policy"
-    PUBPOLICY
-
-    "Social Welfare"
-    SOCWELF
+    "College of Creative Studies"
+    CCS
 
     "Other"
     OTHER

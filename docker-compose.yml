@@ -31,6 +31,27 @@ services:
       - ./.env:/backend/apps/backend/.env
       - ./apps/backend:/backend/apps/backend
       - ./packages:/backend/packages
+  # Runs the UCSB pullers on a schedule (seat counts every 15 minutes, the
+  # catalog and quarter dates twice a day). Opt in with --profile pullers.
+  datapuller-scheduler:
+    profiles:
+      - pullers
+    build:
+      context: .
+      dockerfile: ./apps/datapuller/Dockerfile
+      target: datapuller-dev
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - bt
+    restart: always
+    env_file: .env
+    working_dir: /datapuller/apps/datapuller
+    entrypoint: ["npx", "tsx", "src/scheduler.ts"]
+    volumes:
+      - ./apps/datapuller/src:/datapuller/apps/datapuller/src
+      - ./packages:/datapuller/packages
   semantic-search:
     profiles:
       - semantic-search

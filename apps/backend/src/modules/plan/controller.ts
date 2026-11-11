@@ -189,58 +189,27 @@ export async function createPlan(
     pinned: false,
   });
 
-  // Create all the plan terms
+  // Create all the plan terms. UCSB runs on quarters: an academic year is
+  // Fall, then Winter and Spring of the next calendar year. Summer is
+  // optional, so students add it themselves.
+  const newPlanTerm = (term: "Fall" | "Winter" | "Spring", year: number) =>
+    new PlanTermModel({
+      name: `${term} ${year}`,
+      courses: [],
+      userEmail,
+      year,
+      term,
+      hidden: false,
+      status: "Incomplete",
+      pinned: false,
+    });
+
   const planTerms = [miscellaneous];
-  planTerms.push(
-    new PlanTermModel({
-      name: "Fall " + startYear,
-      courses: [],
-      userEmail,
-      year: startYear,
-      term: "Fall",
-      hidden: false,
-      status: "Incomplete",
-      pinned: false,
-    })
-  );
-  for (let i = startYear + 1; i < endYear; i++) {
-    planTerms.push(
-      new PlanTermModel({
-        name: "Spring " + i,
-        courses: [],
-        userEmail,
-        year: i,
-        term: "Spring",
-        hidden: false,
-        status: "Incomplete",
-        pinned: false,
-      })
-    );
-    planTerms.push(
-      new PlanTermModel({
-        name: "Fall " + i,
-        courses: [],
-        userEmail,
-        year: i,
-        term: "Fall",
-        hidden: false,
-        status: "Incomplete",
-        pinned: false,
-      })
-    );
+  for (let year = startYear; year < endYear; year++) {
+    planTerms.push(newPlanTerm("Fall", year));
+    planTerms.push(newPlanTerm("Winter", year + 1));
+    planTerms.push(newPlanTerm("Spring", year + 1));
   }
-  planTerms.push(
-    new PlanTermModel({
-      name: "Spring " + endYear,
-      courses: [],
-      userEmail,
-      year: endYear,
-      term: "Spring",
-      hidden: false,
-      status: "Incomplete",
-      pinned: false,
-    })
-  );
 
   const selectedPlanRequirements = await buildSelectedPlanRequirementsForPlan(
     majors,

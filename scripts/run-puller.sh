@@ -5,6 +5,7 @@
 #
 #   scripts/run-puller.sh terms-all            # writes to the "sbtime" database
 #   scripts/run-puller.sh terms-nearby bt      # writes to another database
+#   scripts/run-puller.sh schedule             # runs the pullers on their schedule
 #
 # The app's own MONGODB_URI points at the Docker network hostname, which is not
 # reachable from the host, so this builds a localhost URI from the credentials
@@ -38,4 +39,8 @@ echo "Running puller \"${PULLER}\" against database \"${DATABASE}\" on 127.0.0.1
 
 cd apps/datapuller
 # dotenv does not override variables that are already set, so MONGODB_URI above wins.
+if [[ "${PULLER}" == "schedule" ]]; then
+  # Run the pullers on their schedule until stopped (Ctrl-C).
+  exec npx tsx --env-file=../../.env src/scheduler.ts
+fi
 exec npx tsx --env-file=../../.env src/main.ts --puller="${PULLER}"

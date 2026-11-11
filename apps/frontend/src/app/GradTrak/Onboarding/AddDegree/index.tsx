@@ -6,10 +6,10 @@ import { Box, Button, Container, Flex } from "@repo/theme";
 
 import MajorSearch from "@/components/MajorSearch";
 
+import DEGREES from "../../degree-programs.json";
 import { DegreeOption } from "../../types";
 import DotsIndicator from "../DotsIndicator";
 import styles from "./AddDegree.module.scss";
-import DEGREES from "./degree-programs-types.json";
 
 type AddDegreeProps = {
   isMajor: boolean;

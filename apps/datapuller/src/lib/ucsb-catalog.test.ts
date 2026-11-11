@@ -9,6 +9,7 @@ import {
   buildCatalogNames,
   formatGeneralEducation,
   mapQuarter,
+  mergeDuplicateClasses,
   parseCourseId,
   parseDays,
   parseInstructorName,
@@ -459,5 +460,39 @@ describe("buildCatalogNames", () => {
     const plain = mapped.courses.find((c) => c.courseId === "ANTH 3");
     assert.equal(plain?.subjectName, "ANTH");
     assert.equal(plain?.academicOrganizationName, "ANTH");
+  });
+});
+
+describe("mergeDuplicateClasses", () => {
+  const anth3 = FIXTURE.find((c) => c.courseId.trim() === "ANTH      3")!;
+
+  it("collapses identical records into one course", () => {
+    const merged = mapQuarter([anth3, anth3], TERM, new Map(), NOW);
+
+    assert.equal(merged.courses.length, 1);
+    assert.equal(merged.classes.length, 1);
+    assert.equal(merged.sections.length, anth3.classSections!.length);
+    assert.equal(
+      new Set(merged.sections.map((s) => s.sectionId)).size,
+      merged.sections.length
+    );
+  });
+
+  it("keeps sections that only one of the records has", () => {
+    const [lecture, ...rest] = anth3.classSections!;
+    const merged = mergeDuplicateClasses([
+      { ...anth3, classSections: [lecture] },
+      { ...anth3, classSections: [lecture, ...rest] },
+    ]);
+
+    assert.equal(merged.length, 1);
+    assert.deepEqual(
+      merged[0].classSections!.map((s) => s.enrollCode),
+      anth3.classSections!.map((s) => s.enrollCode)
+    );
+  });
+
+  it("leaves different courses alone", () => {
+    assert.equal(mergeDuplicateClasses(FIXTURE).length, FIXTURE.length);
   });
 });

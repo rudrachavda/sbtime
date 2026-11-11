@@ -11,6 +11,18 @@ import {
 import { Colleges, Status, Terms } from "../../generated-types/graphql";
 import { PlanModule } from "./generated-types/module-types";
 
+const KNOWN_COLLEGES = new Set<string>([
+  "LnS",
+  "CoE",
+  "CCS",
+  "OTHER",
+] satisfies Colleges[]);
+
+// Plans can hold colleges this campus no longer offers (or Berkeley's, from
+// imported data); show those as Other instead of failing the whole plan.
+const toCollege = (college: string): Colleges =>
+  KNOWN_COLLEGES.has(college) ? (college as Colleges) : "OTHER";
+
 export function formatPlan(plan: PlanType): PlanModule.Plan {
   return {
     _id: (plan._id as Types.ObjectId).toString(),
@@ -18,7 +30,7 @@ export function formatPlan(plan: PlanType): PlanModule.Plan {
     planTerms: plan.planTerms.map(formatPlanTerm),
     majors: plan.majors,
     minors: plan.minors,
-    colleges: plan.colleges.map((college) => college as Colleges),
+    colleges: [...new Set(plan.colleges.map(toCollege))],
     created: plan.createdAt.toISOString(),
     revised: plan.updatedAt.toISOString(),
     labels: plan.labels.map(formatLabel),
