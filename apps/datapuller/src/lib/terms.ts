@@ -1,249 +1,205 @@
 import { Logger } from "tslog";
 
 import { ITermItem } from "@repo/common/models";
-import { Term, TermsAPI } from "@repo/sis-api/terms";
+import {
+  UcsbClient,
+  UcsbQuarter,
+  getCurrentQuarter,
+  getQuarters,
+} from "@repo/ucsb-api";
 
-const formatTerm = (term: Term) => {
-  const academicCareerCode = term.academicCareer?.code;
-  const temporalPosition = term.temporalPosition as
-    | "Current"
-    | "Past"
-    | "Future"
-    | undefined;
-  const id = term.id;
-  const name = term.name;
-  const academicYear = term.academicYear;
-  const beginDate = term.beginDate;
-  const endDate = term.endDate;
+/**
+ * UCSB has one academic calendar for everyone, so each quarter is stored once
+ * under the undergraduate career. Graduate courses are told apart per course.
+ */
+export const TERM_CAREER_CODE = "UGRD";
 
-  const essentialFields = {
-    academicCareerCode,
+/** Earliest quarter pulled by the full ("terms-all") sync: Fall 2015. */
+export const EARLIEST_QUARTER = "20154";
+
+/** How many quarters past the current one to pull. */
+export const FUTURE_QUARTERS = 2;
+
+const SEASONS = {
+  "1": "Winter",
+  "2": "Spring",
+  "3": "Summer",
+  "4": "Fall",
+} as const;
+
+export type Season = (typeof SEASONS)[keyof typeof SEASONS];
+
+/**
+ * Split a UCSB quarter code into its parts: "20264" is Fall 2026.
+ * Returns null for anything that is not a valid code.
+ */
+export const parseQuarterCode = (
+  code: string
+): { year: number; season: Season } | null => {
+  const match = /^(\d{4})([1-4])$/.exec(code.trim());
+  if (!match) return null;
+
+  return {
+    year: parseInt(match[1], 10),
+    season: SEASONS[match[2] as keyof typeof SEASONS],
+  };
+};
+
+/** Move a quarter code forward (or back, with a negative offset) by whole quarters. */
+export const shiftQuarterCode = (code: string, offset: number): string => {
+  const parsed = /^(\d{4})([1-4])$/.exec(code.trim());
+  if (!parsed) throw new Error(`Invalid quarter code: "${code}"`);
+
+  const index = parseInt(parsed[1], 10) * 4 + (parseInt(parsed[2], 10) - 1);
+  const shifted = index + offset;
+
+  return `${Math.floor(shifted / 4)}${(shifted % 4) + 1}`;
+};
+
+/** "2026-09-24T00:00:00" -> "2026-09-24" */
+const toDate = (value: string | null | undefined) =>
+  value ? value.slice(0, 10) : undefined;
+
+/** Keeps the time of day, which matters for registration passes. */
+const toDateTime = (value: string | null | undefined) => value ?? undefined;
+
+const temporalPositionOf = (
+  code: string,
+  currentCode: string
+): ITermItem["temporalPosition"] => {
+  // Codes are fixed width, so comparing them as strings is chronological.
+  if (code === currentCode) return "Current";
+  return code < currentCode ? "Past" : "Future";
+};
+
+/**
+ * Convert a quarter from UCSB's calendar into a stored term. Returns null when
+ * the quarter lacks the dates the app relies on (common for very old ones).
+ */
+export const formatQuarter = (
+  quarter: UcsbQuarter,
+  currentCode: string
+): ITermItem | null => {
+  const code = quarter.quarter?.trim();
+  const parsed = code ? parseQuarterCode(code) : null;
+  const beginDate = toDate(quarter.firstDayOfClasses);
+  const endDate = toDate(quarter.lastDayOfFinals ?? quarter.lastDayOfClasses);
+
+  if (!code || !parsed || !beginDate || !endDate) return null;
+
+  const temporalPosition = temporalPositionOf(code, currentCode);
+
+  return {
+    academicCareerCode: TERM_CAREER_CODE,
     temporalPosition,
-    id,
-    name,
-    academicYear,
+    id: code,
+    // The backend looks terms up by this exact "<year> <season>" format.
+    name: `${parsed.year} ${parsed.season}`,
+    academicYear: quarter.academicYear?.trim() ?? "",
     beginDate,
     endDate,
+    hasCatalogData: false,
+    selfServiceEnrollBeginDate: toDate(quarter.pass1Begin),
+    firstDayOfQuarter: toDate(quarter.firstDayOfQuarter),
+    lastDayOfClasses: toDate(quarter.lastDayOfClasses),
+    firstDayOfFinals: toDate(quarter.firstDayOfFinals),
+    lastDayOfFinals: toDate(quarter.lastDayOfFinals),
+    lastDayOfSchedule: toDate(quarter.lastDayOfSchedule),
+    pass1Begin: toDateTime(quarter.pass1Begin),
+    pass2Begin: toDateTime(quarter.pass2Begin),
+    pass3Begin: toDateTime(quarter.pass3Begin),
+    feeDeadline: toDate(quarter.feeDeadline),
+    lastDayToAddUndergrad: toDate(quarter.lastDayToAddUnderGrad),
+    lastDayToAddGrad: toDate(quarter.lastDayToAddGrad),
+    // Summer sessions (A, B, ...) are added once UCSB publishes them; every
+    // quarter has at least its regular session.
+    sessions: [
+      {
+        temporalPosition,
+        id: "1",
+        name: "Regular Academic Session",
+        beginDate,
+        endDate,
+      },
+    ],
   };
+};
 
-  const missingField = Object.keys(essentialFields).find(
-    (key) => !essentialFields[key as keyof typeof essentialFields]
+/**
+ * Pick and convert the quarters between two codes (inclusive), oldest first.
+ */
+export const selectTerms = (
+  quarters: UcsbQuarter[],
+  currentCode: string,
+  fromCode: string,
+  toCode: string
+): { terms: ITermItem[]; skipped: string[] } => {
+  const terms: ITermItem[] = [];
+  const skipped: string[] = [];
+
+  for (const quarter of quarters) {
+    const code = quarter.quarter?.trim();
+    if (!code || code < fromCode || code > toCode) continue;
+
+    const term = formatQuarter(quarter, currentCode);
+    if (term) terms.push(term);
+    else skipped.push(code);
+  }
+
+  terms.sort((a, b) => a.id.localeCompare(b.id));
+
+  return { terms, skipped };
+};
+
+const fetchTerms = async (
+  logger: Logger<unknown>,
+  apiKey: string,
+  range: (currentCode: string) => { from: string; to: string }
+) => {
+  const client = new UcsbClient({ apiKey });
+
+  logger.trace("Fetching UCSB quarter calendar...");
+
+  const [quarters, current] = await Promise.all([
+    getQuarters(client),
+    getCurrentQuarter(client),
+  ]);
+
+  const currentCode = current?.quarter?.trim();
+  if (!currentCode || !parseQuarterCode(currentCode)) {
+    throw new Error("UCSB did not report a valid current quarter.");
+  }
+
+  const { from, to } = range(currentCode);
+  const { terms, skipped } = selectTerms(quarters, currentCode, from, to);
+
+  if (skipped.length > 0) {
+    logger.warn(
+      `Skipped ${skipped.length} quarters with missing dates: ${skipped.join(", ")}`
+    );
+  }
+
+  logger.info(
+    `Fetched ${terms.length} terms from ${from} to ${to} (current: ${currentCode}).`
   );
 
-  if (missingField) {
-    console.log(term);
-    throw new Error(`Missing essential section field: ${missingField[0]}`);
-  }
-
-  const output: ITermItem = {
-    academicCareerCode: academicCareerCode!,
-    temporalPosition: temporalPosition!,
-    id: id!,
-    name: name!,
-    academicYear: academicYear!,
-    beginDate: beginDate!,
-    endDate: endDate!,
-    hasCatalogData: false,
-    weeksOfInstruction: term.weeksOfInstruction,
-    holidayScheduleCode: term.holidaySchedule?.code,
-    censusDate: term.censusDate,
-    fullyEnrolledDeadline: term.fullyEnrolledDeadline,
-    fullyGradedDeadline: term.fullyGradedDeadline,
-    cancelDeadline: term.cancelDeadline,
-    withdrawNoPenaltyDeadline: term.withdrawNoPenaltyDeadline,
-    degreeConferDate: term.degreeConferDate,
-    selfServicePlanBeginDate: term.selfServicePlanBeginDate,
-    selfServicePlanEndDate: term.selfServicePlanEndDate,
-    selfServiceEnrollBeginDate: term.selfServiceEnrollBeginDate,
-    selfServiceEnrollEndDate: term.selfServiceEnrollEndDate,
-    sessions: term.sessions?.map((session) => ({
-      temporalPosition: session.temporalPosition! as
-        | "Current"
-        | "Past"
-        | "Future",
-      id: session.id!,
-      name: session.name!,
-      beginDate: session.beginDate!,
-      endDate: session.endDate!,
-      weeksOfInstruction: session.weeksOfInstruction,
-      holidaySchedule: session.holidaySchedule?.code,
-      censusDate: session.censusDate,
-      sixtyPercentPoint: session.sixtyPercentPoint,
-      openEnrollmentDate: session.openEnrollmentDate,
-      enrollBeginDate: session.enrollBeginDate,
-      enrollEndDate: session.enrollEndDate,
-      waitListEndDate: session.waitListEndDate,
-      fullyEnrolledDeadline: session.fullyEnrolledDeadline,
-      dropDeletedFromRecordDeadline: session.dropDeletedFromRecordDeadline,
-      dropRetainedOnRecordDeadline: session.dropRetainedOnRecordDeadline,
-      dropWithPenaltyDeadline: session.dropWithPenaltyDeadline,
-      cancelDeadline: session.cancelDeadline,
-      withdrawNoPenaltyDeadline: session.withdrawNoPenaltyDeadline,
-      withdrawWithPenaltyDeadline: session.withdrawWithPenaltyDeadline,
-      timePeriods: session.timePeriods?.map((timePeriod) => ({
-        periodDescription: timePeriod.period.description!,
-        endDate: timePeriod.endDate,
-      })),
-    })),
-  };
-
-  return output;
-};
-
-/**
- * Fetch all nearby terms denoted by the "Previous", "Current", and "Next" temporal positions.
- */
-export const getNearbyTerms = async (
-  logger: Logger<unknown>,
-  id: string,
-  key: string
-) => {
-  const termsAPI = new TermsAPI();
-  const headers = {
-    app_id: id,
-    app_key: key,
-  };
-
-  const temporalPositions = ["Previous", "Current", "Next"] as const;
-
-  const terms: ITermItem[] = [];
-
-  for (const temporalPosition of temporalPositions) {
-    try {
-      logger.trace(`Fetching "${temporalPosition}" terms...`);
-
-      const response = await termsAPI.v2.getByTermsUsingGet(
-        { "temporal-position": temporalPosition },
-        { headers }
-      );
-
-      // TODO: Filter out redundant terms
-      const responseTerms = response.data.response.terms;
-      if (!responseTerms) continue;
-
-      terms.push(...responseTerms.map(formatTerm));
-
-      if (temporalPosition === "Next") {
-        // we need to fetch Summer and Fall terms at the same time (both begin enrollment during the Spring)
-        const secondResponse = await termsAPI.v2.getByTermsUsingGet(
-          {
-            "temporal-position": "Next",
-            "as-of-date": responseTerms[0].endDate,
-          },
-          { headers }
-        );
-        const secondResponseTerms = secondResponse.data.response.terms;
-        if (!secondResponseTerms) continue;
-        terms.push(...secondResponseTerms.map(formatTerm));
-      }
-    } catch (error: unknown) {
-      const parsedError = error as Error;
-
-      logger.error(`Unexpected error fetching term: "${parsedError}"`);
-      logger.error(`Error details: ${JSON.stringify(parsedError, null, 2)}`);
-
-      if (!parsedError.cause) continue;
-
-      logger.error(`Error cause: ${parsedError.cause}`);
-    }
-  }
-
-  logger.info(`Fetched ${terms.length} nearby terms...`);
-
   return terms;
 };
 
 /**
- * Recursively fetch all terms.
+ * The previous quarter, the current one, and the next few.
  */
-export const getAllTerms = async (
-  logger: Logger<unknown>,
-  id: string,
-  key: string
-) => {
-  const termsAPI = new TermsAPI();
-  const headers = {
-    app_id: id,
-    app_key: key,
-  };
+export const getNearbyTerms = (logger: Logger<unknown>, apiKey: string) =>
+  fetchTerms(logger, apiKey, (currentCode) => ({
+    from: shiftQuarterCode(currentCode, -1),
+    to: shiftQuarterCode(currentCode, FUTURE_QUARTERS),
+  }));
 
-  const terms: ITermItem[] = [];
-
-  logger.trace(`Fetching initial terms...`);
-
-  try {
-    const initialResponse = await termsAPI.v2.getByTermsUsingGet(
-      {
-        "temporal-position": "Next",
-      },
-      {
-        headers,
-      }
-    );
-
-    const initialTerms = initialResponse.data.response.terms;
-    if (!initialTerms) throw new Error("No initial terms found");
-
-    terms.push(...initialTerms.map(formatTerm));
-
-    // we need to fetch Summer and Fall terms at the same time (both begin enrollment during the Spring)
-    const secondResponse = await termsAPI.v2.getByTermsUsingGet(
-      { "temporal-position": "Next", "as-of-date": initialTerms[0].endDate },
-      { headers }
-    );
-    const secondInitialTerms = secondResponse.data.response.terms;
-    if (secondInitialTerms) {
-      terms.push(...secondInitialTerms.map(formatTerm));
-    }
-  } catch (error: unknown) {
-    const parsedError = error as Error;
-
-    logger.error(`Unexpected error fetching term: "${parsedError}"`);
-    logger.error(`Error details: ${JSON.stringify(parsedError, null, 2)}`);
-    logger.error(`Error cause: ${parsedError.cause}`);
-
-    return terms;
-  }
-
-  logger.info(`Fetched ${terms.length} initial terms...`);
-
-  let currentTerm = terms[0];
-
-  logger.trace(`Fetching remaining terms...`);
-
-  while (currentTerm) {
-    try {
-      if (!currentTerm.beginDate)
-        throw new Error(`No "beginDate" found for term ${currentTerm.id}`);
-
-      const currentResponse = await termsAPI.v2.getByTermsUsingGet(
-        {
-          "temporal-position": "Previous",
-          "as-of-date": currentTerm.beginDate,
-        },
-        {
-          headers,
-        }
-      );
-
-      const currentTerms = currentResponse.data.response.terms;
-      if (!currentTerms) throw new Error("No terms found");
-
-      const additionalTerms = currentTerms.map(formatTerm);
-      terms.push(...additionalTerms);
-      currentTerm = additionalTerms[0];
-    } catch (error: unknown) {
-      const parsedError = error as Error;
-
-      logger.error(`Unexpected error fetching term: "${parsedError}"`);
-      logger.error(`Error details: ${JSON.stringify(parsedError, null, 2)}`);
-      logger.error(`Error cause: ${parsedError.cause}`);
-
-      break;
-    }
-  }
-
-  logger.info(`Fetched ${terms.length} total terms...`);
-
-  return terms;
-};
+/**
+ * Every quarter from EARLIEST_QUARTER through the next few.
+ */
+export const getAllTerms = (logger: Logger<unknown>, apiKey: string) =>
+  fetchTerms(logger, apiKey, (currentCode) => ({
+    from: EARLIEST_QUARTER,
+    to: shiftQuarterCode(currentCode, FUTURE_QUARTERS),
+  }));

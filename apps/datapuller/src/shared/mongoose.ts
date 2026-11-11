@@ -12,7 +12,11 @@ process.on("SIGINT", async () => {
 export default async (config: Config): Promise<mongoose.Mongoose> => {
   // Connect to MongoDB
   config.log.trace("Connecting to MongoDB...");
-  config.log.info("MongoDB URI:", config.mongoDB.uri);
+  // Never log the credentials embedded in the connection string.
+  config.log.info(
+    "MongoDB URI:",
+    config.mongoDB.uri.replace(/\/\/[^@/]*@/, "//<credentials>@")
+  );
   const connection = mongoose.connect(config.mongoDB.uri);
 
   // Log when the connection is established

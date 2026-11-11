@@ -17,6 +17,9 @@ export interface Config {
   mongoDB: {
     uri: string;
   };
+  ucsb: {
+    API_KEY: string;
+  };
   sis: {
     CLASS_APP_ID: string;
     CLASS_APP_KEY: string;
@@ -56,6 +59,9 @@ export function loadConfig(): Config {
     log,
     mongoDB: {
       uri: env("MONGODB_URI"),
+    },
+    ucsb: {
+      API_KEY: env("UCSB_API_KEY"),
     },
     sis: {
       CLASS_APP_ID: env("SIS_CLASS_APP_ID"),

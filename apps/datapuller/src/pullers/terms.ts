@@ -6,14 +6,14 @@ import { Config } from "../shared/config";
 const updateTerms = async (config: Config, allTerms: boolean) => {
   const {
     log,
-    sis: { TERM_APP_ID, TERM_APP_KEY },
+    ucsb: { API_KEY },
   } = config;
 
   log.trace(`Fetching terms...`);
 
   const terms = allTerms
-    ? await getAllTerms(log, TERM_APP_ID, TERM_APP_KEY)
-    : await getNearbyTerms(log, TERM_APP_ID, TERM_APP_KEY);
+    ? await getAllTerms(log, API_KEY)
+    : await getNearbyTerms(log, API_KEY);
 
   log.info(`Fetched ${terms.length.toLocaleString()} terms.`);
   if (terms.length === 0) {
@@ -21,7 +21,7 @@ const updateTerms = async (config: Config, allTerms: boolean) => {
     return;
   }
   // Update terms in batches of 5000. hasCatalogData is derived from class
-  // data, so a SIS term refresh must not overwrite it for existing terms.
+  // data, so a calendar refresh must not overwrite it for existing terms.
   // New terms remain hidden until the classes puller confirms catalog data.
   const insertBatchSize = 5000;
   for (let i = 0; i < terms.length; i += insertBatchSize) {

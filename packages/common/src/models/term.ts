@@ -3,7 +3,8 @@ import { Model, Schema, model } from "mongoose";
 /*
  * The term schema is used to store information about the academic term, such as
  * the academic year, begin date, end date, and deadlines for various actions.
- * https://developers.api.berkeley.edu/api/232/interactive-docs
+ * Populated from UCSB's Academic Quarter Calendar API:
+ * https://developer.ucsb.edu/content/academic-quarter-calendar
  */
 
 export interface ISessionItem {
@@ -56,6 +57,20 @@ export interface ITermItem {
   selfServiceEnrollEndDate?: string;
   sessions?: ISessionItem[];
   hasCatalogData: boolean;
+
+  // UCSB quarter calendar. Dates are "YYYY-MM-DD"; the registration passes
+  // keep their time of day ("YYYY-MM-DDTHH:mm:ss", Pacific).
+  firstDayOfQuarter?: string;
+  lastDayOfClasses?: string;
+  firstDayOfFinals?: string;
+  lastDayOfFinals?: string;
+  lastDayOfSchedule?: string;
+  pass1Begin?: string;
+  pass2Begin?: string;
+  pass3Begin?: string;
+  feeDeadline?: string;
+  lastDayToAddUndergrad?: string;
+  lastDayToAddGrad?: string;
 }
 
 const termSchema = new Schema<ITermItem>({
@@ -121,6 +136,17 @@ const termSchema = new Schema<ITermItem>({
     ],
   },
   hasCatalogData: { type: Boolean, required: true, default: true },
+  firstDayOfQuarter: { type: String },
+  lastDayOfClasses: { type: String },
+  firstDayOfFinals: { type: String },
+  lastDayOfFinals: { type: String },
+  lastDayOfSchedule: { type: String },
+  pass1Begin: { type: String },
+  pass2Begin: { type: String },
+  pass3Begin: { type: String },
+  feeDeadline: { type: String },
+  lastDayToAddUndergrad: { type: String },
+  lastDayToAddGrad: { type: String },
 });
 
 // for catalog, grade distribution by semester, scheduler, and terms controllers
