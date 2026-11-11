@@ -1,0 +1,15 @@
+{
+  "name": "@repo/ucsb-api",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit --incremental false"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/node": "^24.7.0",
+    "typescript": "^5.9.3"
+  }
+}

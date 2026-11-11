@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 
 import { Container, PillSwitcher, useTheme } from "@repo/theme";
 
+import { FEATURES } from "@/lib/features";
+
 import styles from "./Footer.module.scss";
 
 function ThemeSwitcher() {
@@ -107,21 +109,29 @@ export default function Footer() {
             <Link to="/catalog" className={styles.link}>
               Courses
             </Link>
-            <Link to="/curated" className={styles.link}>
-              Curated Classes
-            </Link>
+            {FEATURES.curatedClasses && (
+              <Link to="/curated" className={styles.link}>
+                Curated Classes
+              </Link>
+            )}
             <Link to="/scheduler" className={styles.link}>
               Scheduler
             </Link>
-            <Link to="/gradtrak" className={styles.link}>
-              Gradtrak
-            </Link>
-            <Link to="/grades" className={styles.link}>
-              Grades
-            </Link>
-            <Link to="/enrollment" className={styles.link}>
-              Enrollment
-            </Link>
+            {FEATURES.gradtrak && (
+              <Link to="/gradtrak" className={styles.link}>
+                Gradtrak
+              </Link>
+            )}
+            {FEATURES.grades && (
+              <Link to="/grades" className={styles.link}>
+                Grades
+              </Link>
+            )}
+            {FEATURES.enrollment && (
+              <Link to="/enrollment" className={styles.link}>
+                Enrollment
+              </Link>
+            )}
           </div>
           <div className={styles.column}>
             <p className={styles.label}>About Us</p>

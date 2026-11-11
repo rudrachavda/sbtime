@@ -31,6 +31,7 @@ import { useAllNavItems } from "@/hooks/api/nav-item";
 import useUser from "@/hooks/useUser";
 import { signIn, signOut } from "@/lib/api";
 import { BERKELEY_GOGGLES_URL } from "@/lib/berkeley-goggles";
+import { FEATURES } from "@/lib/features";
 import { RecentType, getPageUrl } from "@/lib/recent";
 
 import styles from "./NavigationBar.module.scss";
@@ -146,6 +147,7 @@ export default function NavigationBar({
     : "/enrollment";
 
   const extraNavItems = useMemo<ExtraNavItem[]>(() => {
+    if (!FEATURES.extraNavItems) return [];
     if (navItemsLoading || navItemsError) return FALLBACK_NAV_ITEMS;
 
     return (navItems ?? []).map((navItem) => ({
@@ -190,25 +192,31 @@ export default function NavigationBar({
               }}
             >
               {[
-                { to: "/catalog", label: "Catalog" },
-                { to: "/schedules", label: "Scheduler" },
-                { to: "/gradtrak", label: "Gradtrak" },
-                { to: gradesPath, label: "Grades" },
-                { to: enrollmentPath, label: "Enrollment" },
-              ].map(({ to, label }) => (
-                <motion.div
-                  key={to}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <NavLink to={to} onClick={() => setMenuOpen(false)}>
-                    {label}
-                  </NavLink>
-                </motion.div>
-              ))}
+                { to: "/catalog", label: "Catalog", show: true },
+                { to: "/schedules", label: "Scheduler", show: true },
+                { to: "/gradtrak", label: "Gradtrak", show: FEATURES.gradtrak },
+                { to: gradesPath, label: "Grades", show: FEATURES.grades },
+                {
+                  to: enrollmentPath,
+                  label: "Enrollment",
+                  show: FEATURES.enrollment,
+                },
+              ]
+                .filter(({ show }) => show)
+                .map(({ to, label }) => (
+                  <motion.div
+                    key={to}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <NavLink to={to} onClick={() => setMenuOpen(false)}>
+                      {label}
+                    </NavLink>
+                  </motion.div>
+                ))}
               {extraNavItems.map((navItem) => (
                 <motion.div
                   key={navItem.key}
@@ -267,27 +275,33 @@ export default function NavigationBar({
               </MenuItem>
             )}
           </NavLink>
-          <NavLink to="/gradtrak">
-            {({ isActive }) => (
-              <MenuItem className={styles.item} active={isActive}>
-                Gradtrak
-              </MenuItem>
-            )}
-          </NavLink>
-          <NavLink to={gradesPath}>
-            {({ isActive }) => (
-              <MenuItem className={styles.item} active={isActive}>
-                Grades
-              </MenuItem>
-            )}
-          </NavLink>
-          <NavLink to={enrollmentPath}>
-            {({ isActive }) => (
-              <MenuItem className={styles.item} active={isActive}>
-                Enrollment
-              </MenuItem>
-            )}
-          </NavLink>
+          {FEATURES.gradtrak && (
+            <NavLink to="/gradtrak">
+              {({ isActive }) => (
+                <MenuItem className={styles.item} active={isActive}>
+                  Gradtrak
+                </MenuItem>
+              )}
+            </NavLink>
+          )}
+          {FEATURES.grades && (
+            <NavLink to={gradesPath}>
+              {({ isActive }) => (
+                <MenuItem className={styles.item} active={isActive}>
+                  Grades
+                </MenuItem>
+              )}
+            </NavLink>
+          )}
+          {FEATURES.enrollment && (
+            <NavLink to={enrollmentPath}>
+              {({ isActive }) => (
+                <MenuItem className={styles.item} active={isActive}>
+                  Enrollment
+                </MenuItem>
+              )}
+            </NavLink>
+          )}
           {extraNavItems.map((navItem) => (
             <MenuItem
               key={navItem.key}

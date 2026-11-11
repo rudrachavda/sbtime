@@ -15,6 +15,7 @@ import CatalogErrorBoundary from "@/components/CatalogErrorBoundary";
 import Layout from "@/components/Layout";
 import RootWrapper from "@/components/RootWrapper";
 import SuspenseBoundary from "@/components/SuspenseBoundary";
+import { requireFeature } from "@/lib/features";
 import { TrackingProvider } from "@/providers/TrackingProvider";
 import UserProvider from "@/providers/UserProvider";
 
@@ -124,6 +125,7 @@ const router = createBrowserRouter([
       },
       {
         path: "gradtrak",
+        loader: requireFeature("gradtrak"),
         element: <Layout footer={false} />,
         children: [
           {
@@ -161,6 +163,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "curated",
+            loader: requireFeature("curatedClasses"),
             element: (
               <SuspenseBoundary key="curated">
                 <CuratedClasses />
@@ -294,6 +297,7 @@ const router = createBrowserRouter([
               </SuspenseBoundary>
             ),
             path: "grades",
+            loader: requireFeature("grades"),
           },
           {
             element: (
@@ -302,6 +306,7 @@ const router = createBrowserRouter([
               </SuspenseBoundary>
             ),
             path: "enrollment",
+            loader: requireFeature("enrollment"),
           },
           {
             element: (
@@ -310,6 +315,7 @@ const router = createBrowserRouter([
               </SuspenseBoundary>
             ),
             path: "grades-new",
+            loader: requireFeature("grades"),
           },
           {
             element: (
@@ -318,6 +324,7 @@ const router = createBrowserRouter([
               </SuspenseBoundary>
             ),
             path: "enrollment-legacy",
+            loader: requireFeature("enrollment"),
           },
           {
             element: (

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 import { Dialog, IconButton } from "@repo/theme";
 
+import { FEATURES } from "@/lib/features";
 import { RecentType, getPageUrl } from "@/lib/recent";
 
 import styles from "./SideBar.module.scss";
@@ -44,18 +45,22 @@ export default function SideBar({ children }: SideBarProps) {
               <Link className={styles.item} to="/catalog">
                 Catalog
               </Link>
-              <Link className={styles.item} to="/curated">
-                Curated classes
-              </Link>
+              {FEATURES.curatedClasses && (
+                <Link className={styles.item} to="/curated">
+                  Curated classes
+                </Link>
+              )}
             </div>
             <div className={styles.group}>
               <p className={styles.label}>Career</p>
               <Link className={styles.item} to="/schedules">
                 Scheduler
               </Link>
-              <Link className={styles.item} to="/gradtrak">
-                Gradtrak
-              </Link>
+              {FEATURES.gradtrak && (
+                <Link className={styles.item} to="/gradtrak">
+                  Gradtrak
+                </Link>
+              )}
               {/* <Link className={styles.item} to="/plans">
               My plans
             </Link> */}
@@ -65,12 +70,16 @@ export default function SideBar({ children }: SideBarProps) {
             </div>
             <div className={styles.group}>
               <p className={styles.label}>Tools</p>
-              <Link className={styles.item} to={gradesPath}>
-                Grade distributions
-              </Link>
-              <Link className={styles.item} to={enrollmentPath}>
-                Enrollment over time
-              </Link>
+              {FEATURES.grades && (
+                <Link className={styles.item} to={gradesPath}>
+                  Grade distributions
+                </Link>
+              )}
+              {FEATURES.enrollment && (
+                <Link className={styles.item} to={enrollmentPath}>
+                  Enrollment over time
+                </Link>
+              )}
               {/* <Link className={styles.item} to="/catalog">
               GPA calculator
             </Link> */}
