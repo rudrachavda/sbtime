@@ -242,7 +242,7 @@ const ClassDetails = ({
                   <div className={styles.circle}>
                     {!transfer && <div className={styles.dot}></div>}
                   </div>
-                  <p>UC Berkeley</p>
+                  <p>UC Santa Barbara</p>
                 </label>
                 <label className={styles.option}>
                   <input

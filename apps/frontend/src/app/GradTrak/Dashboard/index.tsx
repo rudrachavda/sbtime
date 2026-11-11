@@ -73,7 +73,7 @@ const FILTER_OPTIONS = [
   },
 ];
 
-const SORT_OPTIONS = ["Course", "Semester"];
+const SORT_OPTIONS = ["Course", "Quarter"];
 const SORT_OPTIONS_SEMESTER = ["Oldest", "Newest"];
 const SORT_OPTIONS_COURSE = ["Unsorted", "A-Z", "Z-A"];
 
@@ -168,7 +168,7 @@ export default function Dashboard() {
 
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [sortPage, setSortPage] =
-    useState<(typeof SORT_OPTIONS)[number]>("Semester");
+    useState<(typeof SORT_OPTIONS)[number]>("Quarter");
   const [sortSemesterOption, setSortSemesterOption] =
     useState<(typeof SORT_OPTIONS_SEMESTER)[number]>("Oldest");
   const [sortCourseOption, setSortCourseOption] =
@@ -543,7 +543,7 @@ export default function Dashboard() {
       >
         <div className={styles.view}>
           <div className={styles.header}>
-            <h1>Semesters</h1>
+            <h1>Quarters</h1>
 
             <div className={styles.buttonsGroup}>
               <DropdownMenu.Root
@@ -759,7 +759,7 @@ export default function Dashboard() {
                     />
 
                     <div>
-                      {sortPage === "Semester" &&
+                      {sortPage === "Quarter" &&
                         SORT_OPTIONS_SEMESTER.map((option) => (
                           <DropdownMenu.Item
                             key={option}

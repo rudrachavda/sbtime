@@ -95,8 +95,8 @@ export function RatingFormBody({
                     if (Array.isArray(selectedOption)) onTermSelect(null);
                     else onTermSelect(selectedOption || null);
                   }}
-                  placeholder="Select semester"
-                  emptyMessage="No semesters found."
+                  placeholder="Select quarter"
+                  emptyMessage="No quarters found."
                   clearable={true}
                   searchable={true}
                 />

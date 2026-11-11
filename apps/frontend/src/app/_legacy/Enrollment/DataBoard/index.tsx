@@ -118,14 +118,14 @@ export default function DataBoard({
       classTitle={courseTitleData?.title ?? undefined}
       metadata={
         enrollmentHistory
-          ? `${semester && year ? `${semester} ${year}` : "All Semesters"} • ${
+          ? `${semester && year ? `${semester} ${year}` : "All Quarters"} • ${
               instructors && instructors.length
                 ? instructors.join(", ")
                 : enrollmentHistory.sectionNumber
                   ? `LEC ${enrollmentHistory.sectionNumber}`
                   : "All Instructors"
             }`
-          : "No Semester or Instructor Data"
+          : "No Quarter or Instructor Data"
       }
       metrics={metrics}
     />

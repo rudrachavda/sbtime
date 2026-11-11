@@ -1330,7 +1330,7 @@ export default function Outreach() {
                 <label className={styles.formLabel}>Banner Text *</label>
                 <Input
                   type="text"
-                  placeholder="e.g., Looking for Spring 2026 data? Check out the new Berkeleytime"
+                  placeholder="e.g., Looking for Spring 2026 data? Check out the new SBTime"
                   value={bannerFormData.text}
                   onChange={(e) =>
                     setBannerFormData({

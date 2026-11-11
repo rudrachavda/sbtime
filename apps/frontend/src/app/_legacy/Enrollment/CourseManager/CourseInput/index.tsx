@@ -290,8 +290,8 @@ export default function CourseInput({ outputs, setOutputs }: CourseInputProps) {
           options={semesterOptions}
           disabled={disabled || !selectedCourse}
           searchable
-          searchPlaceholder="Search semesters..."
-          placeholder="Select a semester"
+          searchPlaceholder="Search quarters..."
+          placeholder="Select a quarter"
           value={selectedSemester}
           onChange={(s) => {
             if (Array.isArray(s)) return;

@@ -332,7 +332,7 @@ const GradeDistributions = () => {
               const semester =
                 output.input.type && output.input.semester && output.input.year
                   ? `${output.input.semester} ${output.input.year}`
-                  : "All semesters";
+                  : "All quarters";
 
               return (
                 <CourseSelectionCard

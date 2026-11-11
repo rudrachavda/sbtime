@@ -633,7 +633,7 @@ export function RatingsContainer() {
                               searchPlaceholder={
                                 activeRatingTab === RATING_TABS.Instructor
                                   ? "Search instructors"
-                                  : "Search semesters"
+                                  : "Search quarters"
                               }
                               emptyMessage={
                                 activeRatingTab === RATING_TABS.Instructor
@@ -648,7 +648,7 @@ export function RatingsContainer() {
                                 },
                                 {
                                   value: RATING_TABS.Semester,
-                                  label: "By Semester",
+                                  label: "By Quarter",
                                   options: termSelectOptions,
                                 },
                               ]}

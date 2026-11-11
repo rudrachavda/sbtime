@@ -285,12 +285,12 @@ export default function Filters() {
           </IconButton>
         </div>
         <div className={styles.formControl}>
-          <p className={styles.label}>Semester</p>
+          <p className={styles.label}>Quarter</p>
           <Select
             combobox
             disabled={!terms || terms.length === 0}
             value={currentTermLabel}
-            placeholder="Select a semester"
+            placeholder="Select a quarter"
             side="bottom"
             maxListHeight={280}
             onChange={(value) => {
@@ -308,7 +308,7 @@ export default function Filters() {
               value: `${term.semester} ${term.year}`,
               label: `${term.semester} ${term.year}`,
             }))}
-            emptyMessage="No semesters found."
+            emptyMessage="No quarters found."
           />
         </div>
         <div className={styles.formControl}>

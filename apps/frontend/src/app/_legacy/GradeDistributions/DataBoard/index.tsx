@@ -114,12 +114,12 @@ export default function DataBoard({
     : "No Class Selected";
 
   const metadata = gradeDistribution
-    ? `${semester && year ? `${semester} ${year}` : "All Semesters"} • ${
+    ? `${semester && year ? `${semester} ${year}` : "All Quarters"} • ${
         givenName && familyName
           ? `${givenName} ${familyName}`
           : "All Instructors"
       }`
-    : "No Semester or Instructor Data";
+    : "No Quarter or Instructor Data";
 
   const metrics: CourseMetric[] = [
     {
@@ -143,7 +143,7 @@ export default function DataBoard({
           <AverageGrade
             style={GRADE_STYLE}
             gradeDistribution={gradeDistribution}
-            tooltip="for this instructor/semester combination"
+            tooltip="for this instructor/quarter combination"
           />
           ({gradeDistribution.average?.toFixed(3)})
         </>

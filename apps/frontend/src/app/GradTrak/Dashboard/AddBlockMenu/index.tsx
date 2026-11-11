@@ -124,7 +124,7 @@ export default function AddBlockMenu({
                 setActiveMenu("semester");
               }}
             >
-              New Semester Block
+              New Quarter Block
               <NavArrowRight className={styles.arrow} />
             </div>
           </div>
@@ -151,14 +151,14 @@ export default function AddBlockMenu({
                 onClick={() => setActiveMenu("main")}
                 style={{ cursor: "pointer" }}
               />
-              New Semester Block
+              New Quarter Block
             </div>
             <div className={styles.inputGroup}>
               <Select
                 options={semesterOptions}
                 value={selectedTerm}
                 onChange={handleSemesterSelect}
-                placeholder="Select a semester..."
+                placeholder="Select a quarter..."
                 multi={false}
               />
               <Select

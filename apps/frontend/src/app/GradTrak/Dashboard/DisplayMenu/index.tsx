@@ -158,7 +158,7 @@ export default function DisplayMenu({
               <div className={styles.sectionTitle}>Board</div>
               <div className={styles.toggleGroup}>
                 <div className={styles.toggleItem}>
-                  <Text>Hide completed semesters</Text>
+                  <Text>Hide completed quarters</Text>
                   <div
                     onClick={() =>
                       onChangeSettings({
@@ -171,7 +171,7 @@ export default function DisplayMenu({
                   </div>
                 </div>
                 <div className={styles.toggleItem}>
-                  <Text>Hide semester status</Text>
+                  <Text>Hide quarter status</Text>
                   <div
                     onClick={() =>
                       onChangeSettings?.({

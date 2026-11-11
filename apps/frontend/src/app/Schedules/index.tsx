@@ -68,9 +68,7 @@ export default function Schedules() {
     <Box p="5">
       <Container style={{ marginBottom: "80px" }}>
         <div className={styles.header}>
-          <div className={styles.title}>
-            Welcome to Berkeleytime&apos;s Scheduler
-          </div>
+          <div className={styles.title}>Welcome to SBTime&apos;s Scheduler</div>
           <div className={styles.prompt}>
             Use our scheduler to build your ideal schedule. Search our catalog
             to add new classes or select from saved ones, and add your own time

@@ -103,14 +103,14 @@ export default function SidePanel({
         <div className={styles.disclaimer}>
           <WarningCircle className={styles.icon} />
           <div className={styles.text}>
-            Future courses may not be offered each semester. Remember to check!
+            Future courses may not be offered each quarter. Remember to check!
           </div>
         </div>
         <div className={styles.disclaimer}>
           <WarningCircle className={styles.icon} />
           <div className={styles.text}>
             Requirements may not be 100% accurate. Always verify with an
-            academic advisor or CalCentral.
+            academic advisor or GOLD.
           </div>
         </div>
       </div>

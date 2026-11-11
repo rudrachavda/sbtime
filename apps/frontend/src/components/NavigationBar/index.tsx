@@ -250,7 +250,7 @@ export default function NavigationBar({
         })}
       >
         <Link className={styles.brand} to="/">
-          Berkeleytime
+          SBTime
         </Link>
         <div className={styles.group}>
           <NavLink to="/catalog">

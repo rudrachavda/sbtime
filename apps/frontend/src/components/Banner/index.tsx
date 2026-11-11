@@ -21,6 +21,10 @@ import {
 import styles from "./Banner.module.scss";
 import BetaBanner from "./BetaBanner";
 
+// The fallback "new release" banner is switched off for now. Set this back to
+// true to show <BetaBanner /> again, e.g. to reuse it for an announcement.
+const FALLBACK_BANNER_ENABLED = false;
+
 interface BannerProps {
   showFallback?: boolean;
 }
@@ -124,7 +128,7 @@ export default function Banner({ showFallback = true }: BannerProps) {
   };
 
   if (!activeBanner) {
-    return showFallback ? <BetaBanner /> : null;
+    return showFallback && FALLBACK_BANNER_ENABLED ? <BetaBanner /> : null;
   }
 
   // Use redirect-based click tracking for reliable 100% tracking

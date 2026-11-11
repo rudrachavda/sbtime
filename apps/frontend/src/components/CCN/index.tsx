@@ -62,7 +62,7 @@ export default function CCN({ sectionId, tooltip }: CCNProps) {
         </div>
       }
       title="Class Number"
-      description="Use this number to search for and enroll in this class within the CalCentral Enrollment Center."
+      description="Use this number to search for and enroll in this class in GOLD."
       open={tooltip}
     />
   );

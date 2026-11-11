@@ -798,7 +798,7 @@ function SemesterBlock({
       <DeleteScheduleDialog
         isOpen={confirmDeleteSemesterOpen}
         onClose={() => setConfirmDeleteSemesterOpen(false)}
-        title="Delete Semester"
+        title="Delete Quarter"
         message={
           <>
             Are you sure you want to delete <strong>{planTerm.name}</strong>?

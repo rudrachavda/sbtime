@@ -26,7 +26,7 @@ import { GRADES } from "@/lib/grades";
 import styles from "./Grades.module.scss";
 
 const chartConfig = createChartConfig(["course"], {
-  labels: { course: "All semesters" },
+  labels: { course: "All quarters" },
   colors: { course: "var(--blue-500)" },
 });
 
@@ -236,7 +236,7 @@ export default function Grades() {
                   dataKey="course"
                   fill="var(--blue-500)"
                   radius={[5, 5, 0, 0]}
-                  name="All semesters"
+                  name="All quarters"
                   isAnimationActive={false}
                 />
               </BarChart>

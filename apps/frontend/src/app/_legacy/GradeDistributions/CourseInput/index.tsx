@@ -35,7 +35,7 @@ interface CourseInputProps {
 }
 
 const DEFAULT_SELECTED_INSTRUCTOR = { value: "all", label: "All Instructors" };
-const DEFAULT_SELECTED_SEMESTER = { value: "all", label: "All Semesters" };
+const DEFAULT_SELECTED_SEMESTER = { value: "all", label: "All Quarters" };
 const DEFAULT_BY_OPTION = {
   value: InputType.Instructor,
   label: "By Instructor",
@@ -43,7 +43,7 @@ const DEFAULT_BY_OPTION = {
 
 const TYPE_OPTIONS = [
   { value: InputType.Instructor, label: "By Instructor" },
-  { value: InputType.Term, label: "By Semester" },
+  { value: InputType.Term, label: "By Quarter" },
 ];
 
 const buildSemesterValue = (
@@ -466,8 +466,8 @@ export default function CourseInput({ outputs, setOutputs }: CourseInputProps) {
             options={semesterOptions}
             disabled={disabled || !selectedCourse}
             searchable
-            searchPlaceholder="Search semesters..."
-            placeholder="Select semesters"
+            searchPlaceholder="Search quarters..."
+            placeholder="Select quarters"
             value={selectedSemester}
             onChange={(s) => {
               if (Array.isArray(s)) return;

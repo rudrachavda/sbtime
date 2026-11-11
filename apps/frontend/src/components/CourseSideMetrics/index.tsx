@@ -44,7 +44,7 @@ export function CourseSideMetrics({
           <ColoredSquare color={color} size="md" />
           <span className={styles.compactCourseTitle}>{courseTitle}</span>
         </div>
-        {metadata !== "No Semester or Instructor Data" &&
+        {metadata !== "No Quarter or Instructor Data" &&
           metadata !== "No Class Selected" && (
             <span className={styles.compactMetadata}>{metadata}</span>
           )}

@@ -152,7 +152,7 @@ export default function CreateScheduleDialog({
                 <Heading>Create a schedule</Heading>
               </Dialog.Title>
               <Dialog.Description asChild>
-                <Text>Select the semester and enter a name</Text>
+                <Text>Select the quarter and enter a name</Text>
               </Dialog.Description>
             </Flex>
             <Dialog.Close asChild>
@@ -172,10 +172,10 @@ export default function CreateScheduleDialog({
               />
             </Flex>
             <Flex direction="column" gap="2">
-              <Label>Semester</Label>
+              <Label>Quarter</Label>
               <Select
                 options={options}
-                placeholder="Select a semester"
+                placeholder="Select a quarter"
                 disabled={loading || pending}
                 value={options?.find(({ value }) => value == term)?.value}
                 onChange={(value) => {

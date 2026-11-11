@@ -1,16 +1,16 @@
 import styles from "./Hero.module.scss";
-import SatherTower from "./SatherTower";
+import StorkeTower from "./StorkeTower";
 
 export default function Hero() {
   return (
     <div className={styles.root}>
       <h1 className={styles.heading}>
-        Berkeley's largest
+        UCSB's
         <br />
         course discovery
         <br className={styles.tabletBreak} /> platform
       </h1>
-      <SatherTower className={styles.tower} />
+      <StorkeTower className={styles.tower} />
     </div>
   );
 }

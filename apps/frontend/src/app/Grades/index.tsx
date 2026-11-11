@@ -105,7 +105,7 @@ const loadOutputsFromInputs = async (
 };
 
 const DEFAULT_SELECTED_INSTRUCTOR = { value: "all", label: "All Instructors" };
-const DEFAULT_SELECTED_SEMESTER = { value: "all", label: "All Semesters" };
+const DEFAULT_SELECTED_SEMESTER = { value: "all", label: "All Quarters" };
 const DEFAULT_BY_OPTION = {
   value: InputType.Instructor,
   label: "By Instructor",
@@ -113,7 +113,7 @@ const DEFAULT_BY_OPTION = {
 
 const TYPE_ITEMS = [
   { value: InputType.Instructor, label: "Instructor" },
-  { value: InputType.Term, label: "Semester" },
+  { value: InputType.Term, label: "Quarter" },
 ];
 const LETTER_GRADE_SET = new Set<string>(LETTER_GRADES);
 
@@ -133,7 +133,7 @@ const getMetadata = (input: Input): string => {
     "semester" in input &&
     input.semester
       ? `${input.semester} ${input.year}`
-      : "All semesters";
+      : "All quarters";
 
   return `${semester} • ${instructor}`;
 };
@@ -627,15 +627,15 @@ function FilterPanel({
                   }}
                 />
               </CourseAnalyticsField>
-              <CourseAnalyticsField label="Semester">
+              <CourseAnalyticsField label="Quarter">
                 <Select
                   ref={secondarySelectRef}
                   options={semesterOptions}
                   loading={courseLoading}
                   disabled={loading || courseLoading}
                   searchable
-                  searchPlaceholder="Search semesters..."
-                  placeholder="Select semester"
+                  searchPlaceholder="Search quarters..."
+                  placeholder="Select quarter"
                   value={selectedSemester}
                   onChange={(s) => {
                     if (Array.isArray(s)) return;
@@ -646,15 +646,15 @@ function FilterPanel({
             </>
           ) : (
             <>
-              <CourseAnalyticsField label="Semester">
+              <CourseAnalyticsField label="Quarter">
                 <Select
                   ref={primarySelectRef}
                   options={semesterOptions}
                   loading={courseLoading}
                   disabled={loading || courseLoading}
                   searchable
-                  searchPlaceholder="Search semesters..."
-                  placeholder="Select semester"
+                  searchPlaceholder="Search quarters..."
+                  placeholder="Select quarter"
                   value={selectedSemester}
                   onChange={(s) => {
                     if (Array.isArray(s)) return;

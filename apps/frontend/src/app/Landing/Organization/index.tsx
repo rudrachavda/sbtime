@@ -16,14 +16,15 @@ import styles from "./Organization.module.scss";
 
 export default function Organization() {
   return (
+    // pt="9"
     <Flex direction="column" className={styles.root} pt="9">
       <Container className={styles.aboutSection}>
         <div className={styles.aboutContent}>
           <h2 className={styles.aboutTitle}>About Us</h2>
           <p className={styles.aboutText}>
-            We're a small group of student volunteers at UC Berkeley, dedicated
-            to simplifying the course discovery experience. We actively build,
-            improve and maintain Berkeleytime.
+            We're a small group of student volunteers at UC Santa Barbara,
+            dedicated to simplifying the course discovery experience. We
+            actively build, improve and maintain SBtime.
           </p>
           <Button
             as={Link}
@@ -35,7 +36,7 @@ export default function Organization() {
           </Button>
         </div>
       </Container>
-      <Container className={styles.wrapper}>
+      {/* <Container className={styles.wrapper}>
         <div className={styles.getInvolvedBox}>
           <div className={styles.getInvolvedTitle}>
             <h2 className={styles.heading}>Sponsors</h2>
@@ -102,7 +103,7 @@ export default function Organization() {
             </a>
           </div>
         </div>
-      </Container>
+      </Container> */}
       <Container className={styles.wrapper}>
         <div className={styles.getInvolvedBox}>
           <div className={styles.getInvolvedTitle}>
@@ -153,7 +154,7 @@ export default function Organization() {
           </Accordion>
         </div>
       </Container>
-      <Container className={styles.sponsorsSection}>
+      {/* <Container className={styles.sponsorsSection}>
         <div className={styles.sponsorsContent}>
           <h2 className={styles.sponsorsTitle}>
             In Memory Of Courtney Brousseau
@@ -163,7 +164,7 @@ export default function Organization() {
             Chief Communications Officer, and Berkeley Mobile Product Manager
           </p>
         </div>
-      </Container>
+      </Container> */}
       <Footer />
     </Flex>
   );

@@ -44,7 +44,7 @@ export function ColoredGrade({ grade, style }: ColoredGradeProps) {
 export function AverageGrade({
   gradeDistribution: { average, pnpPercentage },
   style,
-  tooltip = "across all semesters this course has been offered",
+  tooltip = "across all quarters this course has been offered",
 }: AverageGradeProps) {
   const isPnp =
     !average && pnpPercentage !== null && pnpPercentage !== undefined;

@@ -451,7 +451,7 @@ export default function EnrollmentGraph({
     <div className={styles.graphHeader}>
       {isPhasesDisabled ? (
         <ThemeTooltip
-          title="Phases are only available when comparing classes of the same semester."
+          title="Phases are only available when comparing classes of the same quarter."
           trigger={
             <span className={styles.toggleTooltipTrigger}>{phasesToggle}</span>
           }
