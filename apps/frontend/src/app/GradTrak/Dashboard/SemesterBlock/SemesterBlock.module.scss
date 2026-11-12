@@ -121,9 +121,13 @@ body:not([data-theme]) {
   height: 12px;
   margin-right: 6px;
 }
+// Pushed to the item's right edge (menu items are flex rows) instead of a
+// fixed offset, which ran past the menu and made it scroll sideways.
 .right-aligned-icon {
-  position: relative;
-  left: 60px;
+  flex-shrink: 0;
+  margin-left: auto;
+  // Into the item's right padding, close to the menu's corner.
+  margin-right: -6px;
 }
 .menuStatusColor {
   display: inline-block;
