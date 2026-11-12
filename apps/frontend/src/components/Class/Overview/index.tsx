@@ -3,8 +3,13 @@ import { useMemo } from "react";
 import { Box, Container, Flex } from "@repo/theme";
 
 import Details from "@/components/Details";
+import { useReadTerms } from "@/hooks/api";
 import useClass from "@/hooks/useClass";
-import { DeCal, DeCalInstructor } from "@/lib/generated/graphql";
+import {
+  DeCal,
+  DeCalInstructor,
+  TemporalPosition,
+} from "@/lib/generated/graphql";
 import { linkify } from "@/utils/linkify";
 
 import styles from "./Overview.module.scss";
@@ -70,6 +75,17 @@ export default function Overview() {
   const sectionAttributes = useMemo(
     () => _class.primarySection?.sectionAttributes ?? [],
     [_class.primarySection?.sectionAttributes]
+  );
+
+  // Prerequisites come from today's catalog, so on a past quarter they may not
+  // be what applied back then.
+  const { data: terms } = useReadTerms();
+  const isPastTerm = useMemo(
+    () =>
+      terms?.find(
+        (term) => term.year === _class.year && term.semester === _class.semester
+      )?.temporalPosition === TemporalPosition.Past,
+    [terms, _class.year, _class.semester]
   );
 
   const prereqs = useMemo(() => {
@@ -191,7 +207,9 @@ export default function Overview() {
             )}
           {prereqs && (
             <Flex direction="column" gap="2">
-              <p className={styles.label}>Prerequisites</p>
+              <p className={styles.label}>
+                {isPastTerm ? "Current prerequisites" : "Prerequisites"}
+              </p>
               <p className={styles.description}>{prereqs}</p>
             </Flex>
           )}

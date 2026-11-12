@@ -346,7 +346,7 @@ export function UserFeedbackModal({
       const classNumber = selectedTermInfo.classNumber ?? parsedClassNumber;
       if (!classNumber) {
         throw new Error(
-          "Invalid term selection - class number could not be determined."
+          "Invalid term selection - the class could not be determined."
         );
       }
 

@@ -10,9 +10,11 @@ import enrollmentHistoriesPuller from "./pullers/enrollment";
 import enrollmentTimeframePuller from "./pullers/enrollment-timeframe";
 import gradeDistributionsPuller from "./pullers/grade-distributions";
 import migrationsPuller from "./pullers/migrations";
+import nexusGradesPuller from "./pullers/nexus-grades";
 import sectionsPuller from "./pullers/sections";
 import termsPuller from "./pullers/terms";
 import ucsbEnrollmentPuller from "./pullers/ucsb-enrollment";
+import ucsbplatEnrollmentHistoryPuller from "./pullers/ucsbplat-enrollment-history";
 import setup from "./shared";
 import { Config } from "./shared/config";
 
@@ -30,8 +32,13 @@ const pullerMap: {
   "catalog-backfill": catalogPuller.backfillTerms,
   // UCSB: seat counts for current and upcoming quarters (every 15 minutes).
   "enrollment-active": ucsbEnrollmentPuller.updateEnrollment,
+  // UCSBPlat: daily seat-count history recorded before SBTime (since 2024).
+  "enrollment-history-ucsbplat":
+    ucsbplatEnrollmentHistoryPuller.importEnrollmentHistory,
   // UCSB: prerequisites and full titles from the public General Catalog.
   "catalog-details": catalogDetailsPuller.updateCourseDetails,
+  // Daily Nexus: grade distributions (public records data).
+  "grades-nexus": nexusGradesPuller.importNexusGrades,
   courses: coursesPuller.updateCourses,
   decals: decalsPuller.scrapeDeCals,
   "sections-active": sectionsPuller.activeTerms,

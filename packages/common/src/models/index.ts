@@ -5,6 +5,7 @@ export * from "./class-view-count";
 export * from "./term";
 export * from "./course";
 export * from "./course-catalog-detail";
+export * from "./enrollment-import";
 export * from "./section";
 export * from "./rating";
 export * from "./review";

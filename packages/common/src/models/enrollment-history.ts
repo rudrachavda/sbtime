@@ -22,6 +22,8 @@ export interface IEnrollmentHistoryItem {
     maxEnroll?: number;
     maxWaitlist?: number;
     openReserved?: number;
+    /** Where the entry came from when not SBTime's own puller, e.g. "ucsbplat". */
+    source?: string;
     instructorAddConsentRequired?: boolean;
     instructorDropConsentRequired?: boolean;
     seatReservationCount?: {
@@ -75,6 +77,7 @@ const enrollmentHistorySchema = new Schema<IEnrollmentHistoryItem>({
       maxEnroll: { type: Number },
       maxWaitlist: { type: Number },
       openReserved: { type: Number },
+      source: { type: String },
       instructorAddConsentRequired: { type: Boolean },
       instructorDropConsentRequired: { type: Boolean },
       seatReservationCount: [

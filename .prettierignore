@@ -1,2 +1,5 @@
 **/generated/**
 **/generated-typedefs/**
+
+# Saved web pages used as test fixtures; formatting would change what the parsers see.
+apps/datapuller/src/lib/fixtures/*.html

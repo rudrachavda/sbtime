@@ -48,6 +48,7 @@ import {
   TRACK_CLASS_VIEW,
   signIn,
 } from "@/lib/api";
+import { formatClassNumber } from "@/lib/classNumber";
 import { getEnrollmentInputSearchParam } from "@/lib/enrollmentUrl";
 import {
   CreateRatingsDocument,
@@ -140,15 +141,6 @@ const ratingsTabClasses: RatingsTabClasses = {
 const METRIC_NAMES = Object.values(MetricName) as MetricName[];
 type ClassTab = "overview" | "sections" | "ratings" | "grades" | "enrollment";
 const DEFAULT_TAB: ClassTab = "overview";
-
-const formatClassNumber = (number: string | undefined | null): string => {
-  if (!number) return "";
-  const num = parseInt(number, 10);
-  if (isNaN(num)) return number;
-  // If > 99, show as-is. Otherwise pad to 2 digits with leading zeros
-  if (num > 99) return num.toString();
-  return num.toString().padStart(2, "0");
-};
 
 export default function Class({
   year,

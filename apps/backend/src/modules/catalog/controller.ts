@@ -36,6 +36,13 @@ import { searchSemantic } from "../semantic-search/client";
 import { getCachedCatalog, searchCatalog } from "./catalog-cache";
 import { buildCoEHssQuery, matchesCoEHss } from "./coe-hss";
 
+const QUARTER_ORDER: Record<string, number> = {
+  Winter: 0,
+  Spring: 1,
+  Summer: 2,
+  Fall: 3,
+};
+
 export interface CatalogQueryParams {
   year: number;
   semester: string;
@@ -624,7 +631,12 @@ export const getCatalogFilterOptions = async (
   const semesterList = semesters
     .map((t) => parseTermName(t.name))
     .filter((s): s is { year: number; semester: string } => s !== null)
-    .sort((a, b) => b.year - a.year || a.semester.localeCompare(b.semester));
+    // Newest first; within a calendar year UCSB runs Winter, Spring, Summer, Fall.
+    .sort(
+      (a, b) =>
+        b.year - a.year ||
+        (QUARTER_ORDER[b.semester] ?? -1) - (QUARTER_ORDER[a.semester] ?? -1)
+    );
 
   // Compute time range rounded to nearest hour boundaries
   let timeRange = null;

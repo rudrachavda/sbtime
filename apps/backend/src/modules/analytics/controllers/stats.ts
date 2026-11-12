@@ -29,12 +29,12 @@ export const getStats = async () => {
 
   // Get last 3 semesters with schedule counts
   // First, get all unique year/semester combinations
-  // Semester order for sorting: Fall (0), Spring (1), Summer (2), Winter (3)
-  // Most recent semesters first: higher year, then Fall > Spring > Summer > Winter
+  // Most recent quarters first: higher year, then Fall > Summer > Spring > Winter
+  // (within a calendar year UCSB runs Winter, Spring, Summer, Fall)
   const semesterOrder: Record<string, number> = {
     Fall: 0,
-    Spring: 1,
-    Summer: 2,
+    Summer: 1,
+    Spring: 2,
     Winter: 3,
   };
   const uniqueSemesters = await ScheduleModel.aggregate([

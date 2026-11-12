@@ -10,6 +10,7 @@ import {
   UcsbClassInstructor,
   UcsbClassSection,
   UcsbClassTimeLocation,
+  UcsbCollegeRequirement,
   UcsbDepartment,
   UcsbGeneralEducation,
   UcsbSubject,
@@ -49,20 +50,44 @@ export type EnrollmentSnapshot = Omit<IEnrollmentHistoryItem, "history"> & {
 export interface CatalogNames {
   subjects: Map<string, string>;
   departments: Map<string, string>;
+  /**
+   * GE area names keyed "<college>:<code>" ("L&S:D" -> "Social Sciences"),
+   * plus "*:<code>" for any college, since a few colleges' tables are
+   * incomplete.
+   */
+  geAreas: Map<string, string>;
 }
 
 export const EMPTY_NAMES: CatalogNames = {
   subjects: new Map(),
   departments: new Map(),
+  geAreas: new Map(),
 };
 
 /** Lookup codes can contain runs of spaces ("ART  CS"); match without them. */
 const normalizeCode = (code: string) => code.replace(/\s+/g, "").toUpperCase();
 
+const buildGeAreaNames = (requirements: UcsbCollegeRequirement[]) => {
+  const names = new Map<string, string>();
+  for (const requirement of requirements) {
+    const code = requirement.requirementCode?.trim();
+    const college = requirement.collegeCode?.trim();
+    const name = requirement.requirementTranslation?.trim();
+    if (!code || !college || !name) continue;
+    if (!names.has(`${college}:${code}`)) names.set(`${college}:${code}`, name);
+    // Letters & Science names are the general ones; keep them as the fallback.
+    if (!names.has(`*:${code}`) || college === "L&S")
+      names.set(`*:${code}`, name);
+  }
+  return names;
+};
+
 export const buildCatalogNames = (
   subjects: UcsbSubject[],
-  departments: UcsbDepartment[]
+  departments: UcsbDepartment[],
+  requirements: UcsbCollegeRequirement[] = []
 ): CatalogNames => ({
+  geAreas: buildGeAreaNames(requirements),
   subjects: new Map(
     subjects
       .filter((subject) => subject.subjectCode && subject.subjectTranslation)
@@ -260,6 +285,41 @@ const formatLocation = (timeLocation: UcsbClassTimeLocation) =>
     .filter(Boolean)
     .join(" ") || undefined;
 
+/**
+ * Meetings for a section. Instructors are stored on meetings, so a section
+ * with no scheduled time (independent study, research) still gets one
+ * unscheduled meeting to carry its instructors.
+ */
+const formatMeetings = (section: UcsbClassSection, term: CatalogTerm) => {
+  const instructors = formatInstructors(section.instructors);
+  const timeLocations = section.timeLocations ?? [];
+
+  if (timeLocations.length === 0) {
+    return instructors.length > 0
+      ? [
+          {
+            number: 1,
+            days: parseDays(null),
+            startDate: term.beginDate,
+            endDate: term.endDate,
+            instructors,
+          },
+        ]
+      : [];
+  }
+
+  return timeLocations.map((timeLocation, index) => ({
+    number: index + 1,
+    days: parseDays(timeLocation.days),
+    startTime: toTime(timeLocation.beginTime),
+    endTime: toTime(timeLocation.endTime),
+    startDate: term.beginDate,
+    endDate: term.endDate,
+    location: formatLocation(timeLocation),
+    instructors,
+  }));
+};
+
 const isCancelled = (section: UcsbClassSection) =>
   trim(section.courseCancelled) !== "";
 
@@ -300,8 +360,15 @@ interface GeneralEducationTags {
   codes: string[];
 }
 
+/** Lettered areas read "Area D: Social Sciences"; others just their name. */
+const areaLabel = (code: string, name: string | undefined) => {
+  if (!name) return SPECIAL_SUBJECT_LABELS[code] ?? `Area ${code}`;
+  return /^[A-H]\d?$/.test(code) ? `Area ${code}: ${name}` : name;
+};
+
 export const formatGeneralEducation = (
-  generalEducation: UcsbGeneralEducation[] | null | undefined
+  generalEducation: UcsbGeneralEducation[] | null | undefined,
+  areaNames: Map<string, string> = new Map()
 ): GeneralEducationTags => {
   const sectionAttributes: GeneralEducationTags["sectionAttributes"] = [];
   const codes: string[] = [];
@@ -319,7 +386,10 @@ export const formatGeneralEducation = (
     codes.push(key);
 
     if (college === "UCSB" || UNIVERSITY_REQUIREMENT_LABELS[code]) {
-      const description = UNIVERSITY_REQUIREMENT_LABELS[code] ?? code;
+      const description =
+        UNIVERSITY_REQUIREMENT_LABELS[code] ??
+        areaNames.get(`UCSB:${code}`) ??
+        code;
       requirementDesignation ??= {
         code,
         description,
@@ -329,8 +399,9 @@ export const formatGeneralEducation = (
     }
 
     const collegeLabel = COLLEGE_LABELS[college] ?? college;
-    const areaLabel = SPECIAL_SUBJECT_LABELS[code] ?? `Area ${code}`;
-    const description = `${collegeLabel}: ${areaLabel}`;
+    const name =
+      areaNames.get(`${college}:${code}`) ?? areaNames.get(`*:${code}`);
+    const description = `${collegeLabel} · ${areaLabel(code, name)}`;
 
     sectionAttributes.push({
       attribute: {
@@ -481,7 +552,10 @@ export const mapQuarter = (
     if (!parsed) continue;
 
     const courseDetails = details.get(parsed.courseId);
-    const generalEducation = formatGeneralEducation(ucsbClass.generalEducation);
+    const generalEducation = formatGeneralEducation(
+      ucsbClass.generalEducation,
+      names.geAreas
+    );
     const units = unitsOf(ucsbClass);
     const online = ucsbClass.onLineCourse === true;
     const apiDescription = repairDescription(ucsbClass.description, vocabulary);
@@ -580,18 +654,7 @@ export const mapQuarter = (
           endDate: term.endDate,
           primary: isPrimary,
           associatedSectionIds: isPrimary ? secondaryIds : undefined,
-          meetings: (section.timeLocations ?? []).map(
-            (timeLocation, index) => ({
-              number: index + 1,
-              days: parseDays(timeLocation.days),
-              startTime: toTime(timeLocation.beginTime),
-              endTime: toTime(timeLocation.endTime),
-              startDate: term.beginDate,
-              endDate: term.endDate,
-              location: formatLocation(timeLocation),
-              instructors: formatInstructors(section.instructors),
-            })
-          ),
+          meetings: formatMeetings(section, term),
           sectionAttributes: isPrimary
             ? generalEducation.sectionAttributes
             : undefined,

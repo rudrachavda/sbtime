@@ -80,12 +80,22 @@ const looksLikeChallenge = (body: string) =>
  * Fetch and parse one course page. Anything that looks like a block or a
  * verification challenge is reported as "blocked" so the caller stops.
  */
-export const fetchUcsbplatCourse = async (
-  courseId: string,
+export type PageFetchResult =
+  | { status: "ok"; body: string }
+  | { status: "missing" }
+  | { status: "blocked" }
+  | { status: "error"; message: string };
+
+/**
+ * Fetch one UCSBPlat page. Anything that looks like a block, rate limit or
+ * verification challenge comes back as "blocked" so callers stop at once.
+ */
+export const fetchUcsbplatPage = async (
+  url: string,
   fetchImpl: typeof fetch = fetch
-): Promise<CatalogFetchResult> => {
+): Promise<PageFetchResult> => {
   try {
-    const response = await fetchImpl(ucsbplatCourseUrl(courseId), {
+    const response = await fetchImpl(url, {
       headers: { "user-agent": CATALOG_USER_AGENT, accept: "text/html" },
     });
 
@@ -95,14 +105,30 @@ export const fetchUcsbplatCourse = async (
       return { status: "error", message: `HTTP ${response.status}` };
     }
 
-    const body = await response.text();
-    const course = parseUcsbplatCoursePage(body);
-    if (course) return { status: "found", course };
-
-    return looksLikeChallenge(body)
-      ? { status: "blocked" }
-      : { status: "missing" };
+    return { status: "ok", body: await response.text() };
   } catch (error) {
     return { status: "error", message: (error as Error).message };
   }
+};
+
+/** Whether a page body is a challenge rather than content. */
+export const isChallengePage = looksLikeChallenge;
+
+/**
+ * Fetch and parse one course page. Anything that looks like a block or a
+ * verification challenge is reported as "blocked" so the caller stops.
+ */
+export const fetchUcsbplatCourse = async (
+  courseId: string,
+  fetchImpl: typeof fetch = fetch
+): Promise<CatalogFetchResult> => {
+  const page = await fetchUcsbplatPage(ucsbplatCourseUrl(courseId), fetchImpl);
+  if (page.status !== "ok") return page;
+
+  const course = parseUcsbplatCoursePage(page.body);
+  if (course) return { status: "found", course };
+
+  return looksLikeChallenge(page.body)
+    ? { status: "blocked" }
+    : { status: "missing" };
 };

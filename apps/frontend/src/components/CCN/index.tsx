@@ -61,8 +61,8 @@ export default function CCN({ sectionId, tooltip }: CCNProps) {
           <span ref={textRef}>{sectionId}</span>
         </div>
       }
-      title="Class Number"
-      description="Use this number to search for and enroll in this class in GOLD."
+      title="Enroll Code"
+      description="Use this code to find and enroll in this class in GOLD."
       open={tooltip}
     />
   );

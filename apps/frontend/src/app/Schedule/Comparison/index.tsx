@@ -45,7 +45,7 @@ export default function Comparison() {
     [comparison]
   );
 
-  const SEMESTER_ORDER = ["Spring", "Summer", "Fall"];
+  const SEMESTER_ORDER = ["Winter", "Spring", "Summer", "Fall"];
 
   const scheduleOptions = useMemo<Option<string>[]>(() => {
     if (!schedules) return [];

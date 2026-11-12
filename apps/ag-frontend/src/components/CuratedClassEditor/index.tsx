@@ -65,10 +65,10 @@ export default function CuratedClassEditor({
           if (a.year !== b.year) return b.year - a.year;
 
           const semesterOrder = [
-            Semester.Winter,
             Semester.Fall,
             Semester.Summer,
             Semester.Spring,
+            Semester.Winter,
           ];
 
           return (

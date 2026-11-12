@@ -21,6 +21,7 @@ import EnrollmentDisplay from "@/components/EnrollmentDisplay";
 import Units from "@/components/Units";
 import { IClass, IClassCourse } from "@/lib/api";
 import { IEnrollmentSingular } from "@/lib/api/enrollment";
+import { formatClassNumber } from "@/lib/classNumber";
 import { Color, Semester } from "@/lib/generated/graphql";
 
 import styles from "./ClassCard.module.scss";
@@ -36,15 +37,6 @@ const formatSemester = (semester: Semester): string => {
     default:
       return semester;
   }
-};
-
-const formatClassNumber = (number: string | undefined | null): string => {
-  if (!number) return "";
-  const num = parseInt(number, 10);
-  if (isNaN(num)) return number;
-  // If > 99, show as-is. Otherwise pad to 2 digits with leading zeros
-  if (num > 99) return num.toString();
-  return num.toString().padStart(2, "0");
 };
 
 type BaseClassFields = Pick<

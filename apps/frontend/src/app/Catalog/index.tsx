@@ -37,10 +37,10 @@ import useCatalogLayoutMode from "./hooks/useCatalogLayoutMode";
 
 // Semester hierarchy for chronological ordering (latest to earliest in year)
 const SEMESTER_ORDER: Record<Semester, number> = {
-  [Semester.Spring]: 0,
-  [Semester.Summer]: 1,
-  [Semester.Fall]: 2,
-  [Semester.Winter]: 3,
+  [Semester.Winter]: 0,
+  [Semester.Spring]: 1,
+  [Semester.Summer]: 2,
+  [Semester.Fall]: 3,
 };
 
 // Fallback term so the catalog UI always renders (query will return 0 results)

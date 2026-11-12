@@ -9,6 +9,7 @@ import {
   UcsbApiError,
   UcsbClass,
   UcsbClient,
+  getCollegeRequirements,
   getDepartments,
   getQuarterClasses,
   getSubjects,
@@ -60,13 +61,14 @@ const loadCatalogNames = async (
   client: UcsbClient
 ): Promise<CatalogNames> => {
   try {
-    const [subjects, departments] = await Promise.all([
+    const [subjects, departments, requirements] = await Promise.all([
       getSubjects(client),
       getDepartments(client),
+      getCollegeRequirements(client),
     ]);
-    const names = buildCatalogNames(subjects, departments);
+    const names = buildCatalogNames(subjects, departments, requirements);
     config.log.info(
-      `Loaded ${names.subjects.size} subject and ${names.departments.size} department names.`
+      `Loaded ${names.subjects.size} subject, ${names.departments.size} department and ${names.geAreas.size} GE area names.`
     );
     return names;
   } catch (error) {

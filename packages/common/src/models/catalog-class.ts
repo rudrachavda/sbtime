@@ -312,6 +312,9 @@ const catalogClassSchema = new Schema<ICatalogClassItem>(
 // Base catalog query
 catalogClassSchema.index({ year: 1, semester: 1 });
 
+// for per-course updates across all quarters (grade summaries, details)
+catalogClassSchema.index({ courseId: 1 });
+
 // Level filter
 catalogClassSchema.index({ year: 1, semester: 1, level: 1 });
 

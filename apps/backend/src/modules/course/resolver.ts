@@ -37,10 +37,10 @@ const getClassTermKey = (courseClass: ClassIdentityFields) =>
   `${courseClass.year}|${courseClass.semester}`;
 
 const SEMESTER_RECENCY_ORDER: Record<string, number> = {
-  Spring: 0,
-  Summer: 1,
-  Fall: 2,
-  Winter: -1,
+  Winter: 0,
+  Spring: 1,
+  Summer: 2,
+  Fall: 3,
 };
 
 const compareNumberDesc = (a?: number | null, b?: number | null): number => {

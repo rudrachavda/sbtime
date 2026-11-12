@@ -21,7 +21,7 @@ from .generated_operations import SEMANTIC_SEARCH_OPERATION_IDS
 logger = logging.getLogger("semantic-search")
 
 # Semester order for comparison
-SEMESTER_ORDER = {"Spring": 0, "Summer": 1, "Fall": 2, "Winter": 3}
+SEMESTER_ORDER = {"Winter": 0, "Spring": 1, "Summer": 2, "Fall": 3}
 
 # Redis connection — shared with the rest of the codebase via REDIS_URI
 REDIS_URI = os.getenv("REDIS_URI", "redis://redis:6379")

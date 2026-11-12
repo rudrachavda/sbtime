@@ -152,7 +152,7 @@ export default function Filters() {
     }
 
     if (breadths.length > 0) {
-      options.push({ type: "label", label: "L&S Breadth" });
+      options.push({ type: "label", label: "General Education" });
       options.push(
         ...breadths.map((breadth) => ({
           value: { type: "breadth" as const, value: breadth },
@@ -161,15 +161,8 @@ export default function Filters() {
       );
     }
 
-    if (filterOptions) {
-      options.push(
-        { type: "label", label: "College of Engineering" },
-        {
-          value: { type: "coe", value: "hss" },
-          label: "Humanities and Social Sciences (H/SS)",
-        }
-      );
-    }
+    // Berkeley's College of Engineering H/SS filter is left out: UCSB's
+    // Engineering GE areas are already listed under General Education.
 
     return options;
   }, [filterOptions]);
@@ -430,7 +423,7 @@ export default function Filters() {
           {universityRequirements.length > 0 && breadths.length > 0 && (
             <p className={styles.helperText}>
               Showing classes that meet a selected University Requirement and a
-              selected L&amp;S Breadth.
+              selected General Education area.
             </p>
           )}
         </div>

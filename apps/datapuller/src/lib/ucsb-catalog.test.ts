@@ -150,7 +150,7 @@ describe("formatGeneralEducation", () => {
   it("labels areas by college and names special subjects", () => {
     assert.deepEqual(
       tags.sectionAttributes.map((attribute) => attribute.value.description),
-      ["Engineering: Area D", "L&S: Area D", "L&S: Writing"]
+      ["Engineering · Area D", "L&S · Area D", "L&S · Writing"]
     );
     assert.ok(tags.sectionAttributes.every((a) => a.attribute.code === "GE"));
   });
@@ -238,12 +238,12 @@ describe("mapQuarter", () => {
     assert.deepEqual(
       lecture?.sectionAttributes?.map((a) => a.value.description),
       [
-        "Engineering: Area D",
-        "Engineering: World Cultures",
-        "Engineering: Writing",
-        "L&S: Area D",
-        "L&S: World Cultures",
-        "L&S: Writing",
+        "Engineering · Area D",
+        "Engineering · World Cultures",
+        "Engineering · Writing",
+        "L&S · Area D",
+        "L&S · World Cultures",
+        "L&S · Writing",
       ]
     );
     assert.ok(
@@ -494,5 +494,113 @@ describe("mergeDuplicateClasses", () => {
 
   it("leaves different courses alone", () => {
     assert.equal(mergeDuplicateClasses(FIXTURE).length, FIXTURE.length);
+  });
+});
+
+describe("GE area names", () => {
+  const areaNames = buildCatalogNames(
+    [],
+    [],
+    [
+      {
+        requirementCode: "D",
+        requirementTranslation: "Social Sciences",
+        collegeCode: "L&S ",
+        objCode: "BA",
+        courseCount: 3,
+        units: 0,
+        inactive: false,
+      },
+      {
+        requirementCode: "ETH",
+        requirementTranslation: "Ethnicity",
+        collegeCode: "ENGR",
+        objCode: "BS",
+        courseCount: 1,
+        units: 3,
+        inactive: false,
+      },
+      {
+        requirementCode: "SUB",
+        requirementTranslation: "Entry Level Writing",
+        collegeCode: "UCSB",
+        objCode: "UG",
+        courseCount: 1,
+        units: 0,
+        inactive: false,
+      },
+    ]
+  ).geAreas;
+
+  it("names lettered areas and special subjects", () => {
+    const tags = formatGeneralEducation(
+      [
+        { geCode: "D  ", geCollege: "L&S " },
+        { geCode: "ETH", geCollege: "ENGR" },
+      ],
+      areaNames
+    );
+    assert.deepEqual(
+      tags.sectionAttributes.map((a) => a.value.description),
+      ["Engineering · Ethnicity", "L&S · Area D: Social Sciences"]
+    );
+  });
+
+  it("borrows another college's name when a college's table lacks the area", () => {
+    const tags = formatGeneralEducation(
+      [{ geCode: "D", geCollege: "ENGR" }],
+      areaNames
+    );
+    assert.equal(
+      tags.sectionAttributes[0].value.description,
+      "Engineering · Area D: Social Sciences"
+    );
+  });
+
+  it("falls back to the code when no name is known", () => {
+    const tags = formatGeneralEducation(
+      [{ geCode: "F", geCollege: "L&S" }],
+      areaNames
+    );
+    assert.equal(tags.sectionAttributes[0].value.description, "L&S · Area F");
+  });
+});
+
+describe("sections without a scheduled time", () => {
+  it("keep their instructors on an unscheduled meeting", () => {
+    const anth99 = FIXTURE.find((c) => c.courseId.trim() === "ANTH     99")!;
+    const section = anth99.classSections![0];
+    const unscheduled = {
+      ...anth99,
+      classSections: [
+        {
+          ...section,
+          timeLocations: [],
+          instructors: [
+            { instructor: "SMITH S T", functionCode: "Teaching and in charge" },
+          ],
+        },
+      ],
+    };
+    const [lecture] = mapQuarter([unscheduled], TERM, new Map(), NOW).sections;
+
+    assert.equal(lecture.meetings?.length, 1);
+    assert.deepEqual(lecture.meetings?.[0].days, Array(7).fill(false));
+    assert.equal(lecture.meetings?.[0].startTime, undefined);
+    assert.equal(lecture.meetings?.[0].instructors?.[0].familyName, "SMITH");
+  });
+
+  it("have no meetings when there is also no instructor", () => {
+    const anth99 = FIXTURE.find((c) => c.courseId.trim() === "ANTH     99")!;
+    const bare = {
+      ...anth99,
+      classSections: [
+        { ...anth99.classSections![0], timeLocations: [], instructors: [] },
+      ],
+    };
+    assert.deepEqual(
+      mapQuarter([bare], TERM, new Map(), NOW).sections[0].meetings,
+      []
+    );
   });
 });

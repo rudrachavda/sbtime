@@ -199,7 +199,7 @@ export function TotalSchedulesBlock() {
         const [aSem, aYear] = a.split(" ");
         const [bSem, bYear] = b.split(" ");
         if (aYear !== bYear) return parseInt(bYear) - parseInt(aYear);
-        const semOrder = { Spring: 0, Summer: 1, Fall: 2, Winter: 3 };
+        const semOrder = { Winter: 0, Spring: 1, Summer: 2, Fall: 3 };
         return (
           (semOrder[bSem as keyof typeof semOrder] || 0) -
           (semOrder[aSem as keyof typeof semOrder] || 0)
@@ -814,7 +814,7 @@ export function SchedulesBySemesterBlock() {
         const [aSem, aYear] = a[0].split(" ");
         const [bSem, bYear] = b[0].split(" ");
         if (aYear !== bYear) return parseInt(aYear) - parseInt(bYear);
-        const semOrder = { Spring: 0, Summer: 1, Fall: 2, Winter: 3 };
+        const semOrder = { Winter: 0, Spring: 1, Summer: 2, Fall: 3 };
         return (
           (semOrder[aSem as keyof typeof semOrder] || 0) -
           (semOrder[bSem as keyof typeof semOrder] || 0)
