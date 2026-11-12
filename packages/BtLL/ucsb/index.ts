@@ -1,7 +1,12 @@
+import { UCSB_COMPUTER_SCIENCE_BTLL } from "./computer-science";
 import { UCSB_ENGINEERING_GE_BTLL } from "./engineering";
 import { UCSB_UNIVERSITY_REQ_BTLL } from "./university";
 
-export { UCSB_ENGINEERING_GE_BTLL, UCSB_UNIVERSITY_REQ_BTLL };
+export {
+  UCSB_COMPUTER_SCIENCE_BTLL,
+  UCSB_ENGINEERING_GE_BTLL,
+  UCSB_UNIVERSITY_REQ_BTLL,
+};
 
 /** One requirement set as stored in the planrequirements collection. */
 export interface UcsbPlanRequirementSeed {
@@ -38,6 +43,15 @@ export const UCSB_PLAN_REQUIREMENTS: UcsbPlanRequirementSeed[] = [
     isUcReq: false,
     college: "CoE",
     major: null,
+    minor: null,
+    catalogYear: "2026-27",
+  },
+  {
+    name: "Computer Science (Engineering) (2026-27)",
+    code: UCSB_COMPUTER_SCIENCE_BTLL,
+    isUcReq: false,
+    college: null,
+    major: "Computer Science (Engineering)",
     minor: null,
     catalogYear: "2026-27",
   },

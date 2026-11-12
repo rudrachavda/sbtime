@@ -3,7 +3,11 @@ import { describe, test } from "node:test";
 
 import { init } from "../src/interpreter";
 import type { Data } from "../src/types";
-import { UCSB_ENGINEERING_GE_BTLL, UCSB_UNIVERSITY_REQ_BTLL } from "./index";
+import {
+  UCSB_COMPUTER_SCIENCE_BTLL,
+  UCSB_ENGINEERING_GE_BTLL,
+  UCSB_UNIVERSITY_REQ_BTLL,
+} from "./index";
 
 interface Result {
   result: Data<boolean>;
@@ -31,8 +35,7 @@ const course = (
 type TestCourse = ReturnType<typeof course>;
 
 const run = (code: string, courses: TestCourse[], extraUnits = 0) => {
-  const units =
-    courses.reduce((sum, c) => sum + c.units.data, 0) + extraUnits;
+  const units = courses.reduce((sum, c) => sum + c.units.data, 0) + extraUnits;
   const plan = {
     units: { data: units, type: "number" },
     columns: { data: [], type: "List<Column>" },
@@ -161,5 +164,118 @@ describe("College of Engineering GE (2026-27)", () => {
     assert.equal(results.get("Writing (4 courses)"), false);
     assert.equal(results.get("Ethnicity"), true);
     assert.equal(results.get("Areas D, E, F and G"), true);
+  });
+});
+
+describe("Computer Science (Engineering) 2026-27", () => {
+  const preparation = [
+    "CMPSC 16",
+    "CMPSC 24",
+    "CMPSC 32",
+    "CMPSC 41",
+    "CMPSC 42",
+    "CMPSC 64",
+    "MATH 3A",
+    "MATH 3B",
+    "MATH 4A",
+    "MATH 4B",
+    "MATH 6A",
+    "PSTAT 120A",
+  ].map((name) => course(name));
+  const upperDivision = ["CMPSC 130A", "CMPSC 130B", "ENGR 101"].map((name) =>
+    course(name)
+  );
+  const cmpscElectives = [
+    "CMPSC 138",
+    "CMPSC 154",
+    "CMPSC 156",
+    "CMPSC 160",
+    "CMPSC 170",
+    "CMPSC 174A",
+    "CMPSC 176A",
+    "CMPSC 190N",
+  ].map((name) => course(name));
+  const otherElectives = [
+    "PSTAT 120B",
+    "PSTAT 122",
+    "MATH 108A",
+    "ECE 152A",
+    "ECE 181",
+    "MATH 124A",
+  ].map((name) => course(name));
+
+  const results = (courses: TestCourse[]) =>
+    byName(run(UCSB_COMPUTER_SCIENCE_BTLL, courses));
+
+  test("a complete plan meets everything except the hand-checked science electives", () => {
+    const all = run(UCSB_COMPUTER_SCIENCE_BTLL, [
+      ...preparation,
+      ...upperDivision,
+      ...cmpscElectives,
+      ...otherElectives,
+    ]);
+    assert.deepEqual(
+      all.map((r) => [r.description.data, r.result.data]),
+      [
+        ["Preparation for the Major", true],
+        ["Upper-Division Required Courses", true],
+        ["Major Field Electives", true],
+        [
+          "Science Electives: List A (8 units) and List B (12 units) from the department's lists",
+          false,
+        ],
+      ]
+    );
+  });
+
+  test("a missing preparation course fails preparation only", () => {
+    const r = results([
+      ...preparation.filter((c) => c.number.data !== "6A"),
+      ...upperDivision,
+    ]);
+    assert.equal(r.get("Mathematics and Statistics"), false);
+    assert.equal(r.get("Computer Science"), true);
+    assert.equal(r.get("Upper-Division Required Courses"), true);
+  });
+
+  test("14 electives with only 6 CMPSC fail the CMPSC minimum", () => {
+    const r = results([
+      ...cmpscElectives.slice(0, 6),
+      ...otherElectives,
+      course("PSTAT 130"),
+      course("MATH 119A"),
+    ]);
+    assert.equal(r.get("14 Major Field Electives"), true);
+    assert.equal(r.get("At least 7 CMPSC Electives"), false);
+  });
+
+  test("CMPSC 192 and 196 together count as one elective", () => {
+    const r = results([
+      ...cmpscElectives.slice(0, 6),
+      course("CMPSC 192", [], 2),
+      course("CMPSC 196", [], 2),
+      ...otherElectives,
+    ]);
+    // 6 + 1 CMPSC, 6 others: 13 electives.
+    assert.equal(r.get("At least 7 CMPSC Electives"), true);
+    assert.equal(r.get("14 Major Field Electives"), false);
+  });
+
+  test("courses off the list do not count as electives", () => {
+    const r = results([
+      course("CMPSC 8"),
+      course("CMPSC 190"),
+      course("ECE 10A"),
+    ]);
+    assert.equal(r.get("At least 7 CMPSC Electives"), false);
+    const electives = run(UCSB_COMPUTER_SCIENCE_BTLL, [
+      course("CMPSC 8"),
+      course("CMPSC 190"),
+      course("ECE 10A"),
+    ])[2] as Result & { requirements: Data<Result[]> };
+    const total = electives.requirements.data[0] as Result & {
+      actual_count: Data<number>;
+    };
+    assert.equal(total.actual_count.data, 0);
   });
 });
