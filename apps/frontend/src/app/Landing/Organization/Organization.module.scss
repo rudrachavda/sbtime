@@ -5,6 +5,14 @@ $section-spacing: 48px;
 
 .root {
   background-color: var(--foreground-color);
+  // At least one screen below the sticky navbar, so scrolling to the bottom
+  // always hides the hero entirely instead of leaving a strip of it showing
+  // on tall windows. The footer stays at the bottom of the extra space.
+  min-height: calc(100svh - var(--header-height, 90px));
+
+  > :last-child {
+    margin-top: auto;
+  }
 }
 
 .aboutSection {

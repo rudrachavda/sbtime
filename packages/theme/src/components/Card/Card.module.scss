@@ -18,9 +18,18 @@
   }
 
   .column {
-    padding: 16px;
-    padding-left: 0;
+    // Icons are drawn ~2px inside their box, so trim the right padding and
+    // center them on the 16px heading line: the drawn icon then sits 16px
+    // from the card's right edge, like the heading on the left.
+    padding: 16px 14px 16px 0;
     height: min-content;
+    .icon,
+    .deleteIcon,
+    .delete-icon {
+      display: flex;
+      align-items: center;
+      height: 16px;
+    }
     .icon {
       color: var(--paragraph-color);
       transition: all 100ms ease-in-out;

@@ -160,7 +160,11 @@ export default function ClassCard({
       <Card.ColumnHeader
         style={{
           overflow: "visible",
-          marginLeft: leftBorderColor ? "8px" : undefined,
+          // Make room for the 8px color bar without pushing the right-hand
+          // icons past the card's edge.
+          ...(leftBorderColor
+            ? { marginLeft: "8px", width: "calc(100% - 8px)" }
+            : {}),
         }}
       >
         <Card.Body>

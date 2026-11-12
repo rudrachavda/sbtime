@@ -101,10 +101,11 @@
         height: 24px;
         display: flex;
         align-items: center;
-        padding: 0 12px;
+        padding: 0 6px;
         font-size: var(--text-12);
         color: white;
         line-height: 1;
+        white-space: nowrap;
         border-radius: 4px;
         right: 0;
         background-color: var(--red-500);
