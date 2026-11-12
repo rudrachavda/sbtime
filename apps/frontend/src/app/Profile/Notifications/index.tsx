@@ -45,7 +45,7 @@ export default function Notifications() {
           Course Enrollment Notifications
         </h1>
         <p className={styles.subtitle}>
-          Notifications will be delivered to your registered @berkeley.edu email
+          Notifications will be delivered to your registered @ucsb.edu email
           address when enrollment drops in a class you're tracking.
         </p>
       </div>

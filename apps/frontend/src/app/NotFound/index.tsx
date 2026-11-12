@@ -31,10 +31,7 @@ export default function NotFound() {
         <h1 className={styles.title}>Page Not Found</h1>
         <p className={styles.description}>
           Oops! There is nothing here. Check the{" "}
-          <a
-            href="https://berkeleytime.com/catalog"
-            style={{ color: "var(--blue-500)" }}
-          >
+          <a href="/catalog" style={{ color: "var(--blue-500)" }}>
             catalog
           </a>{" "}
           instead?

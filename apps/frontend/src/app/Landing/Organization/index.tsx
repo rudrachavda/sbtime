@@ -125,10 +125,14 @@ export default function Organization() {
             <AccordionItem value="contribute">
               <AccordionTrigger>Contribute Code</AccordionTrigger>
               <AccordionContent>
-                Berkeleytime is a completely open-source project. Check out our
+                SBTime is open source, built on Berkeleytime. Check out our
                 repository and contribute at{" "}
-                <a href="https://github.com/asuc-octo/berkeleytime">
-                  github.com/asuc-octo/berkeleytime
+                <a
+                  href="https://github.com/rudrachavda/sbtime"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  github.com/rudrachavda/sbtime
                 </a>
                 .
               </AccordionContent>

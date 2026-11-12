@@ -432,7 +432,7 @@ function SemesterBlock({
             unitsMax?: number;
           };
         };
-        const { subject, courseNumber, number, title, unitsMin, unitsMax } =
+        const { subject, courseNumber, title, unitsMin, unitsMax } =
           bookmarkClass;
         let courseUnits = unitsMin ?? unitsMax ?? 0;
         if (courseUnits <= 0) {
@@ -443,13 +443,13 @@ function SemesterBlock({
             planTerm.year
           );
         }
+        // Same id format as classes added from the search box
+        // ("ECE_152A"); `number` is the section, not the course.
         const courseToAdd: ISelectedCourse = {
-          courseID: `${subject}_${number}`,
+          courseID: `${subject}_${courseNumber}`,
           courseName: `${subject} ${courseNumber}`,
           courseTitle: title || `${subject} ${courseNumber}`,
           courseUnits,
-          uniReqs: [],
-          collegeReqs: [],
           pnp: false,
           transfer: false,
           labels: [],
@@ -459,7 +459,11 @@ function SemesterBlock({
         const oldClasses = [...selectedClasses];
         setSelectedCourses(updatedClasses);
         try {
-          await setCourses(semesterId, updatedClasses);
+          await setCourses(
+            semesterId,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            updatedClasses.map(({ course: _course, ...cls }) => cls)
+          );
           const updatedSemesters = {
             ...filteredSemesters,
             [semesterId]: updatedClasses,

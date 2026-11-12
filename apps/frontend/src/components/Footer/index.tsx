@@ -42,6 +42,14 @@ const STATUS_LABELS: Record<Status, string> = {
 // badge is shown; Berkeleytime's page described their servers, not ours.
 const STATUS_PAGE_URL: string | null = null;
 
+// SBTime's own accounts. A link without an address is not shown; the
+// Instagram and Discord links Berkeleytime used were theirs, not ours.
+const SOCIAL_LINKS: { label: string; href: string | null }[] = [
+  { label: "Instagram", href: null },
+  { label: "Discord", href: null },
+  { label: "GitHub", href: "https://github.com/rudrachavda/sbtime" },
+];
+
 function StatusBadge() {
   const [status, setStatus] = useState<Status | null>(null);
 
@@ -87,27 +95,17 @@ export default function Footer() {
         <div className={styles.columns}>
           <div className={styles.column}>
             <p className={styles.label}>Socials</p>
-            <a
-              href="https://www.instagram.com/berkeleytimeofficial/"
-              target="_blank"
-              className={styles.link}
-            >
-              Instagram
-            </a>
-            <a
-              href="https://discord.gg/uP2bTPh99U"
-              target="_blank"
-              className={styles.link}
-            >
-              Discord
-            </a>
-            <a
-              href="https://github.com/asuc-octo/berkeleytime"
-              target="_blank"
-              className={styles.link}
-            >
-              GitHub
-            </a>
+            {SOCIAL_LINKS.filter((social) => social.href).map((social) => (
+              <a
+                key={social.label}
+                href={social.href ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.link}
+              >
+                {social.label}
+              </a>
+            ))}
           </div>
           <div className={styles.column}>
             <p className={styles.label}>Offerings</p>
@@ -143,9 +141,14 @@ export default function Footer() {
             <Link to="/about" className={styles.link}>
               Our Team
             </Link>
-            <Link to="https://octo.asuc.org/" className={styles.link}>
-              OCTO
-            </Link>
+            <a
+              href="https://berkeleytime.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              Berkeleytime
+            </a>
             <Link to="/legal/privacy" className={styles.link}>
               Privacy Policy
             </Link>
