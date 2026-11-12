@@ -2,11 +2,11 @@ import http from "http";
 
 import { Config } from "../../../../packages/common/src/utils/config";
 import log from "../lib/logger";
-import { createApp } from "./app";
+import { configureApp } from "./app";
 
 /** Docker and local development: start up fully, then listen on a port. */
 export default async (config: Config) => {
-  const { app, ready } = createApp();
+  const { app, ready } = configureApp();
   await ready;
 
   const httpServer = http.createServer(app);

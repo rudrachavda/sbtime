@@ -4,16 +4,18 @@ import log from "../lib/logger";
 import loaders from "./loaders";
 
 /**
- * Builds the backend app. Used two ways:
+ * Sets up the backend on an Express app. Used two ways:
  *
  * - main.ts (Docker and local development) waits for `ready`, then listens
  *   on a port.
- * - index.ts (Vercel) exports `app` straight away. Vercel starts the app on
- *   the first request, so requests wait on `ready` (connecting to MongoDB
- *   and Redis, loading Apollo) before reaching the routes.
+ * - index.ts (Vercel) creates the app itself (Vercel only accepts an entry
+ *   file that imports express) and exports it straight away. Vercel starts
+ *   it on the first request, so requests wait on `ready` (connecting to
+ *   MongoDB and Redis, loading Apollo) before reaching the routes.
  */
-export const createApp = (): { app: Application; ready: Promise<void> } => {
-  const app = express();
+export const configureApp = (
+  app: Application = express()
+): { app: Application; ready: Promise<void> } => {
   app.set("trust proxy", 1);
 
   // log http requests
