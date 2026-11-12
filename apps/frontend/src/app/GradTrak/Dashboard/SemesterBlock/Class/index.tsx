@@ -35,6 +35,7 @@ export default function Class({
     <div
       key={index}
       data-class-container
+      data-layout={settings.layout}
       className={styles.classContainer}
       draggable={draggable}
       onDragStart={(e) => handleDragStart(e, index)}

@@ -548,12 +548,6 @@ export const persistedOperations: Readonly<Record<string, PersistedOperation>> =
     variableNames: [],
     sources: ["apps/frontend/src/lib/api/curated-classes.ts"],
   },
-  "86f89d0e46600a42295564b2922954dbabb2ef7587fb5ade4b21b0bd19942637": {
-    operationName: "GetCatalogFilterOptions",
-    document: "query GetCatalogFilterOptions($year:Int!$semester:Semester!){catalogFilterOptions(year:$year semester:$semester){departments{code name __typename}levels gradingOptions breadthRequirements universityRequirements timeRange{minStartTime maxEndTime __typename}__typename}}",
-    variableNames: ["year","semester"],
-    sources: ["apps/frontend/src/lib/api/catalog.ts"],
-  },
   "8926d0e58d6bdc7dab6ea6e31b8195bd047de98652601fe5ab942b67f3e340e2": {
     operationName: "GetClassReviews",
     document: "query GetClassReviews($subject:String!$courseNumber:String!){classReviews(subject:$subject courseNumber:$courseNumber){subject courseNumber count users{anonymousUserId classes{subject courseNumber semester year classNumber professorName metrics{metricName value __typename}reviewTitle reviewContent reviewerGrade lastUpdated reviewId helpfulCount __typename}__typename}__typename}}",
@@ -607,6 +601,12 @@ export const persistedOperations: Readonly<Record<string, PersistedOperation>> =
     document: "mutation VoteReviewHelpful($reviewId:String!){voteReviewHelpful(reviewId:$reviewId)}",
     variableNames: ["reviewId"],
     sources: ["apps/frontend/src/lib/api/ratings.ts"],
+  },
+  "a18116f2d160467389096201306cf502382214e4a4f612be19dd29ba8e68a41c": {
+    operationName: "GetCatalogFilterOptions",
+    document: "query GetCatalogFilterOptions($year:Int!$semester:Semester!){catalogFilterOptions(year:$year semester:$semester){departments{code name __typename}subjects{code name __typename}levels gradingOptions breadthRequirements universityRequirements timeRange{minStartTime maxEndTime __typename}__typename}}",
+    variableNames: ["year","semester"],
+    sources: ["apps/frontend/src/lib/api/catalog.ts"],
   },
   "a191317e944ce56bd4a2b66fafbd2ff20097351dccac69b7b5c66696f95ae6d8": {
     operationName: "GetSemestersWithRatings",

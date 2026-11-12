@@ -253,6 +253,11 @@ export const GET_CLASS_DETAILS = gql`
       unitsMax
       unitsMin
       finalExam
+      crossListing {
+        subject
+        courseNumber
+        number
+      }
       decal {
         title
       }

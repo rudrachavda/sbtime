@@ -49,6 +49,11 @@ export const formatClass = (_class: IClassItem) => {
 
     gradingBasis: _class.gradingBasis as ClassGradingBasis,
     finalExam: _class.finalExam as ClassFinalExam,
+    crossListing: (_class.crossListing ?? []).map((listing) => ({
+      subject: normalizeSubject(listing.subject),
+      courseNumber: listing.courseNumber,
+      number: listing.number,
+    })),
   };
   return output as unknown as IntermediateClass;
 };

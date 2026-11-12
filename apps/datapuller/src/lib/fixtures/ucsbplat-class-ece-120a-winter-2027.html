@@ -1,0 +1,1924 @@
+
+
+
+
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Discover courses, professors, and easy GEs from UCSB. Browse course enrollment trends, grading trends, and professor reviews. Create class schedules with AI Assistant. ">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.png">
+    <title>UCSBPlat . ECE 120A</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        /* Same two navies the site already uses, named so a stylesheet can reach them
+           instead of copying the literals: --navy is the link/brand text colour .navy
+           applies, --navy-surface the filled one behind .bg-navy and the active
+           pagination link. Both follow the theme, which a copied hex cannot. */
+        :root {
+            --navy: #083c63;
+            --navy-surface: #003660;
+        }
+
+        .navy {
+            color: var(--navy);
+        }
+
+        .toastui-calendar-detail-container {
+            width: 301px;
+            min-width: 301px;
+            box-shadow: 0 2px 6px 0 rgb(0 0 0 / 10%);
+            background-color: white;
+            padding: 17px 17px 0;
+            border-radius: 2px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    
+    <link rel="stylesheet" href="/static/style.css" type="text/css">
+
+    
+    
+    <link rel="stylesheet" href="/static/airbnb.css" type="text/css">
+
+    
+    
+    <link rel="stylesheet" href="/static/ge_searchbar.css" type="text/css">
+
+    
+    
+    <link rel="stylesheet" href="/static/housing_searchbar.css" type="text/css">
+
+    
+    
+    <link rel="stylesheet" href="/static/searchbar.css" type="text/css">
+
+
+    
+</head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J9QBND5X1R"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-J9QBND5X1R');
+</script>
+
+<body data-bs-theme="light">
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <nav class="navbar sticky-top navbar-expand bg-body py-xl-2 pb-0 border-bottom mb-2 mb-lg-4">
+        <div class="container d-flex flex-wrap justify-content-between">
+            <div class="d-none d-xl-flex">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <img src="/static/gaucho.png"
+                         alt="Logo"
+                         height="28">
+                    <div class="fw-bold navy mb-0 pb-0 lh-sm">
+                        <span>UCSBPlat</span>
+                    </div>
+                </a>
+                <div class="navbar-nav">
+                    
+    
+    
+    <a class="nav-item nav-link"
+       href="/curriculum/">
+        Courses 
+    </a>
+    
+
+                    
+    
+    
+    <a class="nav-item nav-link"
+       href="/ge/">
+        GE 
+    </a>
+    
+
+                </div>
+            </div>
+
+            <div class="flex-grow-1 mx-xl-5 d-flex">
+                <a class="d-none d-md-inline d-xl-none navbar-brand me-1" href="/">
+                    <img src="/static/ucsb_acm.png" alt="Logo" height="28px"
+                         class="d-inline-block align-text-top">
+                </a>
+                
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/autoComplete.min.js"></script>
+    <style>
+        mark {
+            padding-left: 0 !important;
+            padding-right: 0 !important;;
+        }
+    </style>
+
+    <form class="d-flex justify-content-center align-items-baseline w-100"
+          autocomplete="off" action="/search" autocapitalize="off">
+        <input id="search-bar-604732" class="w-100 rounded-pill" name="query" value="" type="search"
+               autocapitalize="off" autocomplete="off" autocorrect="off" required>
+        <button class="d-none d-lg-inline ms-2 btn btn-warning rounded-circle" type="submit" style="width:40px;height:40px">
+            <i class="bi bi-search" style="position:relative;left:-2px"></i>
+        </button>
+    </form>
+
+    <script>
+        const config = {
+            placeHolder: 'Search courses and professors',
+            selector: "#search-bar-604732",
+            debounce: 0,
+            searchEngine: "loose",
+            data: {
+                src: async (query) => {
+                    try {
+                        const autocomplete_url = new URL("/autocomplete", window.location.origin);
+                        autocomplete_url.searchParams.append('query', query);
+                        const source = await fetch(autocomplete_url.href);
+                        const data = await source.json();
+                        return data;
+                    } catch (error) {
+                        return error;
+                    }
+                },
+                keys: ['query']
+            },
+            submit: true,
+            events: {
+                input: {
+                    focus: () => {
+                        if (autoCompleteJS.input.value.length) autoCompleteJS.start();
+                    }
+                }
+            },
+            resultsList: {
+                element: (list, data) => {
+                    if (data.results.length === 0) {
+                        const info = document.createElement("p");
+                        info.classList.add('pt-2', 'px-3', 'text-secondary', 'text-sm');
+                        info.innerHTML = `Nothing found`;
+                        list.prepend(info);
+                    }
+                },
+                noResults: true,
+                maxResults: 20,
+                tabSelect: true
+            },
+            resultItem: {
+                highlight: true,
+                element: (item, data) => {
+                    item.style = "display: flex; justify-content: space-between;";
+                    if (data.value.type === "original") {
+                        item.innerHTML = `<span class="text-secondary" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                            ${data.value.query}
+                        </span>
+                        <i class="bi bi-arrow-right"></i>`;
+                    } else if (data.value.type === "corrected") {
+                        item.innerHTML = `<span style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                            <span class="text-secondary">Did you mean</span>
+                            <span class="fw-bold text-warning">${data.value.corrected_highlight}</span>
+                            <span class="text-secondary">?</span>
+                        </span>
+                        <span></span>`
+                    } else if (data.value.type === "major") {
+                        item.innerHTML = `<span style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                            <span class="fw-bold navy">${data.value.acronym}</span>
+                            <span class="text-secondary ms-1">${data.value.name}</span>
+                        </span>
+                        <span class="text-secondary" style="display: flex; align-items: center; font-size: 13px; font-weight: 100">
+                            ${data.value.courses_cnt} courses
+                        </span>`
+                    } else if (data.value.type === "course") {
+                        item.innerHTML = `<span>
+                            ${data.value.acronym}
+                        </span>
+                        <span class="text-secondary ms-4" style="text-overflow: ellipsis; margin-top:3px; white-space: nowrap; overflow: hidden; font-size: 13px; font-weight: 100">
+                            ${data.value.name}
+                        </span>`
+                    } else if (data.value.type === "professor") {
+                        var starClass = ''
+                        if (data.value.stars >= 4) {
+                            starClass = 'bi-star-fill'
+                        } else if (data.value.stars >= 2) {
+                            starClass = 'bi-star-half'
+                        } else {
+                            starClass = 'bi-star'
+                        }
+                        item.innerHTML = `<span class="d-flex align-items-center">
+                            <img src="${data.value.img_url}" style="max-width:32px;max-height:32px;object-fit: contain" class="rounded me-2">
+                            <span>${data.value.name}</span>
+                            <span class="ms-1 font-sm text-secondary mb-0">${data.value.department}</span>
+                        </span>
+                        <span style="display: flex; align-items: center; font-size: 13px; font-weight: 100">
+                            <span class="text-warning fw-bold">
+                                <i class="bi ${starClass} me-1"></i> ${data.value.stars.toFixed(1)}
+                            </span>
+                            <span class="ms-2 text-secondary">${data.value.reviews_cnt} reviews</span>
+                        </span>`
+                    }
+                }
+            },
+        }
+        const autoCompleteJS = new autoComplete(config);
+        $(".autoComplete_wrapper").addClass("w-100");
+        $(".autoComplete_wrapper > ul").addClass("bg-body");
+        
+
+        function selectSuggestion(event){
+            let suggestion = event.detail.selection.value;
+            var displayVal = '';
+            if (suggestion.type === 'original') {
+                displayVal = suggestion.query;
+            } else if (suggestion.type === 'corrected') {
+                displayVal = suggestion.corrected;
+            } else if (suggestion.type === 'major') {
+                displayVal = suggestion.acronym;
+            } else if (suggestion.type === 'course') {
+                displayVal = suggestion.acronym;
+            } else if (suggestion.type === 'professor') {
+                displayVal = suggestion.name;
+            }
+            document.getElementById('search-bar-604732').value = displayVal;
+        }
+
+        document.querySelector("#search-bar-604732").addEventListener("navigate", function (event) {
+            selectSuggestion(event);
+        });
+        document.querySelector("#search-bar-604732").addEventListener("selection", function (event) {
+            selectSuggestion(event);
+            document.getElementById('search-bar-604732').form.submit();
+        });
+    </script>
+
+
+
+
+            </div>
+
+            <div class="d-none d-xl-flex">
+                <div class="navbar-nav d-flex">
+                    
+                    <div class="nav-airbnb">
+                        
+    
+    
+    <a class="nav-item nav-link"
+       href="/housing/">
+        Housing 
+    </a>
+    
+
+                    </div>
+                </div>
+                <div class="ms-3">
+    
+        
+    <a class="btn rounded-pill bg-body-tertiary shadow-sm d-inline-flex align-items-center"
+       href="/oauth/google/login?next=/curriculum/class/WINTER+2027+12617">
+        <svg class="me-2" width="18" height="18" viewBox="0 0 18 18"
+             aria-hidden="true" focusable="false">
+            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.33-1.58-5.04-3.71H.94v2.33A9 9 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.96 10.71A5.41 5.41 0 0 1 3.68 9c0-.59.1-1.16.28-1.71V4.96H.94A9 9 0 0 0 0 9c0 1.45.34 2.82.94 4.04l3.02-2.33z"/>
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .94 4.96l3.02 2.33C4.67 5.16 6.66 3.58 9 3.58z"/>
+        </svg>
+        
+            Log in
+        
+    </a>
+
+    
+</div>
+
+            </div>
+
+            <div class="navbar-nav d-xl-none d-flex justify-content-between w-100" style="font-size:14px">
+                
+    
+    
+    <a class="nav-item nav-link"
+       href="/">
+        Home 
+    </a>
+    
+
+                
+    
+    
+    <a class="nav-item nav-link"
+       href="/curriculum/">
+        Courses 
+    </a>
+    
+
+                
+    
+    
+    <a class="nav-item nav-link"
+       href="/ge/">
+        GE 
+    </a>
+    
+
+                
+                
+    
+    
+    <a class="nav-item nav-link"
+       href="/housing/">
+        Housing 
+    </a>
+    
+
+                <div class="nav-item">
+    
+        
+    <a class="btn rounded-pill  shadow-sm d-inline-flex align-items-center"
+       href="/oauth/google/login?next=/curriculum/class/WINTER+2027+12617">
+        <svg class="" width="18" height="18" viewBox="0 0 18 18"
+             aria-hidden="true" focusable="false">
+            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.33-1.58-5.04-3.71H.94v2.33A9 9 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.96 10.71A5.41 5.41 0 0 1 3.68 9c0-.59.1-1.16.28-1.71V4.96H.94A9 9 0 0 0 0 9c0 1.45.34 2.82.94 4.04l3.02-2.33z"/>
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .94 4.96l3.02 2.33C4.67 5.16 6.66 3.58 9 3.58z"/>
+        </svg>
+        
+    </a>
+
+    
+</div>
+            </div>
+        </div>
+    </nav>
+
+
+<div class="container mt-2 mt-lg-4">
+    
+    
+     <div class="breadcrumb">
+        
+    
+    <li class="breadcrumb-item">
+        
+        <a href="/curriculum/">Courses</a>
+        
+    </li>
+
+        
+    
+    <li class="breadcrumb-item">
+        
+        <a href="/curriculum/major/Electrical%20Computer%20Engineering%20-%20ECE">ECE</a>
+        
+    </li>
+
+        
+    
+    <li class="breadcrumb-item">
+        
+        <a href="/curriculum/course/ECE%20120A">ECE 120A</a>
+        
+    </li>
+
+    </div>
+    <h3 class="navy fw-bold">Integrated Circuit Design and Fabrication . ECE 120A</h3>
+    <p class="mt-4 text-secondary">Theory, fabrication, and characterization of solid state devices including P-N junctions, capacitors, bipolar and MOS devices. Devices are fabricated using modern VLSI processing techniques including lithography, oxidation, diffusion, and evaporation. Physics and performance of processing steps are discussed and analyzed.</p>
+
+    <div class="row align-items-center g-4">
+        <div class="col-auto">
+            
+                <div class="nav-item">
+    
+        
+    <a class="btn rounded-pill bg-body-tertiary shadow-sm d-inline-flex align-items-center"
+       href="/oauth/google/login?next=/curriculum/class/WINTER+2027+12617">
+        <svg class="me-2" width="18" height="18" viewBox="0 0 18 18"
+             aria-hidden="true" focusable="false">
+            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.33-1.58-5.04-3.71H.94v2.33A9 9 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.96 10.71A5.41 5.41 0 0 1 3.68 9c0-.59.1-1.16.28-1.71V4.96H.94A9 9 0 0 0 0 9c0 1.45.34 2.82.94 4.04l3.02-2.33z"/>
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .94 4.96l3.02 2.33C4.67 5.16 6.66 3.58 9 3.58z"/>
+        </svg>
+        
+            Login to add to schedule
+        
+    </a>
+
+    
+</div>
+            
+        </div>
+        <div class="col-auto">
+            
+                <h6 class="mb-0 text-info">
+                    Prerequisites: ECE 132 with a minimum grade of C-.
+                </h6>
+            
+        </div>
+    </div>
+
+    <div class="my-3 row row-cols-2 row-cols-lg-5 g-3">
+        
+    <div class="col ">
+        <div class="card w-100 rounded-3 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-grid h3 mb-0 navy"></i>
+                <div class="ms-3">
+                    <p class="fw-bold mb-0">4</p>
+                    <small class="text-secondary">Units</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        
+    <div class="col ">
+        <div class="card w-100 rounded-3 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-patch-check h3 mb-0 navy"></i>
+                <div class="ms-3">
+                    <p class="fw-bold mb-0">Letter</p>
+                    <small class="text-secondary">Grading</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        
+    <div class="col ">
+        <div class="card w-100 rounded-3 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-clock h3 mb-0 navy"></i>
+                <div class="ms-3">
+                    <p class="fw-bold mb-0">1, 2, 3</p>
+                    <small class="text-secondary">Passtime</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        
+    <div class="col ">
+        <div class="card w-100 rounded-3 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-bar-chart h3 mb-0 navy"></i>
+                <div class="ms-3">
+                    <p class="fw-bold mb-0">Undergraduate students only</p>
+                    <small class="text-secondary">Level Limit</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        
+    <div class="col col-12">
+        <div class="card w-100 rounded-3 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-buildings h3 mb-0 navy"></i>
+                <div class="ms-3">
+                    <p class="fw-bold mb-0">Engineering</p>
+                    <small class="text-secondary">College</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <div class="row">
+        
+        
+            
+    <div class="col-auto">
+        <h6 class="me-2 text-secondary">Unlocks 
+    
+        <span class="m-1 badge rounded-pill bg-body-tertiary text-secondary fw-bold ">ECE 120B</span>
+    
+</h6>
+    </div>
+
+        
+        
+            
+    <div class="col-auto">
+        <h6 class="me-2 text-warning">These majors only 
+    
+        <span class="m-1 badge rounded-pill bg-body-tertiary text-warning fw-bold ">ee</span>
+    
+</h6>
+    </div>
+
+        
+        
+    </div>
+
+    <div class="row row-cols-1 row-cols-lg-2 g-4">
+        <div class="col">
+    
+    <div class="mt-3 mt-lg-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="navy fw-bold ">Instructors</h5>
+            
+        </div>
+        
+    </div>
+
+    
+        <div class="row row-cols-1 g-2">
+            
+                <div class="col">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="fw-semibold">MIRIN R</h6>
+                            <small class="text-secondary">No info found</small>
+                        </div>
+                    </div>
+                </div>
+            
+        </div>
+    
+</div>
+        <div class="col">
+    
+</div>
+    </div>
+    
+        
+    
+    <div class="mt-3 mt-lg-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="navy fw-bold ">Lecture</h5>
+            
+        </div>
+        
+    </div>
+
+    
+    <div class="card border-0 rounded-3">
+        
+            
+    <iframe
+            width="100%%"
+            height="200px"
+            class="rounded-top-3"
+            style="border:0;"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyC5DokRqpoI-GgwBQ9SYV0LHXGNpqjED60
+            &q=UCSB+HSSB+&maptype=roadmap">
+    </iframe>
+
+        
+        <div class="card-footer rounded-bottom-3">
+            
+    
+    <div class="row align-items-center">
+        <div class="col-12 col-lg-3">
+            
+    <small>
+        <i class="bi bi-geo-alt-fill"></i> HSSB 1173
+    </small>
+
+        </div>
+        
+            <div class="col-12 col-lg-6 d-flex justify-content-lg-center">
+                <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                <div class="ms-1">
+    <small class="text-secondary font-sm">
+        09:30 AM - 10:45 AM
+    </small>
+</div>
+            </div>
+        
+        
+        <div class="col-12 col-lg-3 d-flex align-items-center justify-content-lg-end">
+            <div class="pe-2 d-flex text-nowrap font-sm">
+                <small class="mx-1 text-secondary fw-semibold">
+                    40 / 40
+                </small>
+                <small class="mx-1 text-danger fw-bold">
+                    Full
+                </small>
+            </div>
+            
+                <div class="w-50 my-3 my-xl-0">
+                    
+    <div class="progress " role="progressbar" aria-label="Progress bar" style="height:6px"
+         data-bs-toggle="tooltip" data-bs-title="">
+        <div class="progress-bar bg-navy" style="width: 100.0%"></div>
+    </div>
+
+                </div>
+            
+        </div>
+        
+    </div>
+
+        </div>
+    </div>
+
+
+    
+        
+    <div class="mt-3 mt-lg-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="navy fw-bold ">Sections</h5>
+            
+        </div>
+        
+    </div>
+
+        <div class="row g-4 row-cols-1 row-cols-md-2 pb-4">
+            
+                <div class="col position-relative">
+                    
+    
+    
+    <div class="row align-items-center">
+        <div class="col-12 col-lg-3">
+            
+    <small>
+        <i class="bi bi-geo-alt-fill"></i> ENGR21141E
+    </small>
+
+        </div>
+        
+            <div class="col-12 col-lg-6 d-flex justify-content-lg-center">
+                <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            R
+        </span>
+    
+</div>
+                <div class="ms-1">
+    <small class="text-secondary font-sm">
+        19:00 PM - 21:50 PM
+    </small>
+</div>
+            </div>
+        
+        
+        <div class="col-12 col-lg-3 d-flex align-items-center justify-content-lg-end">
+            <div class="pe-2 d-flex text-nowrap font-sm">
+                <small class="mx-1 text-secondary fw-semibold">
+                    40 / 40
+                </small>
+                <small class="mx-1 text-danger fw-bold">
+                    Full
+                </small>
+            </div>
+            
+                <div class="w-50 my-3 my-xl-0">
+                    
+    <div class="progress " role="progressbar" aria-label="Progress bar" style="height:6px"
+         data-bs-toggle="tooltip" data-bs-title="">
+        <div class="progress-bar bg-navy" style="width: 100.0%"></div>
+    </div>
+
+                </div>
+            
+        </div>
+        
+    </div>
+
+
+                    <a href="/curriculum/section/(%22WINTER%202027%2012617%22)" class="stretched-link"></a>
+                </div>
+            
+        </div>
+    
+
+    
+
+    
+    
+
+
+    
+        
+    <div class="mt-4 mt-lg-5 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="navy fw-bold ">Enrollment Trends</h5>
+            
+        </div>
+        
+    </div>
+
+        
+    
+        <div class="mb-4">
+            
+    
+    <div class="card border-0 rounded-4 shadow-sm">
+        <div class="card-body">
+            
+            
+    
+    
+    
+    
+
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+
+    <canvas id="enrollment-chart-91839" style="min-height:100px;max-height:200px"></canvas>
+    <script>
+        var ctx = document.getElementById("enrollment-chart-91839").getContext("2d");
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Oct 19", "Oct 20", "Nov 02", "Nov 03", "Nov 05", "Nov 09"],
+                datasets: [
+                    {
+                        label: 'Enrolled',
+                        data: [0, 0, 0, 8, 40, 40],
+                        fill: false,
+                        borderColor: "#003660",
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Capacity',
+                        data: [50, 50, 40, 40, 40, 40],
+                        fill: false,
+                        borderColor: '#FEBC11',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    legend: {display:  true },
+                    annotation: {
+                        annotations: {
+                            
+                                
+                                    'Pass 1': {
+                                        type: 'line',
+                                        xMin: 'Nov 02',
+                                        xMax: 'Nov 02',
+                                        borderDash: [5, 15],
+                                        borderColor: 'black',
+                                        borderWidth: 2,
+                                        label: {
+                                            content: 'Pass 1',
+                                            display: true,
+                                        }
+                                    },
+                                
+                            
+                                
+                            
+                                
+                            
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {display: false}
+                    },
+                    y: {
+                        grid: {display: false}
+                    }
+                }
+            }
+        });
+    </script>
+
+        </div>
+    </div>
+
+        </div>
+    
+
+    
+
+    
+        
+    <div class="mt-4 mt-lg-5 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="navy fw-bold ">Past Enrollment Trends (3)</h5>
+            
+        </div>
+        
+            
+    <a href="/curriculum/past_enrollment_trends/WINTER%202027%2012617" class="text-decoration-none navy" target="">See All</a>
+
+        
+    </div>
+
+        
+    
+        <div class="mb-4">
+            
+    
+    <div class="card border-0 rounded-4 shadow-sm">
+        <div class="card-body">
+            
+                <div class="row justify-content-between mb-2">
+                    <div class="col-12 col-lg-6">
+                        <small class="card-title text-secondary">
+                            Winter 2024 . Ben-Yaacov I
+                        </small>
+                    </div>
+                    <div class="col-12 col-lg-6 mb-4 mb-lg-0 d-flex justify-content-between justify-content-lg-end">
+                        <div>
+    <small>
+        <i class="bi bi-geo-alt-fill"></i> GIRV 2128
+    </small>
+</div>
+                        
+                            <div class="ms-3">
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                            <div class="ms-1">
+    <small class="text-secondary font-sm">
+        09:30 AM - 10:45 AM
+    </small>
+</div>
+                        
+                    </div>
+                </div>
+            
+            
+    
+    
+    
+    
+
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+
+    <canvas id="enrollment-chart-374206" style="min-height:100px;max-height:200px"></canvas>
+    <script>
+        var ctx = document.getElementById("enrollment-chart-374206").getContext("2d");
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Nov 08 2023", "Nov 09 2023", "Nov 11 2023", "Nov 14 2023", "Nov 16 2023", "Nov 17 2023", "Nov 21 2023", "Nov 22 2023", "Nov 25 2023", "Nov 28 2023", "Nov 30 2023", "Dec 01 2023", "Dec 02 2023", "Dec 03 2023", "Jan 14 2024"],
+                datasets: [
+                    {
+                        label: 'Enrolled',
+                        data: [0, 40, 40, 40, 39, 39, 39, 39, 39, 40, 40, 40, 40, 40, 43],
+                        fill: false,
+                        borderColor: "#003660",
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Capacity',
+                        data: [48, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40],
+                        fill: false,
+                        borderColor: '#FEBC11',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    legend: {display:  true },
+                    annotation: {
+                        annotations: {
+                            
+                                
+                            
+                                
+                                    'Pass 2': {
+                                        type: 'line',
+                                        xMin: 'Nov 14 2023',
+                                        xMax: 'Nov 14 2023',
+                                        borderDash: [5, 15],
+                                        borderColor: 'black',
+                                        borderWidth: 2,
+                                        label: {
+                                            content: 'Pass 2',
+                                            display: true,
+                                        }
+                                    },
+                                
+                            
+                                
+                                    'Pass 3': {
+                                        type: 'line',
+                                        xMin: 'Nov 28 2023',
+                                        xMax: 'Nov 28 2023',
+                                        borderDash: [5, 15],
+                                        borderColor: 'black',
+                                        borderWidth: 2,
+                                        label: {
+                                            content: 'Pass 3',
+                                            display: true,
+                                        }
+                                    },
+                                
+                            
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {display: false}
+                    },
+                    y: {
+                        grid: {display: false}
+                    }
+                }
+            }
+        });
+    </script>
+
+        </div>
+    </div>
+
+        </div>
+    
+        <div class="mb-4">
+            
+    
+    <div class="card border-0 rounded-4 shadow-sm">
+        <div class="card-body">
+            
+                <div class="row justify-content-between mb-2">
+                    <div class="col-12 col-lg-6">
+                        <small class="card-title text-secondary">
+                            Winter 2025 . T B A
+                        </small>
+                    </div>
+                    <div class="col-12 col-lg-6 mb-4 mb-lg-0 d-flex justify-content-between justify-content-lg-end">
+                        <div>
+    <small>
+        <i class="bi bi-geo-alt-fill"></i> NH 1109
+    </small>
+</div>
+                        
+                            <div class="ms-3">
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                            <div class="ms-1">
+    <small class="text-secondary font-sm">
+        09:30 AM - 10:45 AM
+    </small>
+</div>
+                        
+                    </div>
+                </div>
+            
+            
+    
+    
+    
+    
+
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+
+    <canvas id="enrollment-chart-499006" style="min-height:100px;max-height:200px"></canvas>
+    <script>
+        var ctx = document.getElementById("enrollment-chart-499006").getContext("2d");
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Oct 21 2024", "Nov 01 2024", "Nov 02 2024", "Nov 04 2024", "Nov 05 2024", "Nov 06 2024", "Nov 07 2024", "Nov 08 2024", "Nov 09 2024", "Nov 10 2024", "Nov 11 2024", "Nov 12 2024", "Nov 13 2024", "Nov 14 2024", "Nov 15 2024", "Nov 17 2024", "Nov 18 2024", "Nov 19 2024", "Nov 20 2024", "Nov 21 2024", "Nov 22 2024", "Nov 23 2024", "Nov 24 2024", "Nov 25 2024", "Nov 27 2024", "Dec 22 2024", "Jan 02 2025", "Jan 15 2025"],
+                datasets: [
+                    {
+                        label: 'Enrolled',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 39, 40, 39, 39, 39, 39, 40, 40, 40, 40, 40, 40, 40, 40, 44],
+                        fill: false,
+                        borderColor: "#003660",
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Capacity',
+                        data: [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40],
+                        fill: false,
+                        borderColor: '#FEBC11',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    legend: {display:  true },
+                    annotation: {
+                        annotations: {
+                            
+                                
+                                    'Pass 1': {
+                                        type: 'line',
+                                        xMin: 'Nov 04 2024',
+                                        xMax: 'Nov 04 2024',
+                                        borderDash: [5, 15],
+                                        borderColor: 'black',
+                                        borderWidth: 2,
+                                        label: {
+                                            content: 'Pass 1',
+                                            display: true,
+                                        }
+                                    },
+                                
+                            
+                                
+                                    'Pass 2': {
+                                        type: 'line',
+                                        xMin: 'Nov 12 2024',
+                                        xMax: 'Nov 12 2024',
+                                        borderDash: [5, 15],
+                                        borderColor: 'black',
+                                        borderWidth: 2,
+                                        label: {
+                                            content: 'Pass 2',
+                                            display: true,
+                                        }
+                                    },
+                                
+                            
+                                
+                                    'Pass 3': {
+                                        type: 'line',
+                                        xMin: 'Nov 18 2024',
+                                        xMax: 'Nov 18 2024',
+                                        borderDash: [5, 15],
+                                        borderColor: 'black',
+                                        borderWidth: 2,
+                                        label: {
+                                            content: 'Pass 3',
+                                            display: true,
+                                        }
+                                    },
+                                
+                            
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {display: false}
+                    },
+                    y: {
+                        grid: {display: false}
+                    }
+                }
+            }
+        });
+    </script>
+
+        </div>
+    </div>
+
+        </div>
+    
+
+    
+
+    
+        
+    <div class="mt-4 mt-lg-5 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="navy fw-bold ">Grading Trends (11)</h5>
+            
+        </div>
+        
+            
+    <a href="/curriculum/grading_trends/WINTER%202027%2012617" class="text-decoration-none navy" target="">See All</a>
+
+        
+    </div>
+
+        
+    <div class="row row-cols-1 row-cols-lg-2 g-2 g-lg-4">
+        
+            <div class="col">
+                
+    
+    
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+    <div class="card rounded-3 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+                <small class="card-title text-secondary">
+                    <span>ECE 120A</span>
+                    <span class="ms-2">Lopatin S D</span>
+                    <span class="ms-2">Winter 2025</span>
+                </small>
+                <small class="text-secondary">Total: 47</small>
+            </div>
+            
+    
+    <canvas id="bar-chart-333760" style="min-height:100px;max-height:200px"></canvas>
+    <script>
+        new Chart(document.getElementById("bar-chart-333760"), {
+            type: 'bar',
+            data: {
+                labels: ["A+", "A", "A-", "B-"],
+                datasets: [
+                    {
+                        label: "Number of students",
+                        barPercentage: 0.5,
+                        backgroundColor: ["#1B5E20", "#388E3C", "#4CAF50", "#5DADE2"],
+                        data: ["18", "12", "16", "1"]
+                    }
+                ]
+            },
+            options: {
+                plugins: {legend: {display: false}},
+                scales: {
+                    x: {grid: {display: false}},
+                    y: {grid: {display: false}}
+                }
+            }
+        });
+    </script>
+
+        </div>
+    </div>
+
+            </div>
+        
+            <div class="col">
+                
+    
+    
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+    <div class="card rounded-3 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+                <small class="card-title text-secondary">
+                    <span>ECE 120A</span>
+                    <span class="ms-2">Lopatin S D</span>
+                    <span class="ms-2">Winter 2024</span>
+                </small>
+                <small class="text-secondary">Total: 42</small>
+            </div>
+            
+    
+    <canvas id="bar-chart-776592" style="min-height:100px;max-height:200px"></canvas>
+    <script>
+        new Chart(document.getElementById("bar-chart-776592"), {
+            type: 'bar',
+            data: {
+                labels: ["A+", "A", "A-", "B+"],
+                datasets: [
+                    {
+                        label: "Number of students",
+                        barPercentage: 0.5,
+                        backgroundColor: ["#1B5E20", "#388E3C", "#4CAF50", "#2874A6"],
+                        data: ["19", "5", "5", "13"]
+                    }
+                ]
+            },
+            options: {
+                plugins: {legend: {display: false}},
+                scales: {
+                    x: {grid: {display: false}},
+                    y: {grid: {display: false}}
+                }
+            }
+        });
+    </script>
+
+        </div>
+    </div>
+
+            </div>
+        
+    </div>
+
+    
+
+    
+
+    
+    
+
+
+    
+
+    
+        <h5 class="mt-4 mt-lg-5 navy fw-bold">You Might Also Like</h5>
+        
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-2 g-lg-4">
+        
+            <div class="col">
+                
+                
+    
+    <div class="w-100 card border-0 shadow-sm rounded-3">
+        <div class="card-body pt-1">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <small class="text-secondary">ECE 122B</small>
+                <div>
+                    
+                        <small class="text-secondary font-xs">
+                            0 / 60
+                        </small>
+                        
+                            <small class="mx-1 text-danger fw-bold font-xs">
+                                Closed
+                            </small>
+                        
+                    
+                </div>
+            </div>
+            <h6 class="mt-1 card-title">
+                VLSI Architecture and Design
+            </h6>
+            <div class="mt-3">
+                
+                    <small class="text-secondary">
+                        Theogarajan L
+                    </small>
+                
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-inline-flex">
+                    
+                        <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                        <div class="ms-1">
+    <small class="text-secondary font-sm">
+        14:00 PM - 15:15 PM
+    </small>
+</div>
+                    
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+            <a href="/curriculum/class/WINTER%202027%2050641" class="stretched-link" target="_blank"></a>
+        </div>
+    </div>
+
+            </div>
+        
+            <div class="col">
+                
+                
+    
+    <div class="w-100 card border-0 shadow-sm rounded-3">
+        <div class="card-body pt-1">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <small class="text-secondary">ECE 122B</small>
+                <div>
+                    
+                        <small class="text-secondary font-xs">
+                            22 / 60
+                        </small>
+                        
+                            <small class="text-secondary font-xs">
+                                Enrolled
+                            </small>
+                        
+                    
+                </div>
+            </div>
+            <h6 class="mt-1 card-title">
+                VLSI Architecture and Design
+            </h6>
+            <div class="mt-3">
+                
+                    <small class="me-2 my-2 d-flex align-items-center text-secondary">
+                        <img data-src="https://www.ece.ucsb.edu/sites/default/files/styles/medium_square/public/2020-01/Theogarajan.jpg?itok=_K-cVM3k" class="lazyload img-fluid rounded me-2" style="width:24px;height:30px;object-position:center;object-fit:cover">
+                        Luke Theogarajan
+                        <small class="ms-1 text-warning">
+                            <i class="bi bi-star-fill"></i>
+                            4.2
+                        </small>
+                    </small>
+                
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-inline-flex">
+                    
+                        <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                        <div class="ms-1">
+    <small class="text-secondary font-sm">
+        14:00 PM - 15:15 PM
+    </small>
+</div>
+                    
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+            <a href="/curriculum/class/WINTER%202027%2050658" class="stretched-link" target="_blank"></a>
+        </div>
+    </div>
+
+            </div>
+        
+            <div class="col">
+                
+                
+    
+    <div class="w-100 card border-0 shadow-sm rounded-3">
+        <div class="card-body pt-1">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <small class="text-secondary">ECE 130A</small>
+                <div>
+                    
+                        <small class="text-secondary font-xs">
+                            58 / 90
+                        </small>
+                        
+                            <small class="text-secondary font-xs">
+                                Enrolled
+                            </small>
+                        
+                    
+                </div>
+            </div>
+            <h6 class="mt-1 card-title">
+                Signal Analysis and Processing
+            </h6>
+            <div class="mt-3">
+                
+                    <small class="me-2 my-2 d-flex align-items-center text-secondary">
+                        <img data-src="https://www.ece.ucsb.edu/sites/default/files/styles/medium_square/public/2020-01/Sen.jpg?itok=XZKC7z-B" class="lazyload img-fluid rounded me-2" style="width:24px;height:30px;object-position:center;object-fit:cover">
+                        Pradeep Sen
+                        <small class="ms-1 text-warning">
+                            <i class="bi bi-star-half"></i>
+                            3.2
+                        </small>
+                    </small>
+                
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-inline-flex">
+                    
+                        <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                        <div class="ms-1">
+    <small class="text-secondary font-sm">
+        12:30 PM - 13:45 PM
+    </small>
+</div>
+                    
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+            <a href="/curriculum/class/WINTER%202027%2012633" class="stretched-link" target="_blank"></a>
+        </div>
+    </div>
+
+            </div>
+        
+            <div class="col">
+                
+                
+    
+    <div class="w-100 card border-0 shadow-sm rounded-3">
+        <div class="card-body pt-1">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <small class="text-secondary">ECE 135</small>
+                <div>
+                    
+                        <small class="text-secondary font-xs">
+                            24 / 30
+                        </small>
+                        
+                            <small class="text-secondary font-xs">
+                                Enrolled
+                            </small>
+                        
+                    
+                </div>
+            </div>
+            <h6 class="mt-1 card-title">
+                Optical Fiber Communications
+            </h6>
+            <div class="mt-3">
+                
+                    <small class="text-secondary">
+                        Moody G A
+                    </small>
+                
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-inline-flex">
+                    
+                        <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            T
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            R
+        </span>
+    
+</div>
+                        <div class="ms-1">
+    <small class="text-secondary font-sm">
+        11:00 AM - 12:15 PM
+    </small>
+</div>
+                    
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+            <a href="/curriculum/class/WINTER%202027%2012690" class="stretched-link" target="_blank"></a>
+        </div>
+    </div>
+
+            </div>
+        
+            <div class="col">
+                
+                
+    
+    <div class="w-100 card border-0 shadow-sm rounded-3">
+        <div class="card-body pt-1">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <small class="text-secondary">ECE 136B</small>
+                <div>
+                    
+                        <small class="text-secondary font-xs">
+                            16 / 30
+                        </small>
+                        
+                            <small class="text-secondary font-xs">
+                                Enrolled
+                            </small>
+                        
+                    
+                </div>
+            </div>
+            <h6 class="mt-1 card-title">
+                Optics and Imaging
+            </h6>
+            <div class="mt-3">
+                
+                    <small class="me-2 my-2 d-flex align-items-center text-secondary">
+                        <img data-src="https://www.ece.ucsb.edu/sites/default/files/styles/medium_square/public/2020-01/Smith.jpg?itok=G4MaHa-G" class="lazyload img-fluid rounded me-2" style="width:24px;height:30px;object-position:center;object-fit:cover">
+                        Spencer Smith
+                        <small class="ms-1 text-warning">
+                            <i class="bi bi-star-half"></i>
+                            2.9
+                        </small>
+                    </small>
+                
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-inline-flex">
+                    
+                        <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                        <div class="ms-1">
+    <small class="text-secondary font-sm">
+        15:30 PM - 16:45 PM
+    </small>
+</div>
+                    
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+            <a href="/curriculum/class/WINTER%202027%2012724" class="stretched-link" target="_blank"></a>
+        </div>
+    </div>
+
+            </div>
+        
+            <div class="col">
+                
+                
+    
+    <div class="w-100 card border-0 shadow-sm rounded-3">
+        <div class="card-body pt-1">
+            <div class="d-flex justify-content-between align-items-baseline">
+                <small class="text-secondary">ECE 137A</small>
+                <div>
+                    
+                        <small class="text-secondary font-xs">
+                            45 / 66
+                        </small>
+                        
+                            <small class="text-secondary font-xs">
+                                Enrolled
+                            </small>
+                        
+                    
+                </div>
+            </div>
+            <h6 class="mt-1 card-title">
+                Circuits and Electronics I
+            </h6>
+            <div class="mt-3">
+                
+                    <small class="me-2 my-2 d-flex align-items-center text-secondary">
+                        <img data-src="https://www.ece.ucsb.edu/sites/default/files/styles/medium_square/public/2020-10/M.-Rodwell-rs-7.2019.jpg?itok=z09_0tJm" class="lazyload img-fluid rounded me-2" style="width:24px;height:30px;object-position:center;object-fit:cover">
+                        Mark Rodwell
+                        <small class="ms-1 text-warning">
+                            <i class="bi bi-star-half"></i>
+                            3.0
+                        </small>
+                    </small>
+                
+            </div>
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-inline-flex">
+                    
+                        <div>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            M
+        </span>
+    
+        <span class="badge bg-body-tertiary text-body fw-semibold font-sm">
+            W
+        </span>
+    
+</div>
+                        <div class="ms-1">
+    <small class="text-secondary font-sm">
+        11:00 AM - 12:15 PM
+    </small>
+</div>
+                    
+                </div>
+                <div>
+                    
+                </div>
+            </div>
+            <a href="/curriculum/class/WINTER%202027%2012740" class="stretched-link" target="_blank"></a>
+        </div>
+    </div>
+
+            </div>
+        
+    </div>
+
+    
+
+</div>
+
+
+    <hr class="opacity-0">
+    <div class="container">
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <small class="col-lg-5 mb-0 text-body-secondary font-xs opacity-25">Created by Jiaming Liu</small>
+
+            <ul class="nav col-lg-5 justify-content-end align-items-center">
+                <li class="nav-item me-2">
+                    <div class="live-users-pill" aria-label="159 users online">
+                        <span class="live-users-dot" aria-hidden="true"></span>
+                        <span class="live-users-value">159</span>
+                        <span class="live-users-label">users online</span>
+                    </div>
+                </li>
+                <li class="nav-item"><a href="/" class="nav-link px-2 text-body-secondary">Home</a>
+                </li>
+                <li class="nav-item"><a href="/about" class="nav-link px-2 text-body-secondary">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/privacy"  class="nav-link px-2 text-body-secondary">Privacy</a>
+                </li>
+            </ul>
+        </footer>
+    </div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
+<script>
+    $("img.lazyload").lazyload();
+    
+</script>
+
+
+    <script type="module" src="/static/r.9d2c7.js"></script>
+
+
+</body>
+
+</html>

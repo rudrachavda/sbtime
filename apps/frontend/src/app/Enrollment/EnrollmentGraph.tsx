@@ -75,6 +75,50 @@ const TOOLTIP_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Los_Angeles",
 });
 
+const TICK_CLOCK_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  hour12: true,
+  timeZone: "America/Los_Angeles",
+});
+
+const MINUTES_PER_DAY = 24 * 60;
+const MAX_TIME_TICKS = 8;
+
+/**
+ * Time-axis ticks, in minutes from the first data point. Two or more days
+ * of data get whole-day ticks ("Day 1", "Day 3", ...); less than that (an
+ * upcoming quarter whose recording just started) gets ticks every few
+ * hours, since whole days would all read "Day 1".
+ */
+const getTimeTicks = (lastMinute: number, firstMinuteOfHour = 0) => {
+  if (lastMinute <= 0) return { ticks: [0], hourly: false };
+
+  if (lastMinute >= 2 * MINUTES_PER_DAY) {
+    const days = lastMinute / MINUTES_PER_DAY;
+    const step = Math.max(1, Math.ceil(days / (MAX_TIME_TICKS - 1)));
+    const ticks: number[] = [];
+    for (let day = 0; day * MINUTES_PER_DAY <= lastMinute; day += step) {
+      ticks.push(day * MINUTES_PER_DAY);
+    }
+    return { ticks, hourly: false };
+  }
+
+  const hours = lastMinute / 60;
+  const step =
+    [1, 2, 3, 4, 6, 8, 12].find(
+      (candidate) => hours / candidate <= MAX_TIME_TICKS - 1
+    ) ?? 12;
+  // Start on the hour, so a tick labelled "3 PM" is at 3:00.
+  const offset = (60 - firstMinuteOfHour) % 60;
+  const ticks: number[] = [];
+  for (let minute = offset; minute <= lastMinute; minute += step * 60) {
+    ticks.push(minute);
+  }
+  return { ticks, hourly: true };
+};
+
 const getSeriesKey = (index: number) => `enroll_${index}`;
 const getCapacityKey = (index: number) => `capacity_${index}`;
 
@@ -343,6 +387,27 @@ export default function EnrollmentGraph({
     return moment(history[0].startTime).startOf("minute");
   }, [outputs]);
 
+  const timeAxis = useMemo(() => {
+    const lastMinute = chartData[chartData.length - 1]?.timeDelta ?? 0;
+    const { ticks, hourly } = getTimeTicks(
+      lastMinute,
+      allOutputsSameSemester && firstTime ? firstTime.minute() : 0
+    );
+    const format = (value: number) => {
+      const day = `Day ${Math.floor(value / MINUTES_PER_DAY) + 1}`;
+      if (!hourly) return day;
+      // Under two days of data: show the clock time when every class is
+      // from the same quarter, otherwise hours since the first reading.
+      if (allOutputsSameSemester && firstTime) {
+        return TICK_CLOCK_FORMATTER.format(
+          firstTime.clone().add(value, "minutes").toDate()
+        );
+      }
+      return `${day}, +${Math.round(value / 60)}h`;
+    };
+    return { ticks, format };
+  }, [allOutputsSameSemester, chartData, firstTime]);
+
   const phaseLinesConfig = useMemo(() => {
     if (!hasOutputs || !showPhases || !allOutputsSameSemester) return null;
 
@@ -514,9 +579,8 @@ export default function EnrollmentGraph({
                 tickMargin={10}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) =>
-                  `Day ${Math.floor(moment.duration(value, "minutes").asDays()) + 1}`
-                }
+                ticks={timeAxis.ticks}
+                tickFormatter={timeAxis.format}
                 tick={{
                   fill: "var(--paragraph-color)",
                   fontSize: "var(--text-12)",
@@ -545,9 +609,8 @@ export default function EnrollmentGraph({
                 dataKey="timeDelta"
                 type="number"
                 domain={["dataMin", "dataMax"]}
-                tickFormatter={(value) =>
-                  `Day ${Math.floor(moment.duration(value, "minutes").asDays()) + 1}`
-                }
+                ticks={timeAxis.ticks}
+                tickFormatter={timeAxis.format}
                 tickMargin={8}
                 tickLine={false}
                 axisLine={false}

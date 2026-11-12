@@ -6,9 +6,11 @@ import { describe, it } from "node:test";
 import {
   EnrollmentChart,
   chartToEntries,
+  classPageUrl,
   combineSectionCharts,
   matchChartToSection,
   parseChartDate,
+  parseClassEnrollmentPage,
   parsePastEnrollmentPage,
   pastEnrollmentUrl,
   quarterLabelToTermId,
@@ -365,5 +367,89 @@ describe("combineSectionCharts", () => {
       combined.entries.map((entry) => entry.maxEnroll),
       [560, 560, 620, 620]
     );
+  });
+});
+
+// ECE 120A's Winter 2027 class page, as UCSBPlat served it on 2026-11-12.
+const CLASS_PAGE = readFileSync(
+  new URL(
+    "./fixtures/ucsbplat-class-ece-120a-winter-2027.html",
+    import.meta.url
+  ),
+  "utf8"
+);
+
+describe("current-quarter class pages", () => {
+  const winter2027 = pacific("2027-01-04");
+
+  it("builds the class page URL from the quarter and enroll code", () => {
+    assert.equal(
+      classPageUrl(2027, "Winter", "12617"),
+      "https://ucsbplat.com/curriculum/class/WINTER%202027%2012617"
+    );
+  });
+
+  it("reads the class's seat-count chart", () => {
+    const chart = parseClassEnrollmentPage(CLASS_PAGE, "Winter 2027");
+    assert.ok(chart);
+    assert.deepEqual(chart.labels, [
+      "Oct 19",
+      "Oct 20",
+      "Nov 02",
+      "Nov 03",
+      "Nov 05",
+      "Nov 09",
+    ]);
+    assert.deepEqual(chart.enrolled, [0, 0, 0, 8, 40, 40]);
+    assert.deepEqual(chart.capacity, [50, 50, 40, 40, 40, 40]);
+  });
+
+  it("ignores charts for earlier offerings", () => {
+    // ANTH 99, Fall 2026: UCSBPlat has no chart for this offering, only its
+    // "Past Enrollment Trends" (Winter and Spring 2024).
+    const page = readFileSync(
+      new URL(
+        "./fixtures/ucsbplat-class-anth-99-fall-2026.html",
+        import.meta.url
+      ),
+      "utf8"
+    );
+    assert.match(page, /Nov 08 2023/);
+    assert.equal(parseClassEnrollmentPage(page, "Fall 2026"), null);
+  });
+
+  it("returns null for a page without a chart", () => {
+    assert.equal(
+      parseClassEnrollmentPage("<html><body>No data</body></html>", "x"),
+      null
+    );
+  });
+
+  it("puts labels without a year in the right year", () => {
+    const chart = parseClassEnrollmentPage(CLASS_PAGE, "Winter 2027")!;
+    const entries = chartToEntries(chart, winter2027);
+    assert.equal(
+      DateTime.fromJSDate(entries[0].startTime)
+        .setZone("America/Los_Angeles")
+        .toISODate(),
+      "2026-10-19"
+    );
+  });
+
+  it("skips days SBTime recorded itself", () => {
+    const chart = parseClassEnrollmentPage(CLASS_PAGE, "Winter 2027")!;
+    // SBTime recorded Nov 5 onward; only Oct 19 to Nov 3 are filled in.
+    const covered = [
+      {
+        start: pacific("2026-11-05T08:00").toJSDate(),
+        end: pacific("2026-11-12T00:00").toJSDate(),
+      },
+    ];
+    const entries = chartToEntries(chart, winter2027, covered);
+    const last = DateTime.fromJSDate(entries[entries.length - 1].endTime)
+      .setZone("America/Los_Angeles")
+      .toISODate();
+    assert.equal(last, "2026-11-03");
+    assert.ok(entries.every((entry) => (entry.enrolledCount ?? 0) <= 8));
   });
 });

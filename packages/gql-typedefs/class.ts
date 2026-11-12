@@ -79,6 +79,14 @@ export const classTypeDef = gql`
     anyPrintInScheduleOfClasses: Boolean
     viewCount: Int!
     decal: DeCal
+    "Other listings of this class in the same quarter and session."
+    crossListing: [ClassCrossListing!]!
+  }
+
+  type ClassCrossListing {
+    subject: String!
+    courseNumber: CourseNumber!
+    number: ClassNumber!
   }
 
   enum ClassFinalExam {

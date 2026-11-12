@@ -3,14 +3,12 @@ import { DateTime } from "luxon";
 import {
   ClassModel,
   EnrollmentImportModel,
-  IEnrollmentHistoryItem,
   NewEnrollmentHistoryModel,
   SectionModel,
   TermModel,
 } from "@repo/common/models";
 
 import { REGULAR_SESSION_ID } from "../lib/ucsb-catalog";
-import { EnrollmentEntry } from "../lib/ucsb-enrollment";
 import {
   UCSBPLAT_REQUEST_DELAY_MS,
   fetchUcsbplatPage,
@@ -26,6 +24,10 @@ import {
   quarterLabelToTermId,
   ucsbplatClassCode,
 } from "../lib/ucsbplat-enrollment";
+import {
+  recordedRanges,
+  saveImportedHistory,
+} from "../lib/ucsbplat-history-store";
 import { Config } from "../shared/config";
 
 /** UCSBPlat started recording in Winter 2024. */
@@ -75,43 +77,6 @@ const fetchCourseCharts = async (
   }
 
   return { status: "ok", charts, pages: lastPage };
-};
-
-/**
- * Store imported history for one section: earlier imports from the same
- * source are replaced, SBTime's own entries are kept, oldest first.
- */
-const saveHistory = async (
-  identity: Omit<IEnrollmentHistoryItem, "history">,
-  imported: EnrollmentEntry[]
-) => {
-  const existing = await NewEnrollmentHistoryModel.findOne(
-    {
-      termId: identity.termId,
-      sessionId: identity.sessionId,
-      sectionId: identity.sectionId,
-    },
-    { history: 1 }
-  ).lean();
-
-  const history = [
-    ...(existing?.history ?? []).filter(
-      (entry) => entry.source !== ENROLLMENT_SOURCE
-    ),
-    ...imported,
-  ].sort(
-    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-  );
-
-  await NewEnrollmentHistoryModel.updateOne(
-    {
-      termId: identity.termId,
-      sessionId: identity.sessionId,
-      sectionId: identity.sectionId,
-    },
-    { $set: { ...identity, history } },
-    { upsert: true }
-  );
 };
 
 /**
@@ -307,13 +272,19 @@ const importEnrollmentHistory = async (config: Config) => {
       }
 
       for (const [sectionId, sectionCharts] of bySection) {
-        const combined = combineSectionCharts(sectionCharts, begin);
+        // Only days SBTime didn't record itself.
+        const covered = await recordedRanges({
+          termId,
+          sessionId: REGULAR_SESSION_ID,
+          sectionId,
+        });
+        const combined = combineSectionCharts(sectionCharts, begin, covered);
         counts.matched += combined.used;
         counts.duplicates += combined.duplicates;
         counts.overlapping += combined.overlapping;
         const entries = combined.entries;
         const lecture = lectures.find((l) => l.sectionId === sectionId)!;
-        await saveHistory(
+        await saveImportedHistory(
           {
             termId,
             year: lecture.year,

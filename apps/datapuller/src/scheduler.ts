@@ -13,6 +13,8 @@ import { fileURLToPath } from "node:url";
 interface Job {
   puller: string;
   everyMinutes: number;
+  /** Extra environment for this job's runs. */
+  env?: Record<string, string>;
 }
 
 export const JOBS: Job[] = [
@@ -24,18 +26,27 @@ export const JOBS: Job[] = [
   { puller: "terms-nearby", everyMinutes: 12 * 60 },
   // Final exam times: once a day (one request per lecture).
   { puller: "finals-active", everyMinutes: 24 * 60 },
+  // Fill days SBTime missed (before a quarter's recording began, or while
+  // the scheduler was off) from UCSBPlat. Capped at 300 lectures (~10 min)
+  // a run so seat counts aren't held up; run the job by hand for a full
+  // catch-up.
+  {
+    puller: "enrollment-current-ucsbplat",
+    everyMinutes: 24 * 60,
+    env: { ENROLLMENT_IMPORT_LIMIT: "300" },
+  },
 ];
 
 const MAIN = fileURLToPath(new URL("./main.ts", import.meta.url));
 
-const runPuller = (puller: string) => {
+const runPuller = ({ puller, env }: Job) => {
   const started = Date.now();
   console.log(`[scheduler] ${new Date().toISOString()} starting ${puller}`);
 
   // A separate process per run, since each puller exits when done.
   const result = spawnSync("npx", ["tsx", MAIN, `--puller=${puller}`], {
     stdio: "inherit",
-    env: process.env,
+    env: { ...process.env, ...env },
   });
 
   const seconds = Math.round((Date.now() - started) / 1000);
@@ -55,7 +66,7 @@ const main = async () => {
       if (Date.now() >= (nextRun.get(job.puller) ?? 0)) {
         // Schedule from the start of the run so the interval stays steady.
         nextRun.set(job.puller, Date.now() + job.everyMinutes * 60 * 1000);
-        runPuller(job.puller);
+        runPuller(job);
       }
     }
     await new Promise((resolve) => setTimeout(resolve, 30 * 1000));

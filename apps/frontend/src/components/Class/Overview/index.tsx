@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { Link } from "react-router-dom";
+
 import { Box, Container, Flex } from "@repo/theme";
 
 import Details from "@/components/Details";
@@ -10,6 +12,7 @@ import {
   DeCalInstructor,
   TemporalPosition,
 } from "@/lib/generated/graphql";
+import { formatSubject } from "@/lib/subject";
 import { linkify } from "@/utils/linkify";
 
 import styles from "./Overview.module.scss";
@@ -71,6 +74,8 @@ const formatExamDate = (dateStr?: string | null): string | null => {
 export default function Overview() {
   const { class: _class, course } = useClass();
   const decal: DeCal | null = _class?.decal ?? null;
+  // Missing while the class comes from a cached query without it.
+  const crossListing = _class.crossListing ?? [];
 
   const sectionAttributes = useMemo(
     () => _class.primarySection?.sectionAttributes ?? [],
@@ -211,6 +216,26 @@ export default function Overview() {
                 {isPastTerm ? "Current prerequisites" : "Prerequisites"}
               </p>
               <p className={styles.description}>{prereqs}</p>
+            </Flex>
+          )}
+          {crossListing.length > 0 && (
+            <Flex direction="column" gap="2">
+              <p className={styles.label}>Cross-listed as</p>
+              <p className={styles.description}>
+                {crossListing.map((listing, index) => (
+                  <span
+                    key={`${listing.subject}-${listing.courseNumber}-${listing.number}`}
+                  >
+                    {index > 0 && ", "}
+                    <Link
+                      to={`/catalog/${_class.year}/${_class.semester}/${listing.subject}/${listing.courseNumber}/${listing.number}/${_class.sessionId}`}
+                      className={styles.link}
+                    >
+                      {formatSubject(listing.subject)} {listing.courseNumber}
+                    </Link>
+                  </span>
+                ))}
+              </p>
             </Flex>
           )}
           <Flex direction="column" gap="2">

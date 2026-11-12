@@ -517,6 +517,78 @@ export const mergeDuplicateClasses = (
   return [...merged.values()];
 };
 
+type CrossListing = NonNullable<IClassItem["crossListing"]>[number];
+
+/**
+ * A lecture's other listings, from UCSB's "concurrent courses": the same
+ * fixed-width course id as the class, then the other listing's lecture
+ * ("BL ST   123A 0100"). These are cross-listings (AS AM 123A and BL ST 123A)
+ * and undergraduate/graduate pairs that meet together (CHEM 115B and CHEM
+ * 222B); each listing has its own enroll code and seats.
+ */
+export const concurrentListingsOf = (
+  section: UcsbClassSection,
+  ownCourseId: string
+): CrossListing[] | undefined => {
+  const listings = new Map<string, CrossListing>();
+
+  for (const concurrent of section.concurrentCourses ?? []) {
+    const parsed = parseCourseId(concurrent.slice(0, 13));
+    const number = trim(concurrent.slice(13));
+    // UCSB sometimes lists another lecture of the same course; skip those.
+    if (!parsed || !number || parsed.courseId === ownCourseId) continue;
+
+    listings.set(`${parsed.subject}|${parsed.number}|${number}`, {
+      subject: parsed.subject,
+      courseNumber: parsed.number,
+      number,
+    });
+  }
+
+  return listings.size > 0 ? [...listings.values()] : undefined;
+};
+
+/**
+ * Keep only cross-listings whose class is offered this quarter (a cancelled
+ * listing would be a dead link), and give each course the union of its
+ * classes' listings, as `${subject} ${number}` like Berkeley's data.
+ */
+const linkCrossListings = (
+  classes: IClassItem[],
+  courses: Map<string, ICourseItem>
+) => {
+  const key = (listing: CrossListing) =>
+    `${listing.subject}|${listing.courseNumber}|${listing.number}`;
+  const offered = new Set(
+    classes.map((_class) =>
+      key({
+        subject: _class.subject,
+        courseNumber: _class.courseNumber,
+        number: _class.number,
+      })
+    )
+  );
+
+  const byCourse = new Map<string, Set<string>>();
+  for (const _class of classes) {
+    const listings = _class.crossListing?.filter((listing) =>
+      offered.has(key(listing))
+    );
+    _class.crossListing = listings?.length ? listings : undefined;
+
+    const courseListings = byCourse.get(_class.courseId) ?? new Set<string>();
+    for (const listing of _class.crossListing ?? []) {
+      courseListings.add(`${listing.subject} ${listing.courseNumber}`);
+    }
+    byCourse.set(_class.courseId, courseListings);
+  }
+
+  // Always set, so a course that stopped being cross-listed loses the old ones.
+  for (const [courseId, course] of courses) {
+    course.crossListing = [...(byCourse.get(courseId) ?? [])].sort();
+  }
+};
+
 /**
  * Convert one quarter of UCSB classes. Each lecture ("0100", "0200") becomes
  * its own class, with the sections that share its first two digits attached.
@@ -619,6 +691,7 @@ export const mapQuarter = (
         contactHours: ucsbClass.contactHours ?? undefined,
         requirementDesignation: generalEducation.requirementDesignation,
         requisites: courseDetails?.prerequisites || undefined,
+        crossListing: concurrentListingsOf(primary, parsed.courseId),
       });
 
       for (const section of groupSections) {
@@ -694,6 +767,8 @@ export const mapQuarter = (
       }
     }
   }
+
+  linkCrossListings(classes, courses);
 
   return {
     courses: [...courses.values()],

@@ -43,6 +43,16 @@ export const pastEnrollmentUrl = (
   return page > 1 ? `${path}?page=${page}` : path;
 };
 
+/** "2027 Winter" + "12617" -> .../curriculum/class/WINTER%202027%2012617 */
+export const classPageUrl = (
+  year: number,
+  season: string,
+  enrollCode: string
+) =>
+  `${UCSBPLAT_BASE_URL}/curriculum/class/${encodeURIComponent(
+    `${season.toUpperCase()} ${year} ${enrollCode}`
+  )}`;
+
 export interface EnrollmentChart {
   /** "Winter 2024" */
   quarter: string;
@@ -138,6 +148,37 @@ export const parsePastEnrollmentPage = (
   return { charts, lastPage: Math.max(1, ...pages) };
 };
 
+/**
+ * The seat-count chart on a class's own page (current and upcoming quarters,
+ * which the past enrollment trends page doesn't list), or null if the page
+ * has none. The class is known from the URL, so only the series is read.
+ */
+export const parseClassEnrollmentPage = (
+  html: string,
+  quarter: string
+): EnrollmentChart | null => {
+  // The page lists earlier offerings under "Past Enrollment Trends"; this
+  // class's own chart (if UCSBPlat has one) comes before that heading.
+  const current = html.split("Past Enrollment Trends")[0];
+  const script = [...current.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map((match) => match[1])
+    .find((text) => /enrollment-chart-/.test(text));
+  if (!script) return null;
+
+  const labels = parseJsonArray<string>(
+    /labels:\s*\[([^\]]*)\]/.exec(script)?.[1]
+  );
+  if (labels.length === 0) return null;
+
+  return {
+    quarter,
+    days: Array(7).fill(false),
+    labels,
+    enrolled: datasetValues(script, "Enrolled"),
+    capacity: datasetValues(script, "Capacity"),
+  };
+};
+
 const SEASON_DIGIT: Record<string, string> = {
   winter: "1",
   spring: "2",
@@ -194,13 +235,32 @@ const isStrayPoint = (points: { capacity: number }[], index: number) => {
   return capacity * 2 < before || capacity > before * 2;
 };
 
+/** A stretch of time SBTime has its own readings for. */
+export interface TimeRange {
+  start: Date;
+  end: Date;
+}
+
+const HALF_DAY_MS = 12 * 60 * 60 * 1000;
+
+/** Whether a daily point (noon) falls on a day SBTime recorded itself. */
+const isCovered = (date: DateTime, covered: TimeRange[]) => {
+  const from = date.toMillis() - HALF_DAY_MS;
+  const to = date.toMillis() + HALF_DAY_MS;
+  return covered.some(
+    (range) => range.start.getTime() < to && range.end.getTime() >= from
+  );
+};
+
 /**
  * Convert a chart's daily points into history entries, merging runs of days
- * with the same numbers into one entry.
+ * with the same numbers into one entry. Days in `covered` (SBTime's own
+ * readings) are left out, so imported history only fills days we missed.
  */
 export const chartToEntries = (
   chart: EnrollmentChart,
-  quarterBegin: DateTime
+  quarterBegin: DateTime,
+  covered: TimeRange[] = []
 ): EnrollmentEntry[] => {
   const points = chart.labels
     .map((label, index) => ({
@@ -217,7 +277,8 @@ export const chartToEntries = (
         Number.isFinite(point.capacity)
     )
     .sort((a, b) => a.date.toMillis() - b.date.toMillis())
-    .filter((_point, index, all) => !isStrayPoint(all, index));
+    .filter((_point, index, all) => !isStrayPoint(all, index))
+    .filter((point) => !isCovered(point.date, covered));
 
   const entries: EnrollmentEntry[] = [];
 
@@ -273,7 +334,8 @@ export interface CombinedCharts {
  */
 export const combineSectionCharts = (
   charts: EnrollmentChart[],
-  quarterBegin: DateTime
+  quarterBegin: DateTime,
+  covered: TimeRange[] = []
 ): CombinedCharts => {
   const seen = new Set<string>();
   const unique = charts.filter((chart) => {
@@ -287,7 +349,7 @@ export const combineSectionCharts = (
   const candidates = unique
     .map((chart) => ({
       chart,
-      entries: chartToEntries(chart, quarterBegin),
+      entries: chartToEntries(chart, quarterBegin, covered),
     }))
     .sort(
       (a, b) =>

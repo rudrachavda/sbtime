@@ -613,3 +613,78 @@ describe("sections without a scheduled time", () => {
     );
   });
 });
+
+describe("cross-listings", () => {
+  const template = FIXTURE.find((c) => c.courseId.trim() === "ANTH     99")!;
+  const listing = (
+    courseId: string,
+    subjectArea: string,
+    lectures: [string, string[]][]
+  ): UcsbClass => ({
+    ...template,
+    courseId,
+    subjectArea,
+    classSections: lectures.map(([section, concurrentCourses], index) => ({
+      ...template.classSections![0],
+      section,
+      enrollCode: `${courseId.trim()}-${index}`,
+      courseCancelled: null,
+      concurrentCourses,
+    })),
+  });
+
+  const quarter = mapQuarter(
+    [
+      listing("AS AM   123A ", "AS AM", [
+        [
+          "0100",
+          [
+            "BL ST   123A 0100",
+            // Another lecture of the same course, and a listing not offered.
+            "AS AM   123A 0200",
+            "HIST    999  0100",
+          ],
+        ],
+        ["0200", []],
+      ]),
+      listing("BL ST   123A ", "BL ST", [["0100", ["AS AM   123A 0100"]]]),
+      listing("CHEM    115B ", "CHEM", [["0100", ["CHEM    222B 0200"]]]),
+      listing("CHEM    222B ", "CHEM", [["0200", ["CHEM    115B 0100"]]]),
+    ],
+    TERM,
+    new Map(),
+    NOW
+  );
+  const classOf = (courseId: string, number: string) =>
+    quarter.classes.find((c) => c.courseId === courseId && c.number === number);
+
+  it("link each lecture to the other listings offered this quarter", () => {
+    assert.deepEqual(classOf("AS AM 123A", "0100")?.crossListing, [
+      { subject: "BLST", courseNumber: "123A", number: "0100" },
+    ]);
+    assert.deepEqual(classOf("BL ST 123A", "0100")?.crossListing, [
+      { subject: "ASAM", courseNumber: "123A", number: "0100" },
+    ]);
+  });
+
+  it("keep the other listing's own lecture number", () => {
+    assert.deepEqual(classOf("CHEM 115B", "0100")?.crossListing, [
+      { subject: "CHEM", courseNumber: "222B", number: "0200" },
+    ]);
+  });
+
+  it("leave lectures without a listing alone", () => {
+    assert.equal(classOf("AS AM 123A", "0200")?.crossListing, undefined);
+  });
+
+  it("give each course its listings the way Berkeley's data does", () => {
+    const course = quarter.courses.find((c) => c.courseId === "AS AM 123A");
+    assert.deepEqual(course?.crossListing, ["BLST 123A"]);
+  });
+
+  it("clear a course's listings when it has none", () => {
+    for (const course of mapped.courses) {
+      assert.deepEqual(course.crossListing, []);
+    }
+  });
+});

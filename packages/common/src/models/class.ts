@@ -65,6 +65,13 @@ export interface IClassItem {
   };
   // requisites.description
   requisites?: string;
+  // UCSB: other listings of this class in the same quarter (its "concurrent
+  // courses"), each with its own enroll code and seats.
+  crossListing?: {
+    subject: string;
+    courseNumber: string;
+    number: string;
+  }[];
 }
 
 export interface IClassItemDocument extends IClassItem, Document {}
@@ -114,6 +121,17 @@ const classSchema = new Schema<IClassItem>({
     formalDescription: String,
   }, // NOTE: Exclude if always the same as course requirementsFulfilled, requirementDesignation.code
   requisites: { type: String }, // requisites.description
+  crossListing: {
+    type: [
+      {
+        _id: false,
+        subject: { type: String, required: true },
+        courseNumber: { type: String, required: true },
+        number: { type: String, required: true },
+      },
+    ],
+    default: undefined,
+  },
 });
 
 // for catalog, class, scheduler, and bookmarked classes controllers
