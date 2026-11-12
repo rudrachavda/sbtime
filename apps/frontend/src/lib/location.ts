@@ -69,14 +69,24 @@ export const buildings: Record<string, Building> = {
   "387": pinned("Building 387", [-119.845674, 34.411971]),
   "451": pinned("Military Science (Building 451)", [-119.843659, 34.416823]),
   "599": pinned("Building 599", [-119.849255, 34.413411]),
-  BSIF: { name: "Biological Sciences Instructional Facility" },
-  HARDR: { name: "Harder Stadium" },
-  MLAB: { name: "MLAB" },
-  MSB: { name: "MSB" },
-  NCEAS: { name: "NCEAS (downtown Santa Barbara)" },
-  "570": { name: "Building 570" },
-  "942": { name: "Building 942" },
-  "477": { name: "Building 477" },
+  // Building 569; OpenStreetMap still calls it "Pharmacology".
+  BSIF: pinned(
+    "Biological Sciences Instructional Facility",
+    [-119.843676, 34.412906]
+  ),
+  // Harder Stadium Offices (Building 579); pinned at the stadium.
+  HARDR: pinned("Harder Stadium", [-119.854488, 34.420444]),
+  // Building 555, beside the REEF.
+  MLAB: pinned("Marine Biotechnology Laboratory", [-119.843275, 34.407969]),
+  // Building 520 (MSRB).
+  MSB: pinned("Marine Science Research Building", [-119.842223, 34.41255]),
+  // Off campus, so no pin: one downtown pin would zoom the schedule map
+  // out over the whole city.
+  NCEAS: { name: "NCEAS (1021 Anacapa St, downtown Santa Barbara)" },
+  "570": pinned("Building 570", [-119.843491, 34.416476]),
+  // Trailer 942 (Physics) is on UCSB's campus map but not in OpenStreetMap.
+  "942": { name: "Trailer 942" },
+  "477": pinned("Building 477", [-119.848507, 34.413656]),
 };
 
 /** UCSB's placeholders for classes without a regular room. */

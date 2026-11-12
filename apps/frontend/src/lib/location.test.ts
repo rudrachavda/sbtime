@@ -43,10 +43,8 @@ describe("resolveLocation", () => {
       room: "101",
       placeholder: false,
     });
-    const unpinned = resolveLocation("BSIF 2229");
-    expect(unpinned?.label).toBe(
-      "Biological Sciences Instructional Facility 2229"
-    );
+    const unpinned = resolveLocation("942 101");
+    expect(unpinned?.label).toBe("Trailer 942 101");
     expect(unpinned?.coordinates).toBeUndefined();
   });
 

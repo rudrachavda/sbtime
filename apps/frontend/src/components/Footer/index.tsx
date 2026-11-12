@@ -42,11 +42,14 @@ const STATUS_LABELS: Record<Status, string> = {
 // badge is shown; Berkeleytime's page described their servers, not ours.
 const STATUS_PAGE_URL: string | null = null;
 
-// SBTime's own accounts. A link without an address is not shown; the
-// Instagram and Discord links Berkeleytime used were theirs, not ours.
-const SOCIAL_LINKS: { label: string; href: string | null }[] = [
-  { label: "Instagram", href: null },
-  { label: "Discord", href: null },
+// TODO(SBTime): Instagram and Discord are still Berkeleytime's accounts.
+// Replace them with SBTime's once those exist.
+const SOCIAL_LINKS: { label: string; href: string }[] = [
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/berkeleytimeofficial/",
+  },
+  { label: "Discord", href: "https://discord.gg/uP2bTPh99U" },
   { label: "GitHub", href: "https://github.com/rudrachavda/sbtime" },
 ];
 
@@ -95,10 +98,10 @@ export default function Footer() {
         <div className={styles.columns}>
           <div className={styles.column}>
             <p className={styles.label}>Socials</p>
-            {SOCIAL_LINKS.filter((social) => social.href).map((social) => (
+            {SOCIAL_LINKS.map((social) => (
               <a
                 key={social.label}
-                href={social.href ?? undefined}
+                href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.link}
@@ -141,14 +144,9 @@ export default function Footer() {
             <Link to="/about" className={styles.link}>
               Our Team
             </Link>
-            <a
-              href="https://berkeleytime.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.link}
-            >
-              Berkeleytime
-            </a>
+            <Link to="https://octo.asuc.org/" className={styles.link}>
+              OCTO
+            </Link>
             <Link to="/legal/privacy" className={styles.link}>
               Privacy Policy
             </Link>
