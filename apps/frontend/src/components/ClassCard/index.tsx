@@ -23,6 +23,7 @@ import { IClass, IClassCourse } from "@/lib/api";
 import { IEnrollmentSingular } from "@/lib/api/enrollment";
 import { formatClassNumber } from "@/lib/classNumber";
 import { Color, Semester } from "@/lib/generated/graphql";
+import { formatSubject } from "@/lib/subject";
 
 import styles from "./ClassCard.module.scss";
 
@@ -173,7 +174,7 @@ export default function ClassCard({
                         {headingPrefix}
                       </span>
                       <span>
-                        {_class?.subject} {_class?.courseNumber}
+                        {formatSubject(_class?.subject)} {_class?.courseNumber}
                         {formattedClassNumber && (
                           <>
                             {" "}
@@ -186,7 +187,7 @@ export default function ClassCard({
                     </span>
                   ) : (
                     <>
-                      {_class?.subject} {_class?.courseNumber}
+                      {formatSubject(_class?.subject)} {_class?.courseNumber}
                       {formattedClassNumber && (
                         <>
                           {" "}

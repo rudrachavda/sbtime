@@ -22,6 +22,8 @@ export const JOBS: Job[] = [
   { puller: "catalog-active", everyMinutes: 12 * 60 },
   // Quarter dates and which quarter is current: twice a day.
   { puller: "terms-nearby", everyMinutes: 12 * 60 },
+  // Final exam times: once a day (one request per lecture).
+  { puller: "finals-active", everyMinutes: 24 * 60 },
 ];
 
 const MAIN = fileURLToPath(new URL("./main.ts", import.meta.url));

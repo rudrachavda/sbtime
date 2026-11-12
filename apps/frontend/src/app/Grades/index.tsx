@@ -123,7 +123,7 @@ const isPastTermClass = (c: ICourseWithInstructorClass) =>
 const getMetadata = (input: Input): string => {
   const instructor =
     input.type && input.familyName && input.givenName
-      ? `${input.givenName} ${input.familyName}`
+      ? `${input.familyName} ${input.givenName}`
       : "All instructors";
 
   const semester =

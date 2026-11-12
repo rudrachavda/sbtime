@@ -69,7 +69,7 @@ export default function Details({
         >
           {instructors && instructors.length > 0
             ? instructors
-                .map((i) => `${i.givenName} ${i.familyName}`)
+                .map((i) => `${i.familyName} ${i.givenName}`)
                 .join(", ")
             : "To be determined"}
         </p>

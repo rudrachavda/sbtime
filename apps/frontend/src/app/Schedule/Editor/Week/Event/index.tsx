@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { Card, Color } from "@repo/theme";
 
 import { componentMap } from "@/lib/api";
+import { formatSubject } from "@/lib/subject";
 
 import { ScheduleEvent } from "../../../schedule";
 import { getY } from "../helpers";
@@ -38,7 +39,7 @@ export default function Event({
 
   const title = useMemo(() => {
     if (props.type === "section") {
-      return `${props.section.subject} ${props.section.courseNumber}`;
+      return `${formatSubject(props.section.subject)} ${props.section.courseNumber}`;
     }
     return props.event.title;
   }, [props]);
@@ -135,7 +136,7 @@ export default function Event({
             {props.type === "section" && props.section.meetings.length > 0 && (
               <Card.Description>
                 {props.section.meetings[0].instructors
-                  .map((i) => `${i.familyName}, ${i.givenName}; `)
+                  .map((i) => `${i.familyName} ${i.givenName}; `)
                   .join("")
                   .slice(0, -2)}
               </Card.Description>

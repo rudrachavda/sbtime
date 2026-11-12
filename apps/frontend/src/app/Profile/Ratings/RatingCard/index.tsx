@@ -5,6 +5,7 @@ import { Badge, Card, Color, IconButton, Tooltip } from "@repo/theme";
 
 import { getStatusColor } from "@/components/Class/Ratings/metricsUtil";
 import { IUserRatingClass } from "@/lib/api";
+import { formatSubject } from "@/lib/subject";
 
 import styles from "./RatingCard.module.scss";
 
@@ -36,7 +37,7 @@ export function RatingCard({ rating, onEdit, onDelete }: RatingCardProps) {
       <div className={styles.header}>
         <div className={styles.classInfo}>
           <span className={styles.className}>
-            {rating.subject} {rating.courseNumber}
+            {formatSubject(rating.subject)} {rating.courseNumber}
           </span>
           <span className={styles.semester}>
             {rating.semester} {rating.year}

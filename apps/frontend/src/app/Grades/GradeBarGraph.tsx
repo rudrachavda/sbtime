@@ -23,6 +23,7 @@ import type { Input } from "@/components/CourseAnalytics/types";
 import useWindowDimensions from "@/hooks/useWindowDimensions";
 import type { IGradeDistribution } from "@/lib/api";
 import { LETTER_GRADES, PASS_FAIL } from "@/lib/grades";
+import { formatSubject } from "@/lib/subject";
 
 import styles from "./GradeBarGraph.module.scss";
 import { buildGradeChartData, isLetterGrade } from "./GradeBarGraph.utils";
@@ -156,7 +157,8 @@ export default function GradeBarGraph({
     const colors: Record<string, string> = {};
     outputs.forEach((output, i) => {
       const key = dataKeys[i];
-      labels[key] = `${output.input.subject} ${output.input.courseNumber}`;
+      labels[key] =
+        `${formatSubject(output.input.subject)} ${output.input.courseNumber}`;
       colors[key] = output.color;
     });
 

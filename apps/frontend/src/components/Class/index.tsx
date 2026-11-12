@@ -57,6 +57,7 @@ import {
 } from "@/lib/generated/graphql";
 import { RecentType, addRecent } from "@/lib/recent";
 import { getExternalLink } from "@/lib/section";
+import { formatSubject } from "@/lib/subject";
 import { getRatingErrorMessage } from "@/utils/ratingErrorMessages";
 
 import SuspenseBoundary from "../SuspenseBoundary";
@@ -544,7 +545,7 @@ export default function Class({
                 <Flex justify="between" align="start" mt="2">
                   <Flex direction="column" gap="2">
                     <h1 className={styles.heading}>
-                      {_class.subject} {_class.courseNumber}{" "}
+                      {formatSubject(_class.subject)} {_class.courseNumber}{" "}
                       <span className={styles.sectionNumber}>
                         #{formatClassNumber(_class.number)}
                       </span>

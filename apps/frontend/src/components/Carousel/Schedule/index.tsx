@@ -2,6 +2,7 @@ import { ArrowRight } from "iconoir-react";
 import { Link } from "react-router-dom";
 
 import { IScheduleClass } from "@/lib/api";
+import { formatSubject } from "@/lib/subject";
 
 import styles from "./Schedule.module.scss";
 
@@ -28,7 +29,7 @@ export default function Schedule({
             {classes.length > 0
               ? classes
                   .reduce((acc, c) => {
-                    return (acc = `${acc} • ${c.class.subject} ${c.class.courseNumber}`);
+                    return (acc = `${acc} • ${formatSubject(c.class.subject)} ${c.class.courseNumber}`);
                   }, "")
                   .substring(3)
               : "Empty schedule"}

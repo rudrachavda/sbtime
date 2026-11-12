@@ -9,6 +9,7 @@ import { useTracking } from "@/hooks/api/tracking/useTracking";
 import { ICourse } from "@/lib/api";
 import { GetCourseNamesDocument } from "@/lib/generated/graphql";
 import { Recent, RecentType, getRecents } from "@/lib/recent";
+import { formatSubject } from "@/lib/subject";
 
 import styles from "./CourseSearch.module.scss";
 import { initialize } from "./browser";
@@ -240,7 +241,7 @@ export default function CourseSearch({
                           disabled={isRated}
                         >
                           <span>
-                            {course.subject} {course.number}
+                            {formatSubject(course.subject)} {course.number}
                             {isRated && (
                               <span className={styles.ratedLabel}>
                                 {" "}

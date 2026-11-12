@@ -5,6 +5,7 @@ import {
   toBusyIntervals,
   toIntervals,
 } from "@/lib/scheduler/time";
+import { formatSubject } from "@/lib/subject";
 
 import { findSelectedSections } from "../schedule";
 
@@ -165,7 +166,7 @@ export const renderScheduleImage = (schedule: ImageSchedule) => {
             day,
             start,
             end,
-            title: `${section.subject} ${section.courseNumber}`,
+            title: `${formatSubject(section.subject)} ${section.courseNumber}`,
             subtitle: `${componentMap[section.component] ?? section.component} ${section.number}`,
             detail: meeting.location ?? "",
             color: resolveColor(color),
@@ -177,7 +178,9 @@ export const renderScheduleImage = (schedule: ImageSchedule) => {
     }
 
     if (!hasMeeting)
-      unscheduled.push(`${_class.subject} ${_class.courseNumber}`);
+      unscheduled.push(
+        `${formatSubject(_class.subject)} ${_class.courseNumber}`
+      );
   }
 
   for (const event of schedule.events) {

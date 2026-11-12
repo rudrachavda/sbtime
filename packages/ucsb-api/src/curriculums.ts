@@ -132,3 +132,22 @@ export const getQuarterClasses = async (
 
   return classes;
 };
+
+export interface UcsbFinalExam {
+  hasFinals: boolean | null;
+  comments: string | null;
+  /** "M", "T", ... */
+  examDay: string | null;
+  /** "20261207" */
+  examDate: string | null;
+  /** "16:00" */
+  beginTime: string | null;
+  endTime: string | null;
+}
+
+/** The final exam for one class (lecture), by quarter and enroll code. */
+export const getFinalExam = (
+  client: UcsbClient,
+  quarter: string,
+  enrollCode: string
+) => client.get<UcsbFinalExam>(`${BASE_PATH}/finals`, { quarter, enrollCode });

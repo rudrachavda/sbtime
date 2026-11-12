@@ -7,6 +7,7 @@ import type { Option } from "@repo/theme";
 
 import { ICourse } from "@/lib/api";
 import { GetCourseNamesDocument } from "@/lib/generated/graphql";
+import { formatSubject } from "@/lib/subject";
 
 import { initialize } from "../CourseSearch/browser";
 
@@ -64,7 +65,7 @@ export default function CourseSelect({
   // Build options dynamically based on search query
   const options = useMemo(() => {
     if (lockedCourse) {
-      const lockedLabel = `${lockedCourse.subject} ${lockedCourse.number}`;
+      const lockedLabel = `${formatSubject(lockedCourse.subject)} ${lockedCourse.number}`;
       const isRated = isCourseRated(lockedCourse.subject, lockedCourse.number);
       const lockedCatalogCourse = catalogCourses.find(
         (c) =>
@@ -133,7 +134,7 @@ export default function CourseSelect({
         const optionValue = courseToOptionValue(course);
         opts.push({
           value: optionValue,
-          label: `${course.subject} ${course.number}`,
+          label: `${formatSubject(course.subject)} ${course.number}`,
           meta: isRated ? "Rated" : undefined,
           disabled: disableRatedCourses && isRated,
         });
@@ -151,7 +152,7 @@ export default function CourseSelect({
       const optionValue = courseToOptionValue(course);
       opts.push({
         value: optionValue,
-        label: `${course.subject} ${course.number}`,
+        label: `${formatSubject(course.subject)} ${course.number}`,
         meta: isRated ? "Rated" : undefined,
         disabled: disableRatedCourses && isRated,
       });
@@ -190,7 +191,7 @@ export default function CourseSelect({
   }, [selectedCourse, catalogCourses]);
 
   const selectedLabel = selectedCourse
-    ? `${selectedCourse.subject} ${selectedCourse.number}`
+    ? `${formatSubject(selectedCourse.subject)} ${selectedCourse.number}`
     : undefined;
 
   return (

@@ -180,7 +180,7 @@ export function formatInstructorText(
   // Deduplicate and show all unique instructors (trim to handle API whitespace)
   const names = [
     ...new Set(
-      allInstructors.map((i) => `${i.givenName.trim()} ${i.familyName.trim()}`)
+      allInstructors.map((i) => `${i.familyName.trim()} ${i.givenName.trim()}`)
     ),
   ].join(", ");
   return `(${names})`;

@@ -30,6 +30,7 @@ import {
   Semester,
 } from "@/lib/generated/graphql";
 import { RecentType, addRecent, getRecents } from "@/lib/recent";
+import { formatSubject } from "@/lib/subject";
 import { compareCollectionsByBookmarksOrder } from "@/utils/collections";
 
 import styles from "./Catalog.module.scss";
@@ -227,11 +228,12 @@ function SavedCollectionSection({
                       if (!currentTermClass) return;
                       onSelect(currentTermClass);
                     }}
-                    title={`${savedClass.subject} ${savedClass.courseNumber}`}
+                    title={`${formatSubject(savedClass.subject)} ${savedClass.courseNumber}`}
                   >
                     <span className={styles.bookmarkClassOption}>
                       <span>
-                        {savedClass.subject} {savedClass.courseNumber}
+                        {formatSubject(savedClass.subject)}{" "}
+                        {savedClass.courseNumber}
                       </span>
                       {isUnavailable && (
                         <span className={styles.bookmarkUnavailableHint}>

@@ -38,21 +38,26 @@ const STATUS_LABELS: Record<Status, string> = {
   UNDERMAINTENANCE: "Under maintenance",
 };
 
+// SBTime's own status page (an Instatus page, for example). Unset, so no
+// badge is shown; Berkeleytime's page described their servers, not ours.
+const STATUS_PAGE_URL: string | null = null;
+
 function StatusBadge() {
   const [status, setStatus] = useState<Status | null>(null);
 
   useEffect(() => {
-    fetch("https://berkeleytime.instatus.com/summary.json")
+    if (!STATUS_PAGE_URL) return;
+    fetch(`${STATUS_PAGE_URL}/summary.json`)
       .then((res) => res.json())
       .then((data) => setStatus(data.page.status as Status))
       .catch(() => setStatus("HASISSUES"));
   }, []);
 
-  if (!status) return null;
+  if (!status || !STATUS_PAGE_URL) return null;
 
   return (
     <a
-      href="https://berkeleytime.instatus.com"
+      href={STATUS_PAGE_URL}
       target="_blank"
       rel="noopener noreferrer"
       className={styles.statusBadge}

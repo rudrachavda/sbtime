@@ -154,6 +154,33 @@ const updateQuarter = async (
     return false;
   }
 
+  // Final exam times come from a separate job ("finals-active"); keep the
+  // ones already pulled when the quarter's classes are replaced.
+  const [examSections, examClasses] = await Promise.all([
+    SectionModel.find(
+      { termId: term.id, "exams.0": { $exists: true } },
+      { sectionId: 1, exams: 1 }
+    ).lean(),
+    ClassModel.find(
+      { termId: term.id, finalExam: { $exists: true, $ne: null } },
+      { courseId: 1, number: 1, finalExam: 1 }
+    ).lean(),
+  ]);
+  const examsBySection = new Map(
+    examSections.map((s) => [s.sectionId, s.exams])
+  );
+  const finalByClass = new Map(
+    examClasses.map((c) => [`${c.courseId}|${c.number}`, c.finalExam])
+  );
+  for (const section of mapped.sections) {
+    const exams = examsBySection.get(section.sectionId);
+    if (exams) section.exams = exams;
+  }
+  for (const _class of mapped.classes) {
+    const finalExam = finalByClass.get(`${_class.courseId}|${_class.number}`);
+    if (finalExam) _class.finalExam = finalExam;
+  }
+
   // Replace the quarter's classes and sections.
   await ClassModel.deleteMany({ termId: term.id });
   await inBatches(mapped.classes, (batch) =>

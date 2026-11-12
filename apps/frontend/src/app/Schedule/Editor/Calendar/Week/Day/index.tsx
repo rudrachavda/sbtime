@@ -3,6 +3,7 @@ import { CSSProperties } from "react";
 import classNames from "classnames";
 
 import { Color } from "@/lib/generated/graphql";
+import { formatSubject } from "@/lib/subject";
 
 import { IDay } from "../../calendar";
 import styles from "./Day.module.scss";
@@ -43,7 +44,7 @@ export default function Day({ date, events, active }: DayProps) {
           >
             <div className={styles.time}>{parseTime(event.startTime)}</div>
             <div className={styles.course}>
-              {event.subject} {event.number}
+              {formatSubject(event.subject)} {event.number}
             </div>
           </div>
         );

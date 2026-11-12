@@ -35,6 +35,7 @@ import {
   toSundayFirst,
 } from "@/lib/scheduler/preferences";
 import { formatMinutes } from "@/lib/scheduler/time";
+import { formatSubject } from "@/lib/subject";
 
 import { downloadBlob, renderScheduleImage } from "../renderScheduleImage";
 import styles from "./GenerateSchedulesDialog.module.scss";
@@ -469,7 +470,7 @@ export default function GenerateSchedulesDialog({
                   className={styles.selectedClasses}
                 >
                   {classes.map((selectedClass) => {
-                    const courseName = `${selectedClass.class.subject} ${selectedClass.class.courseNumber}`;
+                    const courseName = `${formatSubject(selectedClass.class.subject)} ${selectedClass.class.courseNumber}`;
                     return (
                       <Flex
                         direction="row"

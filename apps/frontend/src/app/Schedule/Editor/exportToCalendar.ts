@@ -1,4 +1,5 @@
 import { ISchedule } from "@/lib/api";
+import { formatSubject } from "@/lib/subject";
 
 const generateICS = (schedule: ISchedule) => {
   const formatDate = (date: Date) => {
@@ -134,12 +135,12 @@ const generateICS = (schedule: ISchedule) => {
         );
 
         const eventId = `${section.sectionId}-${meeting.startTime}-${meeting.endTime}`;
-        const summary = `${classInfo.subject} ${classInfo.courseNumber} ${section.component}`;
+        const summary = `${formatSubject(classInfo.subject)} ${classInfo.courseNumber} ${section.component}`;
         const description = `${classInfo.course?.title || ""}`;
         const location = meeting.location || "";
         const instructor =
           meeting.instructors
-            ?.map((i) => `${i.givenName} ${i.familyName}`)
+            ?.map((i) => `${i.familyName} ${i.givenName}`)
             .join(", ") || "";
 
         icsContent.push(

@@ -112,7 +112,7 @@ const getInstructorNames = (courseClass: ICourseWithInstructorClass) => {
 
   courseClass.primarySection?.meetings.forEach((meeting) => {
     meeting.instructors.forEach((instructor) => {
-      const name = `${instructor.givenName} ${instructor.familyName}`.trim();
+      const name = `${instructor.familyName} ${instructor.givenName}`.trim();
       if (name) names.add(name);
     });
   });

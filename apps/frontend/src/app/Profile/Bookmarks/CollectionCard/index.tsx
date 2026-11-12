@@ -26,6 +26,7 @@ import {
   getColorCSSVar,
 } from "@/lib/colors";
 import { getLetterGradeFromGPA } from "@/lib/grades";
+import { formatSubject } from "@/lib/subject";
 import { CollectionPreviewClass } from "@/types/collection";
 
 // eslint-disable-next-line css-modules/no-unused-class
@@ -85,7 +86,7 @@ function TiltedCardContent({ classData }: TiltedCardContentProps) {
     <div className={styles.cardContent}>
       <div className={styles.cardHeader}>
         <span className={styles.cardTitle}>
-          {classData.subject} {classData.courseNumber}
+          {formatSubject(classData.subject)} {classData.courseNumber}
         </span>
         {grade && <span className={styles.cardGrade}>{grade}</span>}
       </div>

@@ -6,6 +6,7 @@ import { Tooltip } from "@repo/theme";
 
 import { ScheduleEvent } from "@/app/Schedule/schedule";
 import { componentMap } from "@/lib/api";
+import { formatSubject } from "@/lib/subject";
 
 import { getY } from "..";
 // eslint-disable-next-line css-modules/no-unused-class
@@ -54,7 +55,7 @@ export default function CompactEvent({
 
   const title = useMemo(() => {
     if (props.type === "section") {
-      return `${props.section.subject} ${props.section.courseNumber}`;
+      return `${formatSubject(props.section.subject)} ${props.section.courseNumber}`;
     }
     return props.event.title;
   }, [props]);

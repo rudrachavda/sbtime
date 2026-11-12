@@ -9,6 +9,7 @@ import { CourseOption } from "@/components/CourseSelect";
 import { useReadCourseWithInstructor, useReadTerms } from "@/hooks/api";
 import { IUserRatingClass } from "@/lib/api";
 import { Semester } from "@/lib/generated/graphql";
+import { formatSubject } from "@/lib/subject";
 
 import { MetricData, toMetricData } from "../metricsUtil";
 import { RatingFormBody } from "./RatingFormBody";
@@ -413,7 +414,7 @@ export function UserFeedbackModal({
     subtitle !== undefined
       ? subtitle
       : showSelectedCourseSubtitle && selectedCourse
-        ? `${selectedCourse.subject} ${selectedCourse.number}`
+        ? `${formatSubject(selectedCourse.subject)} ${selectedCourse.number}`
         : "";
 
   // Calculate question numbers

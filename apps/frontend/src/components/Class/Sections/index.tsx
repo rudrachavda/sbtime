@@ -222,7 +222,7 @@ export default function Sections() {
                   const instructorNames = section.meetings
                     .flatMap((meeting) => meeting?.instructors ?? [])
                     .map((instructor) =>
-                      [instructor?.givenName, instructor?.familyName]
+                      [instructor?.familyName, instructor?.givenName]
                         .filter(Boolean)
                         .join(" ")
                         .trim()

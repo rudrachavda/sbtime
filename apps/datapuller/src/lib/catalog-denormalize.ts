@@ -321,6 +321,11 @@ export const buildCatalogClasses = async (
       _class.courseNumber,
       course.departmentNicknames
     );
+    // UCSB writes some subjects with a space ("AS AM 127"); the course id keeps
+    // that spelling, so searching it the GOLD way works too.
+    if (course.courseId && !searchableNames.includes(course.courseId)) {
+      searchableNames.push(course.courseId);
+    }
 
     // View count
     const viewCountKey = `${_class.sessionId}:${normalizedSubject}:${_class.courseNumber}:${_class.number}`;

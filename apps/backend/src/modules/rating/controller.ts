@@ -508,7 +508,7 @@ const buildInstructorNamesByClassKey = (
           instructor.givenName &&
           instructor.familyName
         ) {
-          names.add(`${instructor.givenName} ${instructor.familyName}`);
+          names.add(`${instructor.familyName} ${instructor.givenName}`);
         }
       });
     });

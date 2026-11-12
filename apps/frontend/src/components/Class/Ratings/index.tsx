@@ -408,7 +408,7 @@ export function RatingsContainer() {
         )
         .map((rating) => {
           const instructorKey = `${rating.instructor.givenName}_${rating.instructor.familyName}`;
-          const displayName = `${rating.instructor.givenName} ${rating.instructor.familyName}`;
+          const displayName = `${rating.instructor.familyName} ${rating.instructor.givenName}`;
           return {
             value: instructorKey,
             label: displayName,
