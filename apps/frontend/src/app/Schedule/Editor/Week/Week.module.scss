@@ -101,11 +101,15 @@
         height: 24px;
         display: flex;
         align-items: center;
-        padding: 0 6px;
-        font-size: var(--text-12);
+        // A pixel under the hour labels and slim sides, so "10:45 AM" fits
+        // inside the sidebar.
+        padding: 0 5px;
+        font-size: 11px;
         color: white;
         line-height: 1;
         white-space: nowrap;
+        // Equal-width digits, so the label doesn't shift as the minutes tick.
+        font-variant-numeric: tabular-nums;
         border-radius: 4px;
         right: 0;
         background-color: var(--red-500);
