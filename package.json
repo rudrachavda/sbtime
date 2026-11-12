@@ -10,7 +10,7 @@
     "type-check": "turbo run type-check",
     "start": "turbo run start",
     "format": "prettier --write \"**/*.{ts,tsx,scss}\"",
-    "postinstall": "patch-package"
+    "postinstall": "node scripts/postinstall.mjs"
   },
   "engines": {
     "node": ">=22.12.0",
