@@ -6,7 +6,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import { IconButton, useColorScheme, useTheme } from "@repo/theme";
 
-import { buildings } from "@/lib/location";
+import { UCSB_CENTER, buildings } from "@/lib/location";
 
 import styles from "./Map.module.scss";
 
@@ -40,7 +40,7 @@ export default function Map() {
         currentTheme === "dark"
           ? "mapbox://styles/mathhulk/clvblbtkd005k01rd1n28b2xt"
           : "mapbox://styles/mathhulk/clbznbvgs000314k8gtwa9q60",
-      center: [-122.2592173, 37.8721508],
+      center: UCSB_CENTER,
       zoom: DEFAULT_ZOOM,
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,

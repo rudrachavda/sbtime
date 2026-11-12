@@ -128,6 +128,13 @@ describe("parseInstructorName", () => {
     });
   });
 
+  it("treats hyphenated initials as initials", () => {
+    assert.deepEqual(parseInstructorName("FOUQUE J-P"), {
+      familyName: "FOUQUE",
+      givenName: "J-P",
+    });
+  });
+
   it("handles names without initials and empty values", () => {
     assert.deepEqual(parseInstructorName("STAFF"), {
       familyName: "STAFF",
@@ -194,10 +201,12 @@ describe("mapQuarter", () => {
     assert.ok(sections.every((s) => s.classNumber === "0100"));
     assert.equal(lecture?.sectionId, "00018");
     assert.equal(lecture?.component, "LEC");
-    assert.deepEqual(lecture?.associatedSectionIds, [
-      "00026",
-      sections[2].sectionId,
-    ]);
+    // Each discussion points at its lecture; the lecture points at nothing.
+    assert.equal(lecture?.associatedSectionIds, undefined);
+    for (const discussion of sections.filter((s) => !s.primary)) {
+      assert.deepEqual(discussion.associatedSectionIds, ["00018"]);
+      assert.equal(discussion.associatedClass, 100);
+    }
     assert.deepEqual(
       sections.filter((s) => !s.primary).map((s) => s.component),
       ["DIS", "DIS"]

@@ -4,6 +4,7 @@ import { useApolloClient } from "@apollo/client/react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
+import { formatInstructorName } from "@repo/common";
 import { Button, Select, type SelectHandle } from "@repo/theme";
 
 import {
@@ -112,7 +113,7 @@ const getInstructorNames = (courseClass: ICourseWithInstructorClass) => {
 
   courseClass.primarySection?.meetings.forEach((meeting) => {
     meeting.instructors.forEach((instructor) => {
-      const name = `${instructor.familyName} ${instructor.givenName}`.trim();
+      const name = formatInstructorName(instructor).trim();
       if (name) names.add(name);
     });
   });

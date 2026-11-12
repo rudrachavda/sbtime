@@ -255,7 +255,8 @@ export const parseInstructorName = (
   if (words.length === 0) return null;
 
   let split = words.length;
-  while (split > 1 && words[split - 1].length === 1) split--;
+  // Initials are single letters, or hyphenated ones such as "J-P".
+  while (split > 1 && /^[A-Z](-[A-Z])*$/i.test(words[split - 1])) split--;
 
   return {
     familyName: words.slice(0, split).join(" "),
@@ -596,9 +597,7 @@ export const mapQuarter = (
       if (!primary) continue;
 
       const classNumber = trim(primary.section);
-      const secondaryIds = groupSections
-        .filter((section) => section !== primary)
-        .map((section) => trim(section.enrollCode));
+      const primaryId = trim(primary.enrollCode);
 
       classes.push({
         courseId: parsed.courseId,
@@ -653,7 +652,10 @@ export const mapQuarter = (
           startDate: term.beginDate,
           endDate: term.endDate,
           primary: isPrimary,
-          associatedSectionIds: isPrimary ? secondaryIds : undefined,
+          // Discussions and labs point at their lecture, the way the
+          // backend looks them up (and Berkeley's data stores them).
+          associatedSectionIds: isPrimary ? undefined : [primaryId],
+          associatedClass: isPrimary ? undefined : parseInt(classNumber, 10),
           meetings: formatMeetings(section, term),
           sectionAttributes: isPrimary
             ? generalEducation.sectionAttributes

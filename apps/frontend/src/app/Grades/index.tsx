@@ -4,6 +4,7 @@ import { useApolloClient } from "@apollo/client/react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
+import { formatInstructorName } from "@repo/common";
 import { Button, PillSwitcher, Select, type SelectHandle } from "@repo/theme";
 
 import {
@@ -123,7 +124,7 @@ const isPastTermClass = (c: ICourseWithInstructorClass) =>
 const getMetadata = (input: Input): string => {
   const instructor =
     input.type && input.familyName && input.givenName
-      ? `${input.familyName} ${input.givenName}`
+      ? formatInstructorName(input)
       : "All instructors";
 
   const semester =
@@ -309,7 +310,10 @@ function FilterPanel({
 
     const opts = [...instructorSet].map((v) => {
       const [family, given] = (v as string).split(", ");
-      const label = given && family ? `${given} ${family}` : (v as string);
+      const label =
+        given && family
+          ? formatInstructorName({ givenName: given, familyName: family })
+          : (v as string);
       return { value: v as string, label };
     });
 

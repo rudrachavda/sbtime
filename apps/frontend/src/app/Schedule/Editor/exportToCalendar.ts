@@ -1,3 +1,5 @@
+import { formatInstructorName } from "@repo/common";
+
 import { ISchedule } from "@/lib/api";
 import { formatSubject } from "@/lib/subject";
 
@@ -139,9 +141,8 @@ const generateICS = (schedule: ISchedule) => {
         const description = `${classInfo.course?.title || ""}`;
         const location = meeting.location || "";
         const instructor =
-          meeting.instructors
-            ?.map((i) => `${i.familyName} ${i.givenName}`)
-            .join(", ") || "";
+          meeting.instructors?.map((i) => formatInstructorName(i)).join(", ") ||
+          "";
 
         icsContent.push(
           "BEGIN:VEVENT",

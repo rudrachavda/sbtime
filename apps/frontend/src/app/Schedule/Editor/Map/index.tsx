@@ -9,7 +9,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import { Button, IconButton, useColorScheme, useTheme } from "@repo/theme";
 
-import { buildings } from "@/lib/location";
+import { UCSB_CENTER, resolveLocation } from "@/lib/location";
 
 import { SectionColor } from "../../schedule";
 import styles from "./Map.module.scss";
@@ -44,17 +44,12 @@ export default function Map({ selectedSections }: MapProps) {
   const waypoints = useMemo(
     () =>
       selectedSections
-        .filter((section) => section.section.meetings[0].location)
         .map(
-          ({
-            section: {
-              meetings: [{ location }],
-            },
-          }) => {
-            const building = location!.split(" ").slice(0, -1).join(" ");
-            return buildings[building].location;
-          }
-        ),
+          ({ section }) =>
+            resolveLocation(section.meetings[0]?.location)?.coordinates
+        )
+        // Online classes and buildings without a map pin have no waypoint.
+        .filter((point): point is [number, number] => point !== undefined),
     [selectedSections]
   );
 
@@ -69,7 +64,7 @@ export default function Map({ selectedSections }: MapProps) {
         currentTheme === "dark"
           ? "mapbox://styles/mathhulk/clvblbtkd005k01rd1n28b2xt"
           : "mapbox://styles/mathhulk/clbznbvgs000314k8gtwa9q60",
-      center: [-122.2592173, 37.8721508],
+      center: UCSB_CENTER,
       zoom: DEFAULT_ZOOM,
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
@@ -191,7 +186,7 @@ export default function Map({ selectedSections }: MapProps) {
           markersRef.current.push(destinationMarker);
         }
 
-        map.jumpTo({ center: [-122.2592173, 37.8721508] });
+        map.jumpTo({ center: UCSB_CENTER });
 
         // Remove unnecessary layers
         map.removeLayer("directions-route-line");

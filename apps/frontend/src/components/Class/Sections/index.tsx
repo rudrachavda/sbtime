@@ -2,6 +2,7 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 import { FrameAltEmpty } from "iconoir-react";
 
+import { formatInstructorName } from "@repo/common";
 import { Box, Container, PillSwitcher } from "@repo/theme";
 
 import { getEnrollmentColor } from "@/components/Capacity";
@@ -12,7 +13,7 @@ import { useGetClassSections } from "@/hooks/api/classes/useGetClass";
 import useClass from "@/hooks/useClass";
 import { componentMap } from "@/lib/api";
 import { Component } from "@/lib/generated/graphql";
-import { buildings } from "@/lib/location";
+import { resolveLocation } from "@/lib/location";
 
 import styles from "./Sections.module.scss";
 
@@ -34,23 +35,15 @@ const getLocationLink = (location?: string) => {
     return null;
   }
 
-  const parts = location.trim().split(/\s+/);
-  if (parts.length < 2) {
-    return null;
-  }
-
-  const room = parts.pop();
-  const buildingKey = parts.join(" ");
-  const building = buildings[buildingKey];
-
-  if (!building?.link || !room) {
+  const resolved = resolveLocation(location);
+  if (!resolved?.link) {
     return null;
   }
 
   return {
-    label: `${building.name} ${room}`,
-    href: building.link,
-    coordinates: building.location,
+    label: resolved.label,
+    href: resolved.link,
+    coordinates: resolved.coordinates,
   };
 };
 
@@ -221,12 +214,7 @@ export default function Sections() {
                   const locationLink = getLocationLink(locationValue);
                   const instructorNames = section.meetings
                     .flatMap((meeting) => meeting?.instructors ?? [])
-                    .map((instructor) =>
-                      [instructor?.familyName, instructor?.givenName]
-                        .filter(Boolean)
-                        .join(" ")
-                        .trim()
-                    )
+                    .map((instructor) => formatInstructorName(instructor ?? {}))
                     .filter((name) => name.length > 0);
                   const uniqueInstructorNames = [...new Set(instructorNames)];
                   const instructorLabel = uniqueInstructorNames.join(", ");
@@ -277,7 +265,7 @@ export default function Sections() {
                             </a>
                           </LocationHoverCard>
                         ) : (
-                          locationValue || NO_DATA_LABEL
+                          resolveLocation(locationValue)?.label || NO_DATA_LABEL
                         )}
                       </td>
                       <td className={`${styles.cell} ${styles.instructor}`}>

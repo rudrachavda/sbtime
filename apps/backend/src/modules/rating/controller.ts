@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { GraphQLError } from "graphql";
 import { type ClientSession, connection } from "mongoose";
 
+import { formatInstructorName } from "@repo/common";
 import {
   AggregatedMetricsModel,
   ClassModel,
@@ -508,7 +509,7 @@ const buildInstructorNamesByClassKey = (
           instructor.givenName &&
           instructor.familyName
         ) {
-          names.add(`${instructor.familyName} ${instructor.givenName}`);
+          names.add(formatInstructorName(instructor));
         }
       });
     });

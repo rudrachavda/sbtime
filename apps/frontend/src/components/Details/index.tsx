@@ -1,3 +1,4 @@
+import { formatInstructorName } from "@repo/common";
 import { Breakpoint, Flex, useBreakpointMatch } from "@repo/theme";
 
 import { IInstructor } from "@/lib/api";
@@ -68,9 +69,7 @@ export default function Details({
           }}
         >
           {instructors && instructors.length > 0
-            ? instructors
-                .map((i) => `${i.familyName} ${i.givenName}`)
-                .join(", ")
+            ? instructors.map((i) => formatInstructorName(i)).join(", ")
             : "To be determined"}
         </p>
       </Flex>

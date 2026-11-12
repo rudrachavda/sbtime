@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 
+import { formatInstructorName } from "@repo/common";
 import { Card, Color } from "@repo/theme";
 
 import { componentMap } from "@/lib/api";
@@ -136,7 +137,7 @@ export default function Event({
             {props.type === "section" && props.section.meetings.length > 0 && (
               <Card.Description>
                 {props.section.meetings[0].instructors
-                  .map((i) => `${i.familyName} ${i.givenName}; `)
+                  .map((i) => `${formatInstructorName(i)}; `)
                   .join("")
                   .slice(0, -2)}
               </Card.Description>

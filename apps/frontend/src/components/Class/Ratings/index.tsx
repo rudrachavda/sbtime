@@ -5,6 +5,7 @@ import { EditPencil, Trash, UserStar } from "iconoir-react";
 import _ from "lodash";
 import { useSearchParams } from "react-router-dom";
 
+import { formatInstructorName } from "@repo/common";
 import { METRIC_ORDER, MetricName } from "@repo/shared";
 import {
   Box,
@@ -408,7 +409,7 @@ export function RatingsContainer() {
         )
         .map((rating) => {
           const instructorKey = `${rating.instructor.givenName}_${rating.instructor.familyName}`;
-          const displayName = `${rating.instructor.familyName} ${rating.instructor.givenName}`;
+          const displayName = formatInstructorName(rating.instructor);
           return {
             value: instructorKey,
             label: displayName,

@@ -23,6 +23,8 @@ const FULL_TERM: DateRange = { first: -Infinity, last: Infinity };
  * Berkeley lists a class that runs 10:10-11:00 as 10:00-10:59. Rounding an
  * end time that falls on :x9 up one minute makes back-to-back classes touch,
  * so they don't show up as one-minute gaps. Overlap results do not change.
+ * UCSB lists real end times (10:50, 12:15), so this never applies to UCSB
+ * data; it is kept so the scheduler's tests and Berkeley fixtures still hold.
  */
 export const roundListedEnd = (end: number) => (end % 10 === 9 ? end + 1 : end);
 

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { buildings } from "@/lib/location";
+import { resolveLocation } from "@/lib/location";
 
 import styles from "./Location.module.scss";
 import { LocationHoverCard } from "./LocationHoverCard";
@@ -10,38 +10,30 @@ interface LocationProps {
 }
 
 export default function Location({ location }: LocationProps) {
-  const building = useMemo(() => {
-    if (!location) return;
+  const resolved = useMemo(() => resolveLocation(location), [location]);
 
-    const building = location.split(" ").slice(0, -1).join(" ");
+  if (!resolved || resolved.placeholder) {
+    return (
+      <p className={styles.placeholder}>
+        {resolved?.label ?? "To be determined"}
+      </p>
+    );
+  }
 
-    return buildings[building];
-  }, [location]);
-
-  const room = useMemo(() => {
-    if (!location) return;
-
-    return location.split(" ").pop();
-  }, [location]);
-
-  if (!building?.location || !building?.link || !room) {
-    return <p className={styles.placeholder}>To be determined</p>;
+  // Buildings without a map pin are shown as text.
+  if (!resolved.building || !resolved.coordinates || !resolved.link) {
+    return <p>{resolved.label}</p>;
   }
 
   return (
-    <LocationHoverCard
-      buildingName={building.name}
-      room={room}
-      link={building.link}
-      coordinates={building.location}
-    >
+    <LocationHoverCard link={resolved.link} coordinates={resolved.coordinates}>
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href={building.link}
+        href={resolved.link}
         className={styles.root}
       >
-        {building.name + " " + room}
+        {resolved.label}
       </a>
     </LocationHoverCard>
   );

@@ -1,3 +1,4 @@
+import { formatInstructorName } from "@repo/common";
 import {
   METRIC_MAPPINGS,
   MetricName,
@@ -179,9 +180,7 @@ export function formatInstructorText(
 
   // Deduplicate and show all unique instructors (trim to handle API whitespace)
   const names = [
-    ...new Set(
-      allInstructors.map((i) => `${i.familyName.trim()} ${i.givenName.trim()}`)
-    ),
+    ...new Set(allInstructors.map((i) => formatInstructorName(i))),
   ].join(", ");
   return `(${names})`;
 }
