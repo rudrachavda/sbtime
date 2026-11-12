@@ -1,3 +1,5 @@
+import { scienceElectives } from "./science-electives";
+
 /**
  * Computer Science (College of Engineering), B.S., from the 2026-27 GEAR,
  * page 20.
@@ -10,8 +12,8 @@
  *   (treated here as one course). "CMPSC 190AA-ZZ" is matched as any
  *   CMPSC 190 with a letter suffix. Cross-listed courses count as CMPSC only
  *   when planned under CMPSC.
- * - Science electives (List A, 8 units; List B, 12 units): the department's
- *   lists are not in the GEAR, so students check this off by hand.
+ * - Science electives (List A, 8 units; List B, 12 units): the lists are
+ *   not in the GEAR; they come from the department (science-electives.ts).
  *
  * Not checked: letter grades, and the GPA rule on CMPSC 192/196.
  * The order of the returned requirements is stored with each plan's manual
@@ -79,8 +81,8 @@ Function<List<Requirement>>() main (){
   NCoursesRequirement electives_cmpsc {all_cmpsc_electives, cmpsc_elective_count, 7, "At least 7 CMPSC Electives"}
   AndRequirement electives {[electives_total, electives_cmpsc], "Major Field Electives"}
 
-  // Science electives: the department's approved lists are not in the GEAR.
-  BooleanRequirement science_electives {false, "Science Electives: List A (8 units) and List B (12 units) from the department's lists"}
+  // Science electives: the department's lists (see science-electives.ts).
+  ${scienceElectives("science_electives")}
 
   List<Requirement> return [preparation, upper_div, electives, science_electives]
 }

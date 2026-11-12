@@ -12,6 +12,7 @@ import {
   type TestCourse,
   byName,
   course,
+  courses,
   run,
 } from "./test-helpers";
 
@@ -162,7 +163,7 @@ describe("Computer Science (Engineering) 2026-27", () => {
   const results = (courses: TestCourse[]) =>
     byName(run(UCSB_COMPUTER_SCIENCE_BTLL, courses));
 
-  test("a complete plan meets everything except the hand-checked science electives", () => {
+  test("a plan without science courses misses only the science electives", () => {
     const all = run(UCSB_COMPUTER_SCIENCE_BTLL, [
       ...preparation,
       ...upperDivision,
@@ -175,12 +176,92 @@ describe("Computer Science (Engineering) 2026-27", () => {
         ["Preparation for the Major", true],
         ["Upper-Division Required Courses", true],
         ["Major Field Electives", true],
-        [
-          "Science Electives: List A (8 units) and List B (12 units) from the department's lists",
-          false,
-        ],
+        ["Science Electives: List A (8 units) and List B (12 units)", false],
       ]
     );
+  });
+
+  describe("science electives", () => {
+    const SCIENCE = "Science Electives: List A (8 units) and List B (12 units)";
+    const science = (planned: TestCourse[]) => results(planned).get(SCIENCE);
+    const physicsSeries = [
+      course("PHYS 7A"),
+      course("PHYS 7B"),
+      course("PHYS 7C"),
+      course("PHYS 7L", [], 1),
+    ];
+
+    test("List A courses and a List B series with a lab meet both lists", () => {
+      assert.equal(
+        science([...physicsSeries, course("ASTRO 1"), course("ECON 1")]),
+        true
+      );
+    });
+
+    test("List B needs a lab", () => {
+      const noLab = courses(
+        "PHYS 7A",
+        "PHYS 7B",
+        "PHYS 7C",
+        "ASTRO 1",
+        "ECON 1"
+      );
+      const r = results(noLab);
+      assert.equal(r.get("List B: 12 units"), true);
+      assert.equal(r.get("List B: at least one lab"), false);
+      assert.equal(r.get(SCIENCE), false);
+    });
+
+    test("a course on both lists counts toward only one", () => {
+      // CHEM 1A, 1B and 1C (12 units) can fill List B or List A, not both.
+      const chem = courses("CHEM 1A", "CHEM 1B", "CHEM 1C");
+      const lab = course("CHEM 2AL", [], 2);
+      assert.equal(science([...chem, lab]), false);
+      assert.equal(
+        science([...chem, lab, course("ASTRO 1"), course("EARTH 2")]),
+        true
+      );
+    });
+
+    test("PHYS 4 counts for List A only with PHYS 4L", () => {
+      const listB = [...physicsSeries];
+      assert.equal(
+        science([...listB, course("PHYS 4"), course("ASTRO 1")]),
+        false
+      );
+      assert.equal(
+        science([...listB, course("PHYS 4"), course("PHYS 4L", [], 4)]),
+        true
+      );
+    });
+
+    test("the biology group counts for List A and leaves MCDB 1B out of List B", () => {
+      const group = [
+        course("MCDB 1B"),
+        course("EEMB 2"),
+        course("EEMB 2L", [], 2),
+      ];
+      const r = results([...group, ...courses("PHYS 7A", "PHYS 7B")]);
+      assert.equal(r.get("List A: 8 units"), true);
+      // MCDB 1B went to the group, so List B has only 8 units.
+      assert.equal(r.get("List B: 12 units"), false);
+    });
+
+    test("online versions count", () => {
+      assert.equal(
+        science([...physicsSeries, ...courses("EARTHW 20", "GEOGW 12")]),
+        true
+      );
+    });
+
+    test("AP Biology can be ticked off for List A by hand", () => {
+      const r = results(physicsSeries);
+      assert.equal(r.get("Science Electives List B"), true);
+      assert.equal(
+        r.get("AP Biology exam, score of 3 or higher (8 units of List A)"),
+        false
+      );
+    });
   });
 
   test("a missing preparation course fails preparation only", () => {

@@ -1,12 +1,12 @@
 import {
   allOf,
   and,
-  byHand,
   cappedUnits,
   electiveCourses,
   program,
   someOf,
 } from "./builders";
+import { scienceElectives } from "./science-electives";
 
 /**
  * Artificial Intelligence (College of Engineering), B.S., from the 2026-27
@@ -16,8 +16,8 @@ import {
  *   together count for at most 4 units (one course). "CMPSC 190AA-ZZ" is
  *   matched as any CMPSC 190 with a letter suffix; "CMPSC/ECE 153A" and
  *   "C LIT/GER 155" count under either subject.
- * - Science electives (List A, 8 units; List B, 12 units) are checked off by
- *   hand until the department's lists are added.
+ * - Science electives (List A, 8 units; List B, 12 units): the CS
+ *   Department's lists, shared with Computer Science (science-electives.ts).
  *
  * Not checked: letter grades and the GPA rule on CMPSC 192/196.
  * Keep the order of the returned requirements: plans store manual check-offs
@@ -89,7 +89,7 @@ export const UCSB_ARTIFICIAL_INTELLIGENCE_BTLL = program(
   })
   NCoursesRequirement electives {all_electives, elective_count, 9, "9 Major Field Electives"}
 
-  ${byHand("science_electives", "Science Electives: List A (8 units) and List B (12 units) from the department's lists")}
+  ${scienceElectives("science_electives")}
 `,
   ["preparation", "upper_div", "electives", "science_electives"]
 );

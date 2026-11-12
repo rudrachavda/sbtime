@@ -45,7 +45,7 @@ describe("Artificial Intelligence 2026-27", () => {
     "CMPSC 190N"
   );
 
-  test("a complete plan meets everything but the hand-checked science electives", () => {
+  test("a plan without science courses misses only the science electives", () => {
     const results = run(UCSB_ARTIFICIAL_INTELLIGENCE_BTLL, [
       ...required,
       ...electives,
