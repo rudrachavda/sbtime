@@ -1,0 +1,18 @@
+<svg fill="#000" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<rect width="32" height="32" rx="7" fill="#fefefe" />
+
+<g transform="translate(16,16) scale(0.6) translate(-16,-16)">
+    <!-- Top-Left Quarter Circle -->
+    <path d="M 15.2 15.2 H 0.2 A 15 15 0 0 1 15.2 0.2 Z" />
+
+    <!-- Bottom-Left Quarter Circle (decrease this curve radius) -->
+    <path d="M 0.2 16.8 H 15.2 A 15 15 0 0 1 0.2 31.8 Z" />
+
+    <!-- Top-Right Quarter Circle (Unchanged) -->
+    <path d="M 16.8 0.2 H 31.8 A 15 15 0 0 1 16.8 15.2 Z" />
+
+    <!-- Bottom-Right Quarter Circle (Unchanged) -->
+    <path d="M 16.8 16.8 H 31.8 A 15 15 0 0 1 16.8 31.8 Z" />
+</g>
+
+</svg>
