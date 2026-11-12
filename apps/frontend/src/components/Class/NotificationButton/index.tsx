@@ -72,7 +72,10 @@ export default function NotificationButton({
         ];
 
     await updateUser({
-      notificationsOn: user.notificationsOn ?? false,
+      // The alert job only emails users with notifications on, and nothing
+      // else turns them on: watching a class does, and they stay on while
+      // any class is watched.
+      notificationsOn: updated.length > 0,
       monitoredClasses: updated.map((mc) => ({
         class: {
           year: mc!.class!.year!,
@@ -88,7 +91,7 @@ export default function NotificationButton({
 
   const label = isMonitored
     ? "Turn off notifications"
-    : "Notify me when this class is about to be full";
+    : "Notify me when a seat opens up";
 
   return (
     <Tooltip

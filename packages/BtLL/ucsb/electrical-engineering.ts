@@ -16,8 +16,10 @@ import {
  * GEAR, page 22.
  *
  * - Departmental electives: 36 units from the approved list, including a
- *   depth sequence for the student's track (checked off by hand; the lists
- *   are with the ECE Department).
+ *   depth sequence in one track. The nine tracks come from the ECE
+ *   Department's curriculum page for 2026-27
+ *   (https://www.ece.ucsb.edu/undergrad/curriculum). A student's own track,
+ *   approved by a faculty adviser, is checked off by hand.
  * - ECE 153A or 153B is required; if both are planned, the second counts as
  *   an elective.
  * - Elective caps: ECE 192 and 196 at most 4 units combined; MATRL 100B or
@@ -141,7 +143,41 @@ export const UCSB_ELECTRICAL_ENGINEERING_BTLL = program(
   number second_153_units sum_units(slice(ece_153_matches, 1, 2))
   number elective_units add([sum_units(listed_electives), independent_units, materials_units, tmp_units, second_153_units])
   NumberRequirement elective_units_req {elective_units, 36, "36 Units of Departmental Electives"}
-  ${byHand("depth_sequence", "A depth sequence for your track approved by your faculty adviser")}
+
+  // Depth sequence: one of the ECE Department's tracks, or the student's own.
+  ${someOf("track_signal", ["ECE 130C", "ECE 133", "ECE 148", "ECE 158", "ECE 178", "ECE 180", "ECE 181", "ECE 186"], "Signal Processing and Sensing: 4 of ECE 130C, 133, 148, 158, 178, 180, 181, 186", 4)}
+  ${someOf("track_wireless", ["ECE 130C", "ECE 146A", "ECE 146B", "ECE 148", "ECE 158"], "Wireless Communications and Sensing: 4 of ECE 130C, 146A, 146B, 148, 158", 4)}
+  ${allOf("architecture_required", ["ECE 154A", "ECE 154B"], "ECE 154A-B")}
+  ${someOf("architecture_two", ["ECE 152B", "ECE 153A", "ECE 153B"], "2 of ECE 152B, 153A, 153B", 2)}
+  ${and("track_architecture", ["architecture_required", "architecture_two"], "Computer Architecture")}
+  ${someOf("track_robotics", ["ECE 130C", "ECE 147A", "ECE 147B", "ECE 147C", "ECE 179D"], "Robotics and Control: 4 of ECE 130C, 147A, 147B, 147C, 179D", 4)}
+  ${someOf("track_photonics", ["ECE 132", "ECE 135", "ECE 136A", "ECE 136B", "ECE 136C", "ECE 144", "ECE 162A", "MATRL 162A", "ECE 162B", "MATRL 162B", "ECE 162C"], "Photonics: 4 of ECE 132, 135, 136A-C, 144, 162A-C", 4)}
+  ${someOf("vlsi_first", ["ECE 122A", "ECE 123"], "ECE 122A or 123")}
+  ${allOf("vlsi_122b", ["ECE 122B"], "ECE 122B")}
+  ${someOf("vlsi_two", ["ECE 132", "ECE 157A", "ECE 157B"], "2 of ECE 132, 157A, 157B", 2)}
+  ${and("track_vlsi", ["vlsi_first", "vlsi_122b", "vlsi_two"], "Digital VLSI")}
+  ${allOf("track_high_speed", ["ECE 132", "ECE 137A", "ECE 137B", "ECE 145A", "ECE 145B"], "High Speed, High Frequency Integrated Circuits")}
+  ${allOf("semiconductors_required", ["ECE 120A", "ECE 132", "ECE 137A", "ECE 142"], "ECE 120A, 132, 137A, 142")}
+  ${someOf("semiconductors_120b", ["ECE 120B", "ECE 137B"], "ECE 120B or 137B")}
+  ${and("track_semiconductors", ["semiconductors_required", "semiconductors_120b"], "Semiconductors and Integrated Circuits")}
+  ${someOf("track_ml", ["ECE 133", "ECE 157A", "ECE 157B", "ECE 180", "ECE 181", "ECE 186"], "Machine Learning: 4 of ECE 133, 157A, 157B, 180, 181, 186", 4)}
+  ${byHand("track_own", "Your own track, approved by a faculty adviser")}
+  ${or(
+    "depth_sequence",
+    [
+      "track_signal",
+      "track_wireless",
+      "track_architecture",
+      "track_robotics",
+      "track_photonics",
+      "track_vlsi",
+      "track_high_speed",
+      "track_semiconductors",
+      "track_ml",
+      "track_own",
+    ],
+    "A depth sequence in one track"
+  )}
   ${and("electives", ["elective_units_req", "depth_sequence"], "Departmental Electives")}
 
   ${totalUnits("graduation_units", 189, "Electrical Engineering")}

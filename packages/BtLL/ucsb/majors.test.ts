@@ -382,7 +382,7 @@ describe("Electrical Engineering 2026-27", () => {
     "ECE 132"
   );
 
-  test("a complete plan meets everything but the hand-checked depth sequence", () => {
+  test("a plan without a complete track misses only the depth sequence", () => {
     const results = run(
       UCSB_ELECTRICAL_ENGINEERING_BTLL,
       [
@@ -440,6 +440,59 @@ describe("Electrical Engineering 2026-27", () => {
       ])
     );
     assert.equal(short.get("36 Units of Departmental Electives"), false);
+  });
+
+  const depth = (...names: string[]) =>
+    byName(run(UCSB_ELECTRICAL_ENGINEERING_BTLL, courses(...names))).get(
+      "A depth sequence in one track"
+    );
+
+  test("four courses from a pick-four track complete it", () => {
+    assert.equal(depth("ECE 130C", "ECE 133", "ECE 158", "ECE 178"), true);
+    assert.equal(depth("ECE 130C", "ECE 133", "ECE 158"), false);
+    assert.equal(depth("ECE 147A", "ECE 147B", "ECE 147C", "ECE 179D"), true);
+  });
+
+  test("a complete plan with a track meets every requirement", () => {
+    const results = run(
+      UCSB_ELECTRICAL_ENGINEERING_BTLL,
+      [
+        ...preparation,
+        ...upperDivision,
+        ...eightElectives,
+        ...courses("ECE 157A", "ECE 157B"),
+      ],
+      60
+    );
+    // Digital VLSI: ECE 122A, 122B, and two of 132, 157A, 157B.
+    assert.equal(byName(results).get("Digital VLSI"), true);
+    assert.ok(summary(results).every(([, met]) => met));
+  });
+
+  test("Computer Architecture needs 154A-B and two of 152B, 153A, 153B", () => {
+    assert.equal(depth("ECE 154A", "ECE 154B", "ECE 152B", "ECE 153B"), true);
+    assert.equal(depth("ECE 154A", "ECE 154B", "ECE 153B"), false);
+  });
+
+  test("Semiconductors takes ECE 120B or 137B", () => {
+    const core = ["ECE 120A", "ECE 132", "ECE 137A", "ECE 142"];
+    assert.equal(depth(...core, "ECE 137B"), true);
+    assert.equal(depth(...core), false);
+  });
+
+  test("Photonics counts the MATRL listing of 162A-B", () => {
+    assert.equal(depth("ECE 132", "ECE 135", "ECE 144", "MATRL 162A"), true);
+  });
+
+  test("High Speed, High Frequency needs all five courses", () => {
+    const five = ["ECE 132", "ECE 137A", "ECE 137B", "ECE 145A", "ECE 145B"];
+    assert.equal(depth(...five), true);
+    assert.equal(depth(...five.slice(0, 4)), false);
+  });
+
+  test("a student's own track can still be ticked off by hand", () => {
+    const r = byName(run(UCSB_ELECTRICAL_ENGINEERING_BTLL, []));
+    assert.equal(r.get("Your own track, approved by a faculty adviser"), false);
   });
 });
 

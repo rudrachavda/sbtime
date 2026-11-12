@@ -22,7 +22,8 @@ export default function Notifications() {
     async (classIndex: number) => {
       const updated = monitoredClasses.filter((_, i) => i !== classIndex);
       await updateUser({
-        notificationsOn: user?.notificationsOn ?? false,
+        // Off once no class is watched, matching the bell.
+        notificationsOn: updated.length > 0,
         monitoredClasses: updated.map((mc) => ({
           class: {
             year: mc!.class!.year!,
@@ -58,17 +59,14 @@ export default function Notifications() {
 
           {monitoredClasses.length === 0 ? (
             <Text>
-              No classes tracked yet. Click the bell icon on any class to
-              start tracking.
+              No classes tracked yet. Click the bell icon on any class to start
+              tracking.
             </Text>
           ) : (
             <div className={styles.classGrid}>
               {monitoredClasses.map((monitoredClass, index) => (
                 <div key={index} className={styles.classCardWrapper}>
-                  <ClassCard
-                    class={monitoredClass!.class}
-                    showGrades={false}
-                  />
+                  <ClassCard class={monitoredClass!.class} showGrades={false} />
                   <div className={styles.notificationButtonOverlay}>
                     <IconButton
                       aria-label="Stop tracking"
