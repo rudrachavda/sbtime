@@ -1,5 +1,7 @@
 import { Container } from "@repo/theme";
 
+import { CONTACT_EMAIL } from "@/lib/contact";
+
 import styles from "./Privacy.module.scss";
 
 export default function Privacy() {
@@ -613,11 +615,8 @@ export default function Privacy() {
             <li>
               <p className={styles.listItemContent}>
                 By email:{" "}
-                <a
-                  href="mailto:octo.berkeleytime@asuc.org"
-                  className={styles.link}
-                >
-                  octo.berkeleytime@asuc.org
+                <a href={`mailto:${CONTACT_EMAIL}`} className={styles.link}>
+                  {CONTACT_EMAIL}
                 </a>
               </p>
             </li>

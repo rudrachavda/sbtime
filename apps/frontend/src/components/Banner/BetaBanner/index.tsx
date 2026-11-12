@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { MessageText, Xmark } from "iconoir-react";
 
+import { FEEDBACK_FORM_URL } from "@/lib/contact";
+
 import styles from "./BetaBanner.module.scss";
 
 export default function BetaBanner() {
@@ -19,7 +21,7 @@ export default function BetaBanner() {
       <div className={styles.actions}>
         <a
           className={styles.link}
-          href="https://forms.gle/zeAUQAHrMcrRJyhK6"
+          href={FEEDBACK_FORM_URL}
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -1,5 +1,7 @@
 import { Container } from "@repo/theme";
 
+import { CONTACT_EMAIL } from "@/lib/contact";
+
 import styles from "./Terms.module.scss";
 
 export default function Terms() {
@@ -108,10 +110,7 @@ export default function Terms() {
           <p className={styles.content}>
             If you have any questions about these Terms of Service, please
             contact us at{" "}
-            <a href="mailto:octo.berkeleytime@asuc.org">
-              octo.berkeleytime@asuc.org
-            </a>
-            .
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
         </section>
       </Container>

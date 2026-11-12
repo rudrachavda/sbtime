@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 import { Container, PillSwitcher, useTheme } from "@repo/theme";
 
+import { DISCORD_URL, INSTAGRAM_URL } from "@/lib/contact";
 import { FEATURES } from "@/lib/features";
 
 import styles from "./Footer.module.scss";
@@ -42,14 +43,10 @@ const STATUS_LABELS: Record<Status, string> = {
 // badge is shown; Berkeleytime's page described their servers, not ours.
 const STATUS_PAGE_URL: string | null = null;
 
-// TODO(SBTime): Instagram and Discord are still Berkeleytime's accounts.
-// Replace them with SBTime's once those exist.
+// Instagram and Discord don't exist yet; their links open the 404 page.
 const SOCIAL_LINKS: { label: string; href: string }[] = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/berkeleytimeofficial/",
-  },
-  { label: "Discord", href: "https://discord.gg/uP2bTPh99U" },
+  { label: "Instagram", href: INSTAGRAM_URL },
+  { label: "Discord", href: DISCORD_URL },
   { label: "GitHub", href: "https://github.com/rudrachavda/sbtime" },
 ];
 
@@ -120,7 +117,7 @@ export default function Footer() {
                 Curated Classes
               </Link>
             )}
-            <Link to="/scheduler" className={styles.link}>
+            <Link to="/schedules" className={styles.link}>
               Scheduler
             </Link>
             {FEATURES.gradtrak && (

@@ -1,5 +1,7 @@
 import { Text } from "@repo/theme";
 
+import { CONTACT_EMAIL, FEEDBACK_FORM_URL } from "@/lib/contact";
+
 // eslint-disable-next-line css-modules/no-unused-class
 import profileStyles from "../Profile.module.scss";
 import styles from "./Support.module.scss";
@@ -12,7 +14,7 @@ export default function Support() {
         <Text size="3" style={{ lineHeight: 1.6 }}>
           Thank you for beta testing our website! To leave us feedback,{" "}
           <a
-            href="https://forms.gle/zeAUQAHrMcrRJyhK6"
+            href={FEEDBACK_FORM_URL}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.link}
@@ -20,8 +22,8 @@ export default function Support() {
             fill out this form
           </a>{" "}
           or email us at{" "}
-          <a href="mailto:octo.berkeleytime@asuc.org" className={styles.link}>
-            octo.berkeleytime@asuc.org
+          <a href={`mailto:${CONTACT_EMAIL}`} className={styles.link}>
+            {CONTACT_EMAIL}
           </a>
           .
         </Text>

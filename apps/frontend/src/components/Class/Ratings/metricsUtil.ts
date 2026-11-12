@@ -164,9 +164,10 @@ export function formatInstructorText(
   primarySection.meetings.forEach((meeting) => {
     if (meeting.instructors) {
       meeting.instructors.forEach((instructor) => {
-        if (instructor.familyName && instructor.givenName) {
+        // Some UCSB names were cut short and have no initials.
+        if (instructor.familyName) {
           allInstructors.push({
-            givenName: instructor.givenName,
+            givenName: instructor.givenName ?? "",
             familyName: instructor.familyName,
           });
         }

@@ -117,7 +117,8 @@ export default function DataBoard({
 
   const metadata = gradeDistribution
     ? `${semester && year ? `${semester} ${year}` : "All Quarters"} • ${
-        givenName && familyName
+        // Some UCSB names were cut short and have no initials.
+        familyName
           ? formatInstructorName({ givenName, familyName })
           : "All Instructors"
       }`

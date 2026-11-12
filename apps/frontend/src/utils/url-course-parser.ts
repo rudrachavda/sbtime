@@ -51,7 +51,9 @@ function parseInstructor(
   if (parts.length < 2) return null;
 
   const [givenName, familyName] = parts;
-  if (!givenName || !familyName) return null;
+  // The given name can be empty: UCSB cuts long names short, dropping the
+  // initials ("GARCIA-CERVER").
+  if (!familyName) return null;
 
   return { givenName, familyName };
 }

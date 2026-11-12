@@ -122,8 +122,9 @@ const isPastTermClass = (c: ICourseWithInstructorClass) =>
   c.term.temporalPosition === TemporalPosition.Past;
 
 const getMetadata = (input: Input): string => {
+  // UCSB cuts long names short, so some instructors have no initials.
   const instructor =
-    input.type && input.familyName && input.givenName
+    input.type && input.familyName
       ? formatInstructorName(input)
       : "All instructors";
 
@@ -261,11 +262,12 @@ function FilterPanel({
       setSelectedInstructor("all");
     } else if (
       editDraft.type === InputType.Instructor &&
-      editDraft.familyName &&
-      editDraft.givenName
+      editDraft.familyName
     ) {
       setSelectedType(InputType.Instructor);
-      setSelectedInstructor(`${editDraft.familyName}, ${editDraft.givenName}`);
+      setSelectedInstructor(
+        `${editDraft.familyName}, ${editDraft.givenName ?? ""}`
+      );
       setSelectedSemester("all");
     } else {
       setSelectedType(DEFAULT_BY_OPTION.value);
@@ -310,10 +312,9 @@ function FilterPanel({
 
     const opts = [...instructorSet].map((v) => {
       const [family, given] = (v as string).split(", ");
-      const label =
-        given && family
-          ? formatInstructorName({ givenName: given, familyName: family })
-          : (v as string);
+      const label = family
+        ? formatInstructorName({ givenName: given, familyName: family })
+        : (v as string);
       return { value: v as string, label };
     });
 

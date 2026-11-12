@@ -11,6 +11,7 @@ import {
 } from "@repo/theme";
 
 import Footer from "@/components/Footer";
+import { CONTACT_EMAIL, FEEDBACK_FORM_URL } from "@/lib/contact";
 
 import styles from "./Organization.module.scss";
 
@@ -142,17 +143,14 @@ export default function Organization() {
               <AccordionContent>
                 Spotted a bug or have a quick suggestion?{" "}
                 <a
-                  href="https://forms.gle/zeAUQAHrMcrRJyhK6"
+                  href={FEEDBACK_FORM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Fill out this form
                 </a>
                 . Interested in beta testing new features? Reach out at{" "}
-                <a href="mailto:octo.berkeleytime@asuc.org">
-                  octo.berkeleytime@asuc.org
-                </a>
-                .
+                <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

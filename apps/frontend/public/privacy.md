@@ -7,4 +7,4 @@ Your privacy is very important to us. Accordingly, we have developed this Policy
 3. We will not share data collected with third parties outside of SBTime unless we have been given explicit consent by the individual concerned.
 4. You may contact SBTime and request to delete personally identifying data from our databases at any time.
 
-If you have any concerns about our Privacy Policy, please [contact us](mailto:octo.berkeleytime@asuc.org).
+If you have any concerns about our Privacy Policy, please [contact us](mailto:rudrachavda@ucsb.edu).
