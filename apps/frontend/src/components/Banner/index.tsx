@@ -21,9 +21,9 @@ import {
 import styles from "./Banner.module.scss";
 import BetaBanner from "./BetaBanner";
 
-// The fallback "new release" banner is switched off for now. Set this back to
-// true to show <BetaBanner /> again, e.g. to reuse it for an announcement.
-const FALLBACK_BANNER_ENABLED = false;
+// The fallback banner (<BetaBanner />) shows when no banner from the database
+// is active. It currently says GradTrak only covers Engineering majors.
+const FALLBACK_BANNER_ENABLED = true;
 
 interface BannerProps {
   showFallback?: boolean;

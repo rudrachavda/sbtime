@@ -1,11 +1,12 @@
 import { useState } from "react";
 
-import { MessageText, Xmark } from "iconoir-react";
-
-import { FEEDBACK_FORM_URL } from "@/lib/contact";
+import { ArrowRight, Xmark } from "iconoir-react";
+import { Link } from "react-router-dom";
 
 import styles from "./BetaBanner.module.scss";
 
+// TODO(SBTime): update once Letters & Science and Creative Studies
+// requirements are in GradTrak.
 export default function BetaBanner() {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -16,18 +17,14 @@ export default function BetaBanner() {
   return (
     <div className={styles.root}>
       <p className={styles.text}>
-        You are viewing the <i>new</i> release of SBTime.
+        GradTrak only checks requirements for College of Engineering majors for
+        now. Letters &amp; Science and Creative Studies are coming later.
       </p>
       <div className={styles.actions}>
-        <a
-          className={styles.link}
-          href={FEEDBACK_FORM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div className={styles.text}>Provide Feedback</div>
-          <MessageText height={12} width={12} />
-        </a>
+        <Link className={styles.link} to="/gradtrak">
+          <div className={styles.text}>Open GradTrak</div>
+          <ArrowRight height={12} width={12} />
+        </Link>
         <button
           type="button"
           className={styles.closeButton}

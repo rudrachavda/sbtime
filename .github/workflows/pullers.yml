@@ -1,0 +1,107 @@
+# Runs the UCSB data pullers on a schedule against the hosted database,
+# the same jobs and timings as apps/datapuller/src/scheduler.ts.
+#
+# Repository secrets (Settings -> Secrets and variables -> Actions):
+#   MONGODB_URI     the Atlas connection string (database "sbtime")
+#   UCSB_API_KEY    UCSB developer API key
+#   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM
+#                   for seat-alert emails (leave SMTP_HOST unset to skip email)
+#
+# Times are UTC and GitHub may start scheduled runs a few minutes late.
+# Use "Run workflow" on the Actions tab to run any puller by hand.
+name: Data pullers
+
+on:
+  schedule:
+    - cron: "*/15 * * * *" # seat counts
+    - cron: "5 3,15 * * *" # catalog and quarter dates, twice a day
+    - cron: "20 10 * * *" # final exams and the UCSBPlat catch-up, daily
+  workflow_dispatch:
+    inputs:
+      puller:
+        description: Puller to run
+        required: true
+        type: choice
+        options:
+          - enrollment-active
+          - catalog-active
+          - terms-nearby
+          - finals-active
+          - enrollment-current-ucsbplat
+          - catalog-details
+          - plan-requirements
+
+# One run at a time, like the local scheduler: the catalog job replaces
+# sections that the seat-count job updates.
+concurrency:
+  group: datapuller
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      UCSB_API_KEY: ${{ secrets.UCSB_API_KEY }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      SMTP_FROM: ${{ secrets.SMTP_FROM }}
+      NODE_ENV: production
+      # Required by the shared config but unused by the UCSB pullers
+      # (Berkeley's SIS and AWS sources, the semantic-search service).
+      SIS_CLASS_APP_ID: unused
+      SIS_CLASS_APP_KEY: unused
+      SIS_COURSE_APP_ID: unused
+      SIS_COURSE_APP_KEY: unused
+      SIS_TERM_APP_ID: unused
+      SIS_TERM_APP_KEY: unused
+      AWS_DATABASE: unused
+      AWS_REGION_NAME: unused
+      AWS_S3_OUTPUT: unused
+      AWS_WORKGROUP: unused
+      BACKEND_URL: unused
+      SEMANTIC_SEARCH_URL: unused
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Choose pullers
+        id: pick
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL: ${{ inputs.puller }}
+        run: |
+          case "$SCHEDULE" in
+            "*/15 * * * *") pullers="enrollment-active" ;;
+            "5 3,15 * * *") pullers="catalog-active terms-nearby" ;;
+            "20 10 * * *") pullers="finals-active enrollment-current-ucsbplat" ;;
+            *) pullers="$MANUAL" ;;
+          esac
+          echo "pullers=$pullers" >> "$GITHUB_OUTPUT"
+
+      - name: Run pullers
+        working-directory: apps/datapuller
+        env:
+          PULLERS: ${{ steps.pick.outputs.pullers }}
+          # The daily catch-up reads at most 300 lectures (about 10 minutes).
+          ENROLLMENT_IMPORT_LIMIT: "300"
+        run: |
+          status=0
+          for puller in $PULLERS; do
+            echo "::group::$puller"
+            npx tsx src/main.ts --puller="$puller" || status=1
+            echo "::endgroup::"
+          done
+          exit $status

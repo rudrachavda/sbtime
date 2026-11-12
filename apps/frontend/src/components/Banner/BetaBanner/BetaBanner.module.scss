@@ -2,11 +2,13 @@
 
 .root {
   flex-shrink: 0;
-  height: 32px;
+  // Grows to two lines on narrow screens instead of squeezing the text.
+  min-height: 32px;
   background-color: var(--backdrop-color);
-  padding: 12px;
+  padding: 4px 12px;
   display: flex;
   align-items: center;
+  gap: 12px;
   color: var(--foreground-color);
 
   .actions {
@@ -20,6 +22,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
     color: var(--gray-700);
     text-decoration: none;
     padding: 4px 8px;
@@ -42,6 +45,8 @@
   .text {
     color: var(--gray-700);
     font-size: var(--text-12);
+    line-height: 1.4;
+    margin: 0;
 
     @include dark-mode {
       color: var(--gray-300);
