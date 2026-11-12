@@ -639,7 +639,7 @@ export function RatingsContainer() {
                               emptyMessage={
                                 activeRatingTab === RATING_TABS.Instructor
                                   ? "No instructors found"
-                                  : "No semesters found"
+                                  : "No quarters found"
                               }
                               tabs={[
                                 {

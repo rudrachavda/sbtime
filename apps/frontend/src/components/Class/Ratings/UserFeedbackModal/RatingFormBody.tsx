@@ -80,7 +80,7 @@ export function RatingFormBody({
           <div className={styles.formGroup}>
             <div className={styles.questionPair}>
               <h3>
-                What semester did you take this course? <RequiredAsterisk />
+                What quarter did you take this course? <RequiredAsterisk />
               </h3>
               <div style={{ width: "100%" }}>
                 <Select

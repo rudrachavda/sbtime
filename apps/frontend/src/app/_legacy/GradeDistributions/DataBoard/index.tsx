@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { formatInstructorName } from "@repo/common";
+
 import { AverageGrade, ColoredGrade } from "@/components/AverageGrade";
 import CourseSideMetrics, {
   type CourseMetric,
@@ -116,7 +118,7 @@ export default function DataBoard({
   const metadata = gradeDistribution
     ? `${semester && year ? `${semester} ${year}` : "All Quarters"} • ${
         givenName && familyName
-          ? `${givenName} ${familyName}`
+          ? formatInstructorName({ givenName, familyName })
           : "All Instructors"
       }`
     : "No Quarter or Instructor Data";

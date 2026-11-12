@@ -23,7 +23,7 @@ const VALIDATION_ERROR_PATTERNS: Array<{
   },
   {
     pattern: /maximum.*semester/i,
-    message: "You've reached the maximum ratings for this semester.",
+    message: "You've reached the maximum ratings for this quarter.",
   },
   {
     pattern: /rating must be an integer/i,

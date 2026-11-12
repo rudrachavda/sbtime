@@ -96,6 +96,14 @@ export const toCatalogTerm = (term: {
   };
 };
 
+/** True once the quarter's last day ("2026-12-11", campus time) is over. */
+export const hasQuarterEnded = (term: { endDate: string }, now: Date) => {
+  const today = now.toLocaleDateString("en-CA", {
+    timeZone: "America/Los_Angeles",
+  });
+  return Boolean(term.endDate) && term.endDate.slice(0, 10) < today;
+};
+
 /**
  * Fetch a quarter's classes. Returns null when UCSB has not published the
  * quarter's schedule yet, which it reports as a 400.
@@ -206,7 +214,11 @@ const updateQuarter = async (
   );
 
   // Seat counts: stretch each section's latest entry, or start a new one.
-  await recordEnrollment(mapped.enrollments);
+  // Only for quarters still running; a refresh of a finished quarter would
+  // otherwise add today's final numbers to its enrollment graph.
+  if (!hasQuarterEnded(term, new Date())) {
+    await recordEnrollment(mapped.enrollments);
+  }
 
   log.info(
     `${label}: ${mapped.courses.length.toLocaleString()} courses, ${mapped.classes.length.toLocaleString()} classes, ${mapped.sections.length.toLocaleString()} sections.`

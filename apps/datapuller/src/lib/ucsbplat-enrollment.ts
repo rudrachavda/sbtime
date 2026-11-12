@@ -180,6 +180,21 @@ export const parseChartDate = (
 };
 
 /**
+ * A lone day whose capacity is less than half or more than double the same
+ * capacity on the days either side. These are another section's numbers
+ * (for example 2 of 25 seats in the middle of a 529-seat lecture).
+ */
+const isStrayPoint = (points: { capacity: number }[], index: number) => {
+  const before = points[index - 1]?.capacity;
+  const after = points[index + 1]?.capacity;
+  const capacity = points[index].capacity;
+  if (before === undefined || after === undefined || before !== after) {
+    return false;
+  }
+  return capacity * 2 < before || capacity > before * 2;
+};
+
+/**
  * Convert a chart's daily points into history entries, merging runs of days
  * with the same numbers into one entry.
  */
@@ -201,7 +216,8 @@ export const chartToEntries = (
         Number.isFinite(point.enrolled) &&
         Number.isFinite(point.capacity)
     )
-    .sort((a, b) => a.date.toMillis() - b.date.toMillis());
+    .sort((a, b) => a.date.toMillis() - b.date.toMillis())
+    .filter((point, index, all) => !isStrayPoint(all, index));
 
   const entries: EnrollmentEntry[] = [];
 

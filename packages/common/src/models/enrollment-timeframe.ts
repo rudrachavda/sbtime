@@ -14,11 +14,12 @@ export const enrollmentTimeframeSchema = new Schema(
     semester: {
       type: String,
       required: true,
-      enum: ["Spring", "Fall", "Summer"],
+      enum: ["Winter", "Spring", "Fall", "Summer"],
     },
     phase: {
       type: Number,
-      enum: [1, 2, null],
+      // UCSB registration has three passes.
+      enum: [1, 2, 3, null],
       default: null,
     },
     isAdjustment: {

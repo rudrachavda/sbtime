@@ -148,6 +148,27 @@ describe("chartToEntries", () => {
   };
   const entries = chartToEntries(chart, pacific("2024-04-01"));
 
+  it("drops a lone day with another section's capacity", () => {
+    const stray = chartToEntries(
+      {
+        quarter: "Winter 2025",
+        days: Array(7).fill(false),
+        labels: ["Nov 10 2024", "Nov 11 2024", "Nov 12 2024", "Nov 13 2024"],
+        enrolled: [156, 2, 158, 160],
+        capacity: [529, 25, 529, 600],
+      },
+      pacific("2025-01-06")
+    );
+    assert.deepEqual(
+      stray.map((e) => [e.enrolledCount, e.maxEnroll]),
+      [
+        [156, 529],
+        [158, 529],
+        [160, 600],
+      ]
+    );
+  });
+
   it("merges consecutive days with the same numbers", () => {
     assert.deepEqual(
       entries.map((e) => [

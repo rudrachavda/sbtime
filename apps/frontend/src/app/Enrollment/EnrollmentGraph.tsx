@@ -397,16 +397,20 @@ export default function EnrollmentGraph({
 
         if (timeDelta < 0 || timeDelta > lastTimeDelta) return null;
 
+        // UCSB calls registration phases "passes".
         const phaseLabel = timeframe.isAdjustment
           ? "Adjustment"
           : timeframe.phase
-            ? `Phase ${timeframe.phase}`
-            : "Phase";
+            ? `Pass ${timeframe.phase}`
+            : "Pass";
         const groupLabel = GROUP_LABELS[timeframe.group] ?? timeframe.group;
 
         return {
           timeDelta,
-          label: `${phaseLabel} - ${groupLabel}`,
+          label:
+            timeframe.group === "all"
+              ? phaseLabel
+              : `${phaseLabel} - ${groupLabel}`,
           key: `${timeframe.phase ?? "adjustment"}-${timeframe.group}-${timeframe.startDate}`,
         };
       })

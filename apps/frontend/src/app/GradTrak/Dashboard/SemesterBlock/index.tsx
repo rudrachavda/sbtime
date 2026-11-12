@@ -802,7 +802,7 @@ function SemesterBlock({
         message={
           <>
             Are you sure you want to delete <strong>{planTerm.name}</strong>?
-            All courses in this semester will be removed.
+            All courses in this quarter will be removed.
           </>
         }
         onConfirm={async () => {

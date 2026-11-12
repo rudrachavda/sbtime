@@ -1,6 +1,7 @@
-import { TermModel } from "@repo/common/models";
+import { EnrollmentTimeframeModel, TermModel } from "@repo/common/models";
 
 import { getAllTerms, getNearbyTerms } from "../lib/terms";
+import { buildPassTimeframes } from "../lib/ucsb-pass-times";
 import { Config } from "../shared/config";
 
 const updateTerms = async (config: Config, allTerms: boolean) => {
@@ -54,6 +55,33 @@ const updateTerms = async (config: Config, allTerms: boolean) => {
   log.info(
     `Completed updating database with ${terms.length.toLocaleString()} terms.`
   );
+
+  // Registration passes become the Enrollment graph's phase markers.
+  const timeframes = terms
+    .filter((term) => term.academicCareerCode === "UGRD")
+    .flatMap((term) => buildPassTimeframes(term));
+  if (timeframes.length > 0) {
+    await EnrollmentTimeframeModel.bulkWrite(
+      timeframes.map((timeframe) => ({
+        updateOne: {
+          filter: {
+            termId: timeframe.termId,
+            phase: timeframe.phase,
+            isAdjustment: timeframe.isAdjustment,
+            group: timeframe.group,
+          },
+          update: {
+            $set: { ...timeframe, lastSyncedAt: new Date() },
+            ...(timeframe.endDate ? {} : { $unset: { endDate: "" } }),
+          },
+          upsert: true,
+        },
+      }))
+    );
+    log.info(
+      `Updated ${timeframes.length.toLocaleString()} registration pass times.`
+    );
+  }
 };
 
 const allTerms = async (config: Config) => {

@@ -4,6 +4,7 @@ import { useApolloClient } from "@apollo/client/react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+import { formatInstructorName } from "@repo/common";
 import { Boundary, LoadingIndicator } from "@repo/theme";
 
 import {
@@ -326,7 +327,7 @@ const GradeDistributions = () => {
                 output.input.type &&
                 output.input.familyName &&
                 output.input.givenName
-                  ? `${output.input.givenName} ${output.input.familyName}`
+                  ? formatInstructorName(output.input)
                   : "All instructors";
 
               const semester =
@@ -382,6 +383,14 @@ const GradeDistributions = () => {
                 subject={output.input.subject}
                 courseNumber={output.input.courseNumber}
                 gradeDistribution={output.data}
+                {...(output.input.type
+                  ? {
+                      givenName: output.input.givenName,
+                      familyName: output.input.familyName,
+                      semester: output.input.semester,
+                      year: output.input.year,
+                    }
+                  : {})}
                 hoveredLetter={hoveredLetter}
               />
             ))

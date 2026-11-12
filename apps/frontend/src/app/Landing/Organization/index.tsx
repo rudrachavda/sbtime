@@ -109,8 +109,8 @@ export default function Organization() {
           <div className={styles.getInvolvedTitle}>
             <h2 className={styles.heading}>Get Involved</h2>
             <p className={styles.description}>
-              Over 20,000 students use Berkeleytime every semester. Help us make
-              course planning a little easier for everyone.
+              SBTime is built by students, for students. Help us make course
+              planning a little easier for everyone.
             </p>
           </div>
           <Accordion type="single" collapsible className={styles.accordion}>

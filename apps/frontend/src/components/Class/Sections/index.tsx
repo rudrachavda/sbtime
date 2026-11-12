@@ -199,8 +199,6 @@ export default function Sections() {
                   const enrolledCount =
                     section.enrollment?.latest?.enrolledCount;
                   const maxEnroll = section.enrollment?.latest?.maxEnroll;
-                  const waitlistedCount =
-                    section.enrollment?.latest?.waitlistedCount;
                   const firstMeeting = section.meetings[0];
                   const hasTimeData = Boolean(
                     firstMeeting?.days?.some((day) => day) &&
@@ -280,12 +278,7 @@ export default function Sections() {
                         }
                       >
                         {enrollmentPercentage !== null
-                          ? `${enrollmentPercentage}%${
-                              typeof waitlistedCount === "number" &&
-                              waitlistedCount > 0
-                                ? ` (${waitlistedCount} wl.)`
-                                : ""
-                            }`
+                          ? `${enrollmentPercentage}%`
                           : NO_DATA_LABEL}
                       </td>
                     </tr>

@@ -24,7 +24,7 @@ const ROLES = [
     icon: CodeBrackets,
     title: "Software Engineer",
     description:
-      "Build and ship features used by thousands of students every semester. Work across our React frontend, Node.js/GraphQL backend, and data pipelines — all you need is curiosity and a willingness to learn.",
+      "Build and ship features used by thousands of students every quarter. Work across our React frontend, Node.js/GraphQL backend, and data pipelines — all you need is curiosity and a willingness to learn.",
   },
   {
     icon: DesignNib,

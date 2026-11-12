@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import { useApolloClient } from "@apollo/client/react";
 import { useSearchParams } from "react-router-dom";
 
+import { formatInstructorName } from "@repo/common";
 import { Box, Select, SelectHandle } from "@repo/theme";
 import { Button, Flex } from "@repo/theme";
 
@@ -144,9 +145,12 @@ export default function CourseInput({ outputs, setOutputs }: CourseInputProps) {
       });
     });
     const opts = [...instructorSet].map((v) => {
-      // value remains "Family, Given" for parsing, label is "Given Family" for display
+      // value remains "Family, Given" for parsing, label is "J. B. Miller" for display
       const [family, given] = (v as string).split(", ");
-      const label = given && family ? `${given} ${family}` : (v as string);
+      const label =
+        given && family
+          ? formatInstructorName({ givenName: given, familyName: family })
+          : (v as string);
       return { value: v as string, label };
     });
     if (opts.length === 1 && selectedType === InputType.Term) {
