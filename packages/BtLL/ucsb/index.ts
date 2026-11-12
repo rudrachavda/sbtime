@@ -1,10 +1,20 @@
+import { UCSB_ARTIFICIAL_INTELLIGENCE_BTLL } from "./artificial-intelligence";
+import { UCSB_CHEMICAL_ENGINEERING_BTLL } from "./chemical-engineering";
+import { UCSB_COMPUTER_ENGINEERING_BTLL } from "./computer-engineering";
 import { UCSB_COMPUTER_SCIENCE_BTLL } from "./computer-science";
+import { UCSB_ELECTRICAL_ENGINEERING_BTLL } from "./electrical-engineering";
 import { UCSB_ENGINEERING_GE_BTLL } from "./engineering";
+import { UCSB_MECHANICAL_ENGINEERING_BTLL } from "./mechanical-engineering";
 import { UCSB_UNIVERSITY_REQ_BTLL } from "./university";
 
 export {
+  UCSB_ARTIFICIAL_INTELLIGENCE_BTLL,
+  UCSB_CHEMICAL_ENGINEERING_BTLL,
+  UCSB_COMPUTER_ENGINEERING_BTLL,
   UCSB_COMPUTER_SCIENCE_BTLL,
+  UCSB_ELECTRICAL_ENGINEERING_BTLL,
   UCSB_ENGINEERING_GE_BTLL,
+  UCSB_MECHANICAL_ENGINEERING_BTLL,
   UCSB_UNIVERSITY_REQ_BTLL,
 };
 
@@ -21,6 +31,17 @@ export interface UcsbPlanRequirementSeed {
   /** Academic year the rules come from, e.g. "2026-27". */
   catalogYear: string;
 }
+
+/** A 2026-27 GEAR major, keyed by its GradTrak label. */
+const gearMajor = (major: string, code: string): UcsbPlanRequirementSeed => ({
+  name: `${major} (2026-27)`,
+  code,
+  isUcReq: false,
+  college: null,
+  major,
+  minor: null,
+  catalogYear: "2026-27",
+});
 
 /**
  * UCSB requirement sets loaded by the datapuller's `plan-requirements` job.
@@ -46,13 +67,10 @@ export const UCSB_PLAN_REQUIREMENTS: UcsbPlanRequirementSeed[] = [
     minor: null,
     catalogYear: "2026-27",
   },
-  {
-    name: "Computer Science (Engineering) (2026-27)",
-    code: UCSB_COMPUTER_SCIENCE_BTLL,
-    isUcReq: false,
-    college: null,
-    major: "Computer Science (Engineering)",
-    minor: null,
-    catalogYear: "2026-27",
-  },
+  gearMajor("Computer Science (Engineering)", UCSB_COMPUTER_SCIENCE_BTLL),
+  gearMajor("Artificial Intelligence", UCSB_ARTIFICIAL_INTELLIGENCE_BTLL),
+  gearMajor("Chemical Engineering", UCSB_CHEMICAL_ENGINEERING_BTLL),
+  gearMajor("Computer Engineering", UCSB_COMPUTER_ENGINEERING_BTLL),
+  gearMajor("Electrical Engineering", UCSB_ELECTRICAL_ENGINEERING_BTLL),
+  gearMajor("Mechanical Engineering", UCSB_MECHANICAL_ENGINEERING_BTLL),
 ];

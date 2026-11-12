@@ -7,7 +7,7 @@
     },
     "scripts": {
       "test": "npx tsx src/test.ts",
-      "test:ucsb": "npx tsx --test ucsb/requirements.test.ts",
+      "test:ucsb": "npx tsx --test ucsb/requirements.test.ts ucsb/majors.test.ts",
       "generate:mongosh": "npx tsx generate-mongosh-commands.ts",
       "seed:requirements": "npx tsx generate-mongosh-commands.ts > seed-requirements.js && docker cp seed-requirements.js berkeleytime-mongodb-1:/tmp/seed-requirements.js && docker exec berkeleytime-mongodb-1 mongosh --file /tmp/seed-requirements.js && rm seed-requirements.js"
     },

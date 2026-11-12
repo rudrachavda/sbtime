@@ -1,64 +1,19 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { init } from "../src/interpreter";
 import type { Data } from "../src/types";
 import {
   UCSB_COMPUTER_SCIENCE_BTLL,
   UCSB_ENGINEERING_GE_BTLL,
   UCSB_UNIVERSITY_REQ_BTLL,
 } from "./index";
-
-interface Result {
-  result: Data<boolean>;
-  description: Data<string>;
-  requirements?: Data<Result[]>;
-}
-
-const course = (
-  name: string,
-  tags: string[] = [],
-  units = 4,
-  universityRequirement = ""
-) => {
-  const [subject, ...rest] = name.split(" ");
-  return {
-    subject: { data: subject, type: "string" },
-    number: { data: rest.join(" "), type: "string" },
-    units: { data: units, type: "number" },
-    universityRequirement: { data: universityRequirement, type: "string" },
-    breadthRequirements: { data: tags, type: "List<string>" },
-    languageLevel: { data: "", type: "string" },
-  };
-};
-
-type TestCourse = ReturnType<typeof course>;
-
-const run = (code: string, courses: TestCourse[], extraUnits = 0) => {
-  const units = courses.reduce((sum, c) => sum + c.units.data, 0) + extraUnits;
-  const plan = {
-    units: { data: units, type: "number" },
-    columns: { data: [], type: "List<Column>" },
-    allCourses: { data: courses, type: "List<Course>" },
-  };
-  const variables = new Map<string, Data<unknown>>([
-    ["this", { data: plan, type: "Plan" }],
-    ["columns", { data: [], type: "List<Column>" }],
-  ]);
-  return init(code, variables, {}) as Result[];
-};
-
-const byName = (results: Result[]) => {
-  const all = new Map<string, boolean>();
-  const walk = (list: Result[]) => {
-    for (const r of list) {
-      all.set(r.description.data, r.result.data);
-      if (r.requirements) walk(r.requirements.data);
-    }
-  };
-  walk(results);
-  return all;
-};
+import {
+  type Result,
+  type TestCourse,
+  byName,
+  course,
+  run,
+} from "./test-helpers";
 
 describe("UCSB university requirements", () => {
   test("nothing planned meets nothing", () => {
