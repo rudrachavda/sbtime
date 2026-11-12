@@ -11,11 +11,12 @@ export function courseAdapter(
 ): Course {
   const primarySection = course.course?.mostRecentClass?.primarySection;
 
+  // UCSB GE tags, keyed by college: "ENGR:D", "L&S:WRT", ...
   const breadthRequirements = {
     data:
       primarySection?.sectionAttributes
         ?.filter((s) => s.attribute.code === "GE")
-        .map((sectionAttribute) => sectionAttribute.value?.description)
+        .map((sectionAttribute) => sectionAttribute.value?.code)
         .filter((s) => s !== null && s !== undefined) ?? [],
     type: "List<string>",
   };

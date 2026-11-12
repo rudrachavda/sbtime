@@ -54,6 +54,12 @@ export const planRequirementSchema = new Schema(
       required: true,
       default: false,
     },
+    // Academic year the rules come from, e.g. "2026-27".
+    catalogYear: {
+      type: String,
+      required: false,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

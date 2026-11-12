@@ -11,6 +11,7 @@ import enrollmentTimeframePuller from "./pullers/enrollment-timeframe";
 import gradeDistributionsPuller from "./pullers/grade-distributions";
 import migrationsPuller from "./pullers/migrations";
 import nexusGradesPuller from "./pullers/nexus-grades";
+import planRequirementsPuller from "./pullers/plan-requirements";
 import sectionsPuller from "./pullers/sections";
 import termsPuller from "./pullers/terms";
 import ucsbEnrollmentPuller from "./pullers/ucsb-enrollment";
@@ -54,6 +55,7 @@ const pullerMap: {
   "enrollment-timeframe": enrollmentTimeframePuller.syncEnrollmentTimeframe,
   "terms-all": termsPuller.allTerms,
   "terms-nearby": termsPuller.nearbyTerms,
+  "plan-requirements": planRequirementsPuller.loadPlanRequirements,
   "migrate-aggregated-metrics-classid":
     migrationsPuller.backfillAggregatedMetricsClassId,
   "catalog-sync-grades": async (config: Config) =>

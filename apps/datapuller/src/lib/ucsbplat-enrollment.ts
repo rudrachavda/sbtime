@@ -217,7 +217,7 @@ export const chartToEntries = (
         Number.isFinite(point.capacity)
     )
     .sort((a, b) => a.date.toMillis() - b.date.toMillis())
-    .filter((point, index, all) => !isStrayPoint(all, index));
+    .filter((_point, index, all) => !isStrayPoint(all, index));
 
   const entries: EnrollmentEntry[] = [];
 
