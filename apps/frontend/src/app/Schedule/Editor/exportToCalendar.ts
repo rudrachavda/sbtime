@@ -146,7 +146,7 @@ const generateICS = (schedule: ISchedule) => {
 
         icsContent.push(
           "BEGIN:VEVENT",
-          `UID:${eventId}@berkeleytime.com`,
+          `UID:${eventId}@ucsbtime.com`,
           `DTSTART;TZID=America/Los_Angeles:${formatTime(meeting.startTime, startDate)}`,
           `DTEND;TZID=America/Los_Angeles:${formatTime(meeting.endTime, startDate)}`,
           `RRULE:FREQ=WEEKLY;BYDAY=${activeDays.join(",")};UNTIL=${formatDate(endDate)}`,
@@ -179,7 +179,7 @@ const generateICS = (schedule: ISchedule) => {
 
     icsContent.push(
       "BEGIN:VEVENT",
-      `UID:${event._id}@berkeleytime.com`,
+      `UID:${event._id}@ucsbtime.com`,
       `DTSTART;TZID=America/Los_Angeles:${formatTime(event.startTime, startDate)}`,
       `DTEND;TZID=America/Los_Angeles:${formatTime(event.endTime, startDate)}`,
       `RRULE:FREQ=WEEKLY;BYDAY=${activeDays.join(",")};UNTIL=${formatDate(endDate)}`,

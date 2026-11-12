@@ -23,7 +23,16 @@ const getTransporter = () => {
 const siteUrl = () =>
   (process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 
-/** The class's page on SBTime (the regular session). */
+/** Text for an email's HTML: names and class fields come from users. */
+const escapeHtml = (value: string | number) =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+/** The class's page on SBTime (the regular session), escaped for an href. */
 const classPageUrl = (
   subject: string,
   courseNumber: string,
@@ -31,7 +40,11 @@ const classPageUrl = (
   semester: string,
   year: number
 ) =>
-  `${siteUrl()}/catalog/${year}/${semester}/${encodeURIComponent(subject)}/${encodeURIComponent(courseNumber)}/${number}/1`;
+  escapeHtml(
+    `${siteUrl()}/catalog/${[year, semester, subject, courseNumber, number]
+      .map((part) => encodeURIComponent(String(part)))
+      .join("/")}/1`
+  );
 
 export const sendSubscribeConfirmation = async (
   to: string,
@@ -46,14 +59,16 @@ export const sendSubscribeConfirmation = async (
   if (!mailer) return;
 
   const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "";
-  const classLabel = `${subject} ${courseNumber} Section ${sectionNumber} (${semester} ${year})`;
+  const classLabel = escapeHtml(
+    `${subject} ${courseNumber} Section ${sectionNumber} (${semester} ${year})`
+  );
 
   await mailer.sendMail({
     from,
     to,
     subject: `Subscribed to notifications for ${subject} ${courseNumber}`,
     html: `
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>You're now subscribed to enrollment drop notifications for <strong>${classLabel}</strong>.</p>
       <p>You'll receive an email when all of the following are true:</p>
       <ul>
@@ -79,14 +94,16 @@ export const sendUnsubscribeConfirmation = async (
   if (!mailer) return;
 
   const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "";
-  const classLabel = `${subject} ${courseNumber} Section ${sectionNumber} (${semester} ${year})`;
+  const classLabel = escapeHtml(
+    `${subject} ${courseNumber} Section ${sectionNumber} (${semester} ${year})`
+  );
 
   await mailer.sendMail({
     from,
     to,
     subject: `Unsubscribed from notifications for ${subject} ${courseNumber}`,
     html: `
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>You've been unsubscribed from enrollment drop notifications for <strong>${classLabel}</strong>.</p>
       <p>You won't receive any further notifications for this class.</p>
       <p>You can re-subscribe anytime from the <a href="${classPageUrl(subject, courseNumber, sectionNumber, semester, year)}">class page on SBTime</a>.</p>

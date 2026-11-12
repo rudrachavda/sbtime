@@ -34,6 +34,11 @@ trackingEventSchema.index({ targetId: 1, timestamp: -1 });
 trackingEventSchema.index({ sessionId: 1, timestamp: -1 });
 // Query by user (all events for a logged-in user)
 trackingEventSchema.index({ userId: 1, timestamp: -1 }, { sparse: true });
+// Usage events are deleted after a year, as the Privacy Policy says.
+trackingEventSchema.index(
+  { timestamp: 1 },
+  { expireAfterSeconds: 365 * 24 * 60 * 60 }
+);
 
 export const TrackingEventModel: Model<ITrackingEvent> = model<ITrackingEvent>(
   "trackingevents",

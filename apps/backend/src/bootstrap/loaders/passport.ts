@@ -14,7 +14,7 @@ const LOGIN_REDIRECT_ROUTE = "/login/redirect";
 const LOGOUT_ROUTE = "/logout";
 
 // route need to be added as authorized origins/redirect uris in google cloud console
-// OAuth requires an absolute callback URL (e.g. https://berkeleytime.com/api/login/redirect)
+// OAuth requires an absolute callback URL (e.g. https://ucsbtime.com/api/login/redirect)
 const backendBase = (config.backendPublicUrl ?? config.backendPath).replace(
   /\/$/,
   ""
@@ -36,15 +36,15 @@ function safeRedirect(value: unknown): string | null {
 
   try {
     const url = new URL(value);
-    const isBerkeleytime =
+    const isSBTime =
       url.protocol === "https:" &&
-      (url.hostname === "berkeleytime.com" ||
-        url.hostname.endsWith(".berkeleytime.com"));
+      (url.hostname === "ucsbtime.com" ||
+        url.hostname.endsWith(".ucsbtime.com"));
     const isLocalDevelopment =
       config.isDev &&
       (url.protocol === "http:" || url.protocol === "https:") &&
       (url.hostname === "localhost" || url.hostname === "127.0.0.1");
-    return isBerkeleytime || isLocalDevelopment ? url.toString() : null;
+    return isSBTime || isLocalDevelopment ? url.toString() : null;
   } catch {
     return null;
   }
@@ -63,7 +63,8 @@ export default async (app: Application, redis: RedisClientType) => {
         httpOnly: true,
         maxAge: ANONYMOUS_SESSION_TTL,
         sameSite: "lax",
-        domain: config.isDev ? undefined : ".berkeleytime.com",
+        // No domain: the cookie belongs only to the site that set it
+        // (ucsbtime.com). Berkeleytime shared it across its subdomains.
       },
       store: new RedisStore({
         client: redis,
@@ -229,6 +230,15 @@ export default async (app: Application, redis: RedisClientType) => {
   if (config.isDev) {
     const DEV_LOGIN_ROUTE = "/dev/login";
     const DEV_USERS_ROUTE = "/dev/users";
+
+    // These routes sign anyone in as any user and list every account, so on
+    // top of NODE_ENV they only answer requests made to localhost. A hosted
+    // copy started with NODE_ENV=development by mistake still refuses them.
+    const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+    app.use([DEV_LOGIN_ROUTE, DEV_USERS_ROUTE], (req, res, next) => {
+      if (LOCAL_HOSTS.has(req.hostname)) return next();
+      res.status(404).end();
+    });
 
     // GET /dev/login?userId=xxx&redirect_uri=/
     app.get(DEV_LOGIN_ROUTE, async (req, res) => {

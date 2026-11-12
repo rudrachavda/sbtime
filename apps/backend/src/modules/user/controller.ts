@@ -1,8 +1,12 @@
 import {
   AggregatedMetricsModel,
   CollectionModel,
+  PlanModel,
+  PlanRequirementModel,
+  PlanTermModel,
   RatingModel,
   ScheduleModel,
+  TrackingEventModel,
   UserModel,
 } from "@repo/common/models";
 
@@ -138,6 +142,24 @@ export const deleteAccount = async (context: RequestContext) => {
 
   // Delete all ratings
   await RatingModel.deleteMany({ createdBy: userId });
+
+  // Delete GradTrak: the plan, its quarters and any requirements the user
+  // wrote. Plans are keyed by email, so read it from the stored user.
+  const email = (await UserModel.findById(userId, { email: 1 }).lean())?.email;
+  if (email) {
+    await PlanModel.deleteMany({ userEmail: email });
+    await PlanTermModel.deleteMany({ userEmail: email });
+    await PlanRequirementModel.deleteMany({
+      createdBy: email,
+      isOfficial: false,
+    });
+  }
+
+  // Keep usage events, but no longer tied to the account.
+  await TrackingEventModel.updateMany(
+    { userId: String(userId) },
+    { $unset: { userId: 1 } }
+  );
 
   // Delete the user record
   await UserModel.findByIdAndDelete(userId);

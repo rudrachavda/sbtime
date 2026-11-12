@@ -1,118 +1,173 @@
+import type { ReactNode } from "react";
+
+import { Link } from "react-router-dom";
+
 import { Container } from "@repo/theme";
 
 import { CONTACT_EMAIL } from "@/lib/contact";
 
 import styles from "./Terms.module.scss";
 
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className={styles.section}>
+      <h2 className={styles.heading}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function List({ items }: { items: ReactNode[] }) {
+  return (
+    <ul className={styles.list}>
+      {items.map((item, index) => (
+        <li key={index}>
+          <p className={styles.listItemContent}>{item}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const Email = () => (
+  <a href={`mailto:${CONTACT_EMAIL}`} className={styles.link}>
+    {CONTACT_EMAIL}
+  </a>
+);
+
 export default function Terms() {
   return (
     <div className={styles.root}>
       <Container className={styles.container}>
         <h1 className={styles.title}>Terms of Service</h1>
-        <p className={styles.lastUpdated}>
-          Last updated: {new Date("2025-12-24").toLocaleDateString()}
-        </p>
+        <p className={styles.lastUpdated}>Last updated: November 12, 2026</p>
 
         <p className={styles.content}>
-          By accessing this web site, you are agreeing to be bound by these
-          Terms of Service, all applicable laws and regulations, and agree that
-          you are responsible for compliance with any applicable local laws. If
-          you do not agree with any of these terms, you are prohibited from
-          using or accessing this site. The materials contained in this web site
-          are protected by applicable copyright and trade mark law.
+          These terms cover your use of SBTime (
+          <a href="https://ucsbtime.com" className={styles.link}>
+            ucsbtime.com
+          </a>
+          ). By using SBTime, you agree to them. SBTime is a free, independent
+          student project and is not affiliated with or endorsed by UC Santa
+          Barbara.
         </p>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Use</h2>
+        <Section title="Course information">
           <p className={styles.content}>
-            Permission is granted to temporarily download one copy of the
-            materials (information or software) on SBTime's web site for
-            personal, non-commercial transitory viewing only. This is the grant
-            of a license, not a transfer of title, and under this license you
-            may not: a) modify or copy the materials; b) use the materials for
-            any commercial purpose, or for any public display (commercial or
-            non-commercial); c) attempt to decompile or reverse engineer any
-            software contained on SBTime's web site; d) remove any copyright or
-            other proprietary notations from the materials; or e) transfer the
-            materials to another person or "mirror" the materials on any other
-            server. This license shall automatically terminate if you violate
-            any of these restrictions and may be terminated by SBTime at any
-            time. Upon terminating your viewing of these materials or upon the
-            termination of this license, you must destroy any downloaded
-            materials in your possession whether in electronic or printed
-            format.
+            Class times, seats, grades and requirements on SBTime come from
+            public sources, including UCSB&apos;s Academic Curriculums API and
+            General Catalog, grade data published by the Daily Nexus, and
+            enrollment history from UCSBPlat. This information can be out of
+            date, incomplete or wrong.
           </p>
-        </section>
+          <p className={styles.content}>
+            SBTime is a planning aid, not an official record. GradTrak&apos;s
+            requirement checks are not a degree audit. Always confirm classes,
+            enrollment and graduation requirements with GOLD, the UCSB General
+            Catalog and your academic advisor before making decisions.
+          </p>
+        </Section>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Disclaimer</h2>
-          <p className={styles.content}>
-            The materials on SBTime's web site are provided "as is". SBTime
-            makes no warranties, expressed or implied, and hereby disclaims and
-            negates all other warranties, including without limitation, implied
-            warranties or conditions of merchantability, fitness for a
-            particular purpose, or non-infringement of intellectual property or
-            other violation of rights. Further, SBTime does not warrant or make
-            any representations concerning the accuracy, likely results, or
-            reliability of the use of the materials on its Internet web site or
-            otherwise relating to such materials or on any sites linked to this
-            site.
-          </p>
-        </section>
+        <Section title="Your account">
+          <List
+            items={[
+              "You sign in with your Google account and are responsible for what happens under it.",
+              "Accounts are for one person. Don't sign in as someone else or share an account.",
+              "SBTime may suspend or remove accounts that break these terms.",
+            ]}
+          />
+        </Section>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Limitations</h2>
+        <Section title="Using SBTime fairly">
           <p className={styles.content}>
-            In no event shall SBTime or its suppliers be liable for any damages
-            (including, without limitation, damages for loss of data or profit,
-            or due to business interruption) arising out of the use or inability
-            to use the materials on SBTime's Internet site, even if SBTime or a
-            SBTime authorized representative has been notified orally or in
-            writing of the possibility of such damage. Because some
-            jurisdictions do not allow limitations on implied warranties, or
-            limitations of liability for consequential or incidental damages,
-            these limitations may not apply to you.
+            When using SBTime, please don&apos;t:
           </p>
-        </section>
+          <List
+            items={[
+              "Collect data from the site in bulk with automated tools (scraping), or put heavy load on its servers.",
+              "Try to break, overload or get around the site's security or limits.",
+              "Submit fake, misleading or manipulated ratings, or rate classes on someone else's behalf.",
+              "Use SBTime for anything illegal, or to harass or harm others.",
+            ]}
+          />
+          <p className={styles.content}>
+            SBTime&apos;s source code is open source under the MIT License and
+            available{" "}
+            <a
+              href="https://github.com/rudrachavda/sbtime"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              on GitHub
+            </a>
+            . You&apos;re welcome to read, copy and build on the code under that
+            license; these terms cover using the website itself.
+          </p>
+        </Section>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Revisions and Errata</h2>
+        <Section title="What you add">
           <p className={styles.content}>
-            The materials appearing on SBTime's web site could include
-            technical, typographical, or photographic errors. SBTime does not
-            warrant that any of the materials on its web site are accurate,
-            complete, or current. SBTime may make changes to the materials
-            contained on its web site at any time without notice. SBTime does
-            not, however, make any commitment to update the materials.
+            Your schedules, plans and bookmarks stay yours. When you submit a
+            class rating, you allow SBTime to store it and include it in the
+            anonymous totals shown to other students. You can delete your
+            ratings, or your whole account, at any time; see the{" "}
+            <Link to="/legal/privacy" className={styles.link}>
+              Privacy Policy
+            </Link>{" "}
+            for how your information is handled.
           </p>
-        </section>
+        </Section>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Site Terms of Use Modifications</h2>
+        <Section title="Seat alerts">
           <p className={styles.content}>
-            SBTime may revise these terms of use for its web site at any time
-            without notice. By using this web site you are agreeing to be bound
-            by the then current version of these Terms of Service.
+            Seat alerts are sent on a best-effort basis. They can be late or
+            missed, and a seat can be taken before you see the email. Don&apos;t
+            rely on SBTime alone to enroll in a class.
           </p>
-        </section>
+        </Section>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Governing Law</h2>
+        <Section title="Changes and availability">
           <p className={styles.content}>
-            Any claim relating to SBTime's web site shall be governed by the
-            laws of the State of California without regard to its conflict of
-            law provisions.
+            SBTime is offered for free and may change, pause or stop any feature
+            at any time. These terms may also change; the new version will be
+            posted here with a new date, and continuing to use SBTime means you
+            accept it.
           </p>
-        </section>
+        </Section>
 
-        <section className={styles.section}>
-          <h2 className={styles.heading}>Contact</h2>
+        <Section title="No warranty">
           <p className={styles.content}>
-            If you have any questions about these Terms of Service, please
-            contact us at{" "}
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+            SBTime is provided &quot;as is&quot; and &quot;as available&quot;,
+            without warranties of any kind, including any warranty that it will
+            be accurate, reliable, uninterrupted or fit for a particular
+            purpose.
           </p>
-        </section>
+        </Section>
+
+        <Section title="Limitation of liability">
+          <p className={styles.content}>
+            To the fullest extent the law allows, SBTime and the people who run
+            it are not liable for any indirect, incidental or consequential
+            damages, or for any loss arising from your use of SBTime or from
+            relying on its information, such as a missed class, a missed
+            requirement or lost data. Some places don&apos;t allow these limits,
+            so they may not all apply to you.
+          </p>
+        </Section>
+
+        <Section title="Governing law">
+          <p className={styles.content}>
+            These terms are governed by the laws of the State of California,
+            without regard to its conflict of law rules.
+          </p>
+        </Section>
+
+        <Section title="Contact">
+          <p className={styles.content}>
+            Questions about these terms: <Email />.
+          </p>
+        </Section>
       </Container>
     </div>
   );

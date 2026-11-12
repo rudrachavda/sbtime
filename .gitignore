@@ -16,7 +16,10 @@ mdb.archive
 
 # build outputs
 *.log
+# Secrets: every .env file except the template.
 .env
+.env.*
+!.env.template
 .turbo
 node_modules
 dist/

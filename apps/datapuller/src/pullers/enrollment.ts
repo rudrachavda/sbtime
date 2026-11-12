@@ -20,6 +20,15 @@ const DATAGAP_THRESHOLD = 4 * GRANULARITY;
 
 const TERMS_PER_API_BATCH = 4;
 
+/** The user's name comes from Google; escape it for the email's HTML. */
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 const HOT_COURSE_THRESHOLD = 0.8;
 const DROP_THRESHOLD = 0.05;
 const MIN_OPEN_SPOTS = 3;
@@ -564,7 +573,7 @@ export const checkEnrollmentDrop = async (config: Config) => {
           to: user.email,
           subject: `Spot opened in ${history.subject} ${history.courseNumber}`,
           html: `
-            <p>Hi ${user.name},</p>
+            <p>Hi ${escapeHtml(user.name ?? "")},</p>
             <p>${history.subject} ${history.courseNumber} section ${history.sectionNumber}
             now has ${openSpots} open spot(s) (${Math.round(currentPct * 100)}% full).</p>
             <p>Go to <a href="https://my.sa.ucsb.edu/gold/">GOLD</a> to enroll.</p>
