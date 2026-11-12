@@ -52,7 +52,6 @@ jobs:
       SMTP_USER: ${{ secrets.SMTP_USER }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       SMTP_FROM: ${{ secrets.SMTP_FROM }}
-      NODE_ENV: production
       # Required by the shared config but unused by the UCSB pullers
       # (Berkeley's SIS and AWS sources, the semantic-search service).
       SIS_CLASS_APP_ID: unused
@@ -98,6 +97,9 @@ jobs:
       - name: Run pullers
         working-directory: apps/datapuller
         env:
+          # Only here: set for the whole job, it makes `npm ci` skip
+          # development packages, including tsx.
+          NODE_ENV: production
           PULLERS: ${{ steps.pick.outputs.pullers }}
           # The daily catch-up reads at most 300 lectures (about 10 minutes).
           ENROLLMENT_IMPORT_LIMIT: "300"

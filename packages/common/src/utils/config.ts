@@ -58,7 +58,9 @@ export const config: Config = {
   backendPath: env("BACKEND_PATH"),
   backendPublicUrl: envOptional("BACKEND_PUBLIC_URL"),
   graphqlPath: env("GRAPHQL_PATH"),
-  isDev: env("NODE_ENV") === "development",
+  // Unset counts as production. Hosts such as Vercel should leave it unset:
+  // NODE_ENV=production during a build makes npm skip devDependencies.
+  isDev: process.env.NODE_ENV === "development",
   semanticSearch: {
     url: env("SEMANTIC_SEARCH_URL"),
   },

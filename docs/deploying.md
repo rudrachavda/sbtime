@@ -20,9 +20,12 @@ The database is MongoDB Atlas (Flex, AWS Oregon), the cache is Upstash Redis
 
 Real values:
 
+Don't set `NODE_ENV`: when it's `production` during the build, npm skips
+development packages such as Vite and the build fails. Left unset, SBTime
+runs in production mode.
+
 | Name | Value |
 |---|---|
-| `NODE_ENV` | `production` |
 | `MONGODB_URI` | the Atlas connection string (database `sbtime`) |
 | `REDIS_URI` | the Upstash `rediss://...` address |
 | `SESSION_SECRET` | a new long random string (not the local one) |
