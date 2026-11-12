@@ -309,15 +309,15 @@ const GradeDistributions = () => {
         bottomTitle="% of Students vs Grade Received"
         bottomDescription={
           <>
-            We source our course grade data from Berkeley's official{" "}
+            We source our course grade data from the{" "}
             <a
-              href="https://calanswers.berkeley.edu/"
+              href="https://github.com/dailynexusdata/grades-data"
               target="_blank"
               rel="noopener noreferrer"
             >
-              CalAnswers
-            </a>{" "}
-            database.
+              Daily Nexus grades dataset
+            </a>
+            , compiled from UCSB Registrar public records requests.
           </>
         }
         courseCards={

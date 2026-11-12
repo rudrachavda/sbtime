@@ -6,6 +6,7 @@ import { mapQuarter } from "../lib/ucsb-catalog";
 import { recordEnrollment } from "../lib/ucsb-enrollment-store";
 import { Config } from "../shared/config";
 import { fetchQuarter, toCatalogTerm } from "./catalog";
+import { checkEnrollmentDrop } from "./enrollment";
 
 /**
  * Record seat counts for the current and upcoming quarters. Meant to run every
@@ -82,6 +83,10 @@ const updateEnrollment = async (config: Config) => {
       );
     }
   }
+
+  // Email students tracking a class when seats open up (needs SMTP settings;
+  // skipped with a warning otherwise).
+  await checkEnrollmentDrop(config);
 };
 
 export default { updateEnrollment };

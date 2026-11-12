@@ -6,6 +6,7 @@ import { describe, it } from "node:test";
 import {
   EnrollmentChart,
   chartToEntries,
+  combineSectionCharts,
   matchChartToSection,
   parseChartDate,
   parsePastEnrollmentPage,
@@ -227,9 +228,61 @@ describe("matchChartToSection", () => {
   const MWF = [true, false, true, false, true, false, false];
 
   it("takes the only lecture of the quarter", () => {
+    // Same start time, different room and days: still that lecture.
     assert.equal(
-      matchChartToSection(chart, [lecture("1", MWF, "08:00:00", "X 1", "Y")]),
+      matchChartToSection(chart, [lecture("1", MWF, "15:30:00", "X 1", "Y")]),
       "1"
+    );
+  });
+
+  it("refuses the only lecture when the chart starts at another time", () => {
+    // CHEM 1A, Spring 2024: a second, empty lecture at 9:00 that UCSB's data
+    // no longer has.
+    assert.equal(
+      matchChartToSection(chart, [lecture("1", TR, "12:00:00", "X 1", "Y")]),
+      null
+    );
+    assert.equal(
+      matchChartToSection(chart, [lecture("1", TR, "", "T B A", "Y")]),
+      "1"
+    );
+  });
+
+  it("matches unscheduled sections by instructor alone", () => {
+    const unscheduled = {
+      ...chart,
+      instructor: "Barnett M L",
+      location: "T B A",
+      days: [false, false, false, false, false, false, false],
+      startTime: undefined,
+    };
+    const none = [false, false, false, false, false, false, false];
+    const sections = [
+      lecture("1", none, "", "", "BARNETT"),
+      lecture("2", none, "", "", "CEREZO"),
+      lecture("3", none, "", "", "DOWDY"),
+    ];
+    assert.equal(matchChartToSection(unscheduled, sections), "1");
+    // Two sections with that instructor: can't tell which.
+    assert.equal(
+      matchChartToSection(unscheduled, [
+        ...sections,
+        lecture("4", none, "", "", "BARNETT"),
+      ]),
+      null
+    );
+    // "T B A" with every section taught: no match.
+    assert.equal(
+      matchChartToSection({ ...unscheduled, instructor: "T B A" }, sections),
+      null
+    );
+    // "T B A" and exactly one section without an instructor: that one.
+    assert.equal(
+      matchChartToSection({ ...unscheduled, instructor: "T B A" }, [
+        ...sections,
+        { sectionId: "5", meetings: [] },
+      ]),
+      "5"
     );
   });
 
@@ -257,6 +310,60 @@ describe("matchChartToSection", () => {
         lecture("2", MWF, "12:00:00", "PHELP 1445", "YAN"),
       ]),
       null
+    );
+  });
+});
+
+describe("combineSectionCharts", () => {
+  const spring = pacific("2024-04-01");
+  const series = (
+    labels: string[],
+    enrolled: number[],
+    capacity: number[]
+  ): EnrollmentChart => ({
+    quarter: "Spring 2024",
+    days: [true, false, true, false, true, false, false],
+    labels,
+    enrolled,
+    capacity,
+  });
+  const april = ["Apr 01 2024", "Apr 02 2024", "Apr 03 2024"];
+
+  it("drops exact repeats of a chart", () => {
+    const chart = series(april, [100, 120, 130], [300, 300, 300]);
+    const combined = combineSectionCharts([chart, { ...chart }], spring);
+    assert.equal(combined.used, 1);
+    assert.equal(combined.duplicates, 1);
+    assert.deepEqual(
+      combined.entries,
+      combineSectionCharts([chart], spring).entries
+    );
+  });
+
+  it("keeps the enrolled lecture when another chart covers the same days", () => {
+    const lecture = series(april, [100, 120, 130], [300, 300, 300]);
+    const empty = series(april, [0, 0, 0], [100, 100, 100]);
+    const combined = combineSectionCharts([empty, lecture], spring);
+    assert.equal(combined.used, 1);
+    assert.equal(combined.overlapping, 1);
+    assert.ok(combined.entries.every((entry) => entry.maxEnroll === 300));
+  });
+
+  it("keeps charts that cover different days", () => {
+    // ANTH 2, Spring 2024: a "T B A" chart, then a new one once the
+    // instructor was named.
+    const before = series(["Mar 01 2024", "Mar 02 2024"], [0, 10], [560, 560]);
+    const after = series(
+      ["Apr 01 2024", "Apr 02 2024"],
+      [400, 410],
+      [620, 620]
+    );
+    const combined = combineSectionCharts([after, before], spring);
+    assert.equal(combined.used, 2);
+    assert.equal(combined.overlapping, 0);
+    assert.deepEqual(
+      combined.entries.map((entry) => entry.maxEnroll),
+      [560, 560, 620, 620]
     );
   });
 });

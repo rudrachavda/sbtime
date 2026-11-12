@@ -8,7 +8,7 @@ export const formatUser = (user: UserType): UserModule.User => {
     email: user.email,
     staff: user.staff,
     name: user.name,
-    student: user.email.endsWith("@berkeley.edu"),
+    student: user.email.toLowerCase().endsWith("@ucsb.edu"),
     majors: user.majors ? user.majors : [],
     minors: user.minors ? user.minors : [],
     bookmarkedClasses: (user.bookmarkedClasses ??

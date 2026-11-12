@@ -466,7 +466,7 @@ const updateEnrollmentHistories = async (config: Config) => {
   await checkEnrollmentDrop(config);
 };
 
-const checkEnrollmentDrop = async (config: Config) => {
+export const checkEnrollmentDrop = async (config: Config) => {
   const { log, email } = config;
 
   if (!email) {
@@ -567,7 +567,7 @@ const checkEnrollmentDrop = async (config: Config) => {
             <p>Hi ${user.name},</p>
             <p>${history.subject} ${history.courseNumber} section ${history.sectionNumber}
             now has ${openSpots} open spot(s) (${Math.round(currentPct * 100)}% full).</p>
-            <p>Go to Calcentral to enroll.</p>
+            <p>Go to <a href="https://my.sa.ucsb.edu/gold/">GOLD</a> to enroll.</p>
           `,
         });
 

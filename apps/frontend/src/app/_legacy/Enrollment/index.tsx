@@ -693,16 +693,23 @@ export default function Enrollment() {
         bottomTitle="% of Class Filled vs Days After Enrollment Begins"
         bottomDescription={
           <>
-            We source our historic course and enrollment data directly from
-            Berkeley{" "}
+            We source our course and enrollment data from UCSB's{" "}
             <a
-              href="https://sis.berkeley.edu/"
+              href="https://developer.ucsb.edu/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Student Information System's
-            </a>{" "}
-            Course and Class APIs.
+              Academic Curriculums API
+            </a>
+            , with enrollment history before our own records from{" "}
+            <a
+              href="https://ucsbplat.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              UCSBPlat
+            </a>
+            .
           </>
         }
         courseCards={

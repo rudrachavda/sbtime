@@ -43,8 +43,10 @@ describe("resolveLocation", () => {
       room: "101",
       placeholder: false,
     });
-    const unpinned = resolveLocation("942 101");
-    expect(unpinned?.label).toBe("Trailer 942 101");
+    const unpinned = resolveLocation("NCEAS 101");
+    expect(unpinned?.label).toBe(
+      "NCEAS (1021 Anacapa St, downtown Santa Barbara) 101"
+    );
     expect(unpinned?.coordinates).toBeUndefined();
   });
 

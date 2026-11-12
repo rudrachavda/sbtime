@@ -236,7 +236,16 @@ describe("Computer Engineering 2026-27", () => {
     "ECE 194BB"
   );
 
-  test("a complete plan meets everything but the hand-checked sequences", () => {
+  const SEQUENCES =
+    "At least 2 approved elective sequences (ECE Department list)";
+  const sequencesMet = (...names: string[]) =>
+    byName(run(UCSB_COMPUTER_ENGINEERING_BTLL, courses(...names))).get(
+      SEQUENCES
+    );
+
+  test("a complete plan meets every requirement", () => {
+    // The electives include the VLSI, Signals & Systems and Real-Time
+    // sequences.
     const results = run(
       UCSB_COMPUTER_ENGINEERING_BTLL,
       [...preparation, ...upperDivision, ...eceCapstone, ...nineElectives],
@@ -245,11 +254,60 @@ describe("Computer Engineering 2026-27", () => {
     assert.deepEqual(summary(results), [
       ["Preparation for the Major", true],
       ["Upper-Division Required Courses", true],
-      ["Computer Engineering Electives", false],
+      ["Computer Engineering Electives", true],
       ["Minimum 191 Units for Computer Engineering", true],
     ]);
     const r = byName(results);
     assert.equal(r.get("Elective Units: 40 or 36 with ECE 189A-B-C"), true);
+  });
+
+  test("two complete sequences are required", () => {
+    assert.equal(
+      sequencesMet("CMPSC 165A", "CMPSC 165B", "ECE 179D", "ECE 179P"),
+      true
+    );
+    assert.equal(sequencesMet("CMPSC 165A", "CMPSC 165B", "ECE 179D"), false);
+  });
+
+  test("either listing of a cross-listed course counts", () => {
+    assert.equal(
+      sequencesMet("CMPSC 153A", "ECE 153B", "CMPSC 181", "ECE 178"),
+      true
+    );
+  });
+
+  test("ECE 123 can replace ECE 122A in the VLSI sequence", () => {
+    assert.equal(
+      sequencesMet("ECE 123", "ECE 122B", "ECE 130A", "ECE 130B"),
+      true
+    );
+  });
+
+  test("Multimedia needs two of ECE 178, 180 and 181", () => {
+    assert.equal(
+      sequencesMet("ECE 178", "ECE 160", "CMPSC 160", "CMPSC 162"),
+      false
+    );
+    assert.equal(
+      sequencesMet("ECE 178", "ECE 180", "CMPSC 160", "CMPSC 162"),
+      true
+    );
+  });
+
+  test("a course counts toward one sequence only", () => {
+    // Distributed Systems and Systems Software both need CMPSC 171.
+    assert.equal(sequencesMet("CMPSC 171", "CMPSC 176A", "CMPSC 170"), false);
+    // Networks (176A + 176B) and Systems Software (170 + 171) share nothing.
+    assert.equal(
+      sequencesMet("CMPSC 176A", "CMPSC 176B", "CMPSC 170", "CMPSC 171"),
+      true
+    );
+    // Networks and Distributed Systems need four separate courses.
+    assert.equal(sequencesMet("CMPSC 176A", "CMPSC 176B", "CMPSC 171"), false);
+    assert.equal(
+      sequencesMet("CMPSC 176A", "CMPSC 176B", "CMPSC 176C", "CMPSC 171"),
+      true
+    );
   });
 
   test("with the CMPSC capstone, 36 elective units are not enough", () => {

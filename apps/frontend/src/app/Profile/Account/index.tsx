@@ -36,7 +36,7 @@ export default function Account() {
               <span className={styles.infoValue}>{user?.name}</span>
             </div>
             <div className={styles.infoItem}>
-              <label>bConnected Email</label>
+              <label>Connected Email</label>
               <span className={styles.infoValue}>{user?.email}</span>
             </div>
             <div className={styles.infoItem}>

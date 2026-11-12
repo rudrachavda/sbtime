@@ -19,7 +19,7 @@ import {
 import {
   ENROLLMENT_SOURCE,
   EnrollmentChart,
-  chartToEntries,
+  combineSectionCharts,
   matchChartToSection,
   parsePastEnrollmentPage,
   pastEnrollmentUrl,
@@ -121,6 +121,8 @@ const saveHistory = async (
  *
  * Environment:
  *   ENROLLMENT_IMPORT_LIMIT  stop after this many courses (default: no limit)
+ *   ENROLLMENT_IMPORT_RETRY_UNMATCHED=1  re-read only courses whose last
+ *     import left charts unmatched
  */
 const importEnrollmentHistory = async (config: Config) => {
   const { log } = config;
@@ -159,7 +161,21 @@ const importEnrollmentHistory = async (config: Config) => {
     })
   );
 
-  let pending = newest.filter((course) => !done.has(course._id));
+  // ENROLLMENT_IMPORT_RETRY_UNMATCHED=1 re-reads only courses whose last
+  // import left charts unmatched, however recent.
+  const retry = process.env.ENROLLMENT_IMPORT_RETRY_UNMATCHED === "1";
+  const retryIds = retry
+    ? new Set(
+        await EnrollmentImportModel.distinct("courseId", {
+          source: ENROLLMENT_SOURCE,
+          unmatched: { $gt: 0 },
+        })
+      )
+    : null;
+
+  let pending = newest.filter((course) =>
+    retryIds ? retryIds.has(course._id) : !done.has(course._id)
+  );
   log.info(
     `${newest.length.toLocaleString()} courses offered since Winter 2024, ${pending.length.toLocaleString()} to import from UCSBPlat.`
   );
@@ -176,6 +192,9 @@ const importEnrollmentHistory = async (config: Config) => {
     courses: 0,
     charts: 0,
     matched: 0,
+    duplicates: 0,
+    overlapping: 0,
+    sections: 0,
     unmatched: 0,
     missing: 0,
   };
@@ -224,17 +243,29 @@ const importEnrollmentHistory = async (config: Config) => {
     const charts = fetched.status === "ok" ? fetched.charts : [];
     if (fetched.status === "missing") totals.missing++;
 
-    // Match charts to lectures, one quarter at a time.
-    let matched = 0;
+    // Match charts to lectures, one quarter at a time. Charts whose label
+    // isn't a plain quarter ("Spring 2024 .") are discussion sections; only
+    // lecture history is kept.
+    const counts = {
+      matched: 0,
+      duplicates: 0,
+      overlapping: 0,
+      sections: 0,
+      unmatched: 0,
+    };
     const byTerm = new Map<string, EnrollmentChart[]>();
     for (const chart of charts) {
       const termId = quarterLabelToTermId(chart.quarter);
-      if (termId) byTerm.set(termId, [...(byTerm.get(termId) ?? []), chart]);
+      if (!termId) counts.sections++;
+      else byTerm.set(termId, [...(byTerm.get(termId) ?? []), chart]);
     }
 
     for (const [termId, termCharts] of byTerm) {
       const begin = termBegin.get(termId);
-      if (!begin) continue;
+      if (!begin) {
+        counts.unmatched += termCharts.length;
+        continue;
+      }
 
       const lectures = await SectionModel.find(
         { termId, courseId: course._id, primary: true },
@@ -249,17 +280,38 @@ const importEnrollmentHistory = async (config: Config) => {
         }
       ).lean();
 
-      const bySection = new Map<string, EnrollmentEntry[]>();
+      const bySection = new Map<string, EnrollmentChart[]>();
       for (const chart of termCharts) {
         const sectionId = matchChartToSection(chart, lectures);
-        if (!sectionId) continue;
-        bySection.set(sectionId, [
-          ...(bySection.get(sectionId) ?? []),
-          ...chartToEntries(chart, begin),
-        ]);
+        if (!sectionId) {
+          counts.unmatched++;
+          continue;
+        }
+        bySection.set(sectionId, [...(bySection.get(sectionId) ?? []), chart]);
       }
 
-      for (const [sectionId, entries] of bySection) {
+      // Lectures that no longer get a chart lose what an earlier, less
+      // careful import gave them.
+      const unchartered = lectures
+        .map((lecture) => lecture.sectionId)
+        .filter((sectionId) => !bySection.has(sectionId));
+      if (unchartered.length > 0) {
+        await NewEnrollmentHistoryModel.updateMany(
+          {
+            termId,
+            sessionId: REGULAR_SESSION_ID,
+            sectionId: { $in: unchartered },
+          },
+          { $pull: { history: { source: ENROLLMENT_SOURCE } } }
+        );
+      }
+
+      for (const [sectionId, sectionCharts] of bySection) {
+        const combined = combineSectionCharts(sectionCharts, begin);
+        counts.matched += combined.used;
+        counts.duplicates += combined.duplicates;
+        counts.overlapping += combined.overlapping;
+        const entries = combined.entries;
         const lecture = lectures.find((l) => l.sectionId === sectionId)!;
         await saveHistory(
           {
@@ -274,7 +326,6 @@ const importEnrollmentHistory = async (config: Config) => {
           },
           entries
         );
-        matched++;
       }
     }
 
@@ -285,8 +336,7 @@ const importEnrollmentHistory = async (config: Config) => {
           fetchedAt: new Date(),
           pages: fetched.status === "ok" ? fetched.pages : 0,
           charts: charts.length,
-          matched,
-          unmatched: charts.length - matched,
+          ...counts,
         },
       },
       { upsert: true }
@@ -294,16 +344,20 @@ const importEnrollmentHistory = async (config: Config) => {
 
     totals.courses++;
     totals.charts += charts.length;
-    totals.matched += matched;
-    totals.unmatched += charts.length - matched;
+    totals.matched += counts.matched;
+    totals.duplicates += counts.duplicates;
+    totals.overlapping += counts.overlapping;
+    totals.sections += counts.sections;
+    totals.unmatched += counts.unmatched;
 
     if ((index + 1) % 50 === 0) {
       log.trace(`  ${index + 1} / ${pending.length} courses`);
     }
   }
 
+  const n = (value: number) => value.toLocaleString();
   log.info(
-    `Imported ${totals.courses.toLocaleString()} courses: ${totals.matched.toLocaleString()} of ${totals.charts.toLocaleString()} charts matched to a lecture, ${totals.unmatched.toLocaleString()} unmatched, ${totals.missing.toLocaleString()} courses with no history on UCSBPlat.`
+    `Imported ${n(totals.courses)} courses, ${n(totals.charts)} charts: ${n(totals.matched)} matched to a lecture, ${n(totals.sections)} for discussion sections (not kept), ${n(totals.duplicates)} repeats, ${n(totals.overlapping)} other lectures overlapping a matched one, ${n(totals.unmatched)} with no lecture to match; ${n(totals.missing)} courses with no history on UCSBPlat.`
   );
 };
 

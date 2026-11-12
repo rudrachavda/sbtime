@@ -1,10 +1,10 @@
 import {
   allOf,
   and,
-  byHand,
   cappedUnits,
   electiveCourses,
   or,
+  planned,
   program,
   totalUnits,
 } from "./builders";
@@ -17,7 +17,10 @@ import {
  *   are 36-40 units: 40 with the CMPSC capstone, 36 with the ECE one, so the
  *   two always add up to 48.
  * - Electives must include at least 2 sequences approved by the ECE
- *   Department; the list is not in the GEAR, so this is checked off by hand.
+ *   Department. The 12 sequences come from the department's "Senior
+ *   Elective Sequence (choose 2)" sheet (the GEAR does not list them). The
+ *   sheet doesn't say whether a course can count in two sequences; this
+ *   assumes it can't.
  * - ECE 192/196 and CMPSC 192/196 count for at most 4 units combined (the
  *   GEAR's text is cut off after "(4 units"). "ECE 194AA-194ZZ (except
  *   194R)" is matched as any ECE 194 with a letter suffix other than R.
@@ -115,7 +118,57 @@ export const UCSB_COMPUTER_ENGINEERING_BTLL = program(
   boolean has_ece_capstone get_attr(ece_capstone, "result")
   number required_elective_units if_else(has_ece_capstone, 36, 40)
   NumberRequirement elective_units_req {elective_units, required_elective_units, "Elective Units: 40 or 36 with ECE 189A-B-C"}
-  ${byHand("sequences", "At least 2 elective sequences approved by the ECE Department")}
+  // Senior elective sequences (ECE Department sheet): at least 2.
+  ${planned("has_176a", ["CMPSC 176A"])}
+  ${planned("has_176b", ["CMPSC 176B"])}
+  ${planned("has_176c", ["CMPSC 176C"])}
+  ${planned("has_171", ["CMPSC 171"])}
+  ${planned("has_170", ["CMPSC 170"])}
+  ${planned("has_153a", ["ECE 153A", "CMPSC 153A"])}
+  ${planned("has_153b", ["ECE 153B"])}
+  ${planned("has_178", ["ECE 178"])}
+  ${planned("has_180", ["ECE 180"])}
+  ${planned("has_181", ["ECE 181", "CMPSC 181"])}
+  ${planned("has_160", ["CMPSC 160"])}
+  ${planned("has_162", ["CMPSC 162"])}
+  ${planned("has_147a", ["ECE 147A"])}
+  ${planned("has_147b", ["ECE 147B"])}
+  ${planned("has_vlsi_a", ["ECE 122A", "ECE 123"])}
+  ${planned("has_122b", ["ECE 122B"])}
+  ${planned("has_179d", ["ECE 179D"])}
+  ${planned("has_179p", ["ECE 179P"])}
+  ${planned("has_130a", ["ECE 130A"])}
+  ${planned("has_130b", ["ECE 130B"])}
+  ${planned("has_157a", ["ECE 157A"])}
+  ${planned("has_157b", ["ECE 157B"])}
+  ${planned("has_165a", ["CMPSC 165A"])}
+  ${planned("has_165b", ["CMPSC 165B"])}
+
+  number multimedia_count add([if_else(has_178, 1, 0), if_else(has_180, 1, 0), if_else(has_181, 1, 0)])
+  boolean systems_design and([has_153a, has_153b])
+  boolean multimedia greater_than(multimedia_count, 1)
+  boolean programming_languages and([has_160, has_162])
+  boolean real_time and([has_147a, has_147b])
+  boolean vlsi and([has_vlsi_a, has_122b])
+  boolean robotics and([has_179d, has_179p])
+  boolean signals and([has_130a, has_130b])
+  boolean design_automation and([has_157a, has_157b])
+  boolean machine_learning and([has_165a, has_165b])
+  number independent_sequences add([if_else(systems_design, 1, 0), if_else(multimedia, 1, 0), if_else(programming_languages, 1, 0), if_else(real_time, 1, 0), if_else(vlsi, 1, 0), if_else(robotics, 1, 0), if_else(signals, 1, 0), if_else(design_automation, 1, 0), if_else(machine_learning, 1, 0)])
+
+  // Networks, Distributed Systems and Systems Software share courses, and a
+  // course counts toward one sequence only. Distributed Systems and Systems
+  // Software both need CMPSC 171, so they never pair; Networks and
+  // Distributed Systems pair only with CMPSC 171, 176A, 176B and 176C.
+  boolean networks and([has_176a, or([has_176b, has_176c])])
+  boolean distributed and([has_171, or([has_176a, has_176b])])
+  boolean systems_software and([has_170, has_171])
+  boolean networks_and_distributed and([has_176a, has_176b, has_176c, has_171])
+  boolean two_shared or([and([networks, systems_software]), networks_and_distributed])
+  number shared_sequences if_else(two_shared, 2, if_else(or([networks, distributed, systems_software]), 1, 0))
+
+  number sequence_count add([independent_sequences, shared_sequences])
+  BooleanRequirement sequences {greater_than(sequence_count, 1), "At least 2 approved elective sequences (ECE Department list)"}
   ${and("electives", ["elective_units_req", "sequences"], "Computer Engineering Electives")}
 
   ${totalUnits("graduation_units", 191, "Computer Engineering")}

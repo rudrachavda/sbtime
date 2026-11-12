@@ -253,6 +253,79 @@ export const chartToEntries = (
   return entries;
 };
 
+export interface CombinedCharts {
+  entries: EnrollmentEntry[];
+  /** Charts whose history was kept. */
+  used: number;
+  /** Exact repeats of another chart (UCSBPlat lists some charts twice). */
+  duplicates: number;
+  /** Charts dropped because they cover the same days as a stronger chart. */
+  overlapping: number;
+}
+
+/**
+ * Merge the charts matched to one lecture. UCSBPlat sometimes lists a chart
+ * twice, and sometimes keeps a separate chart for another (often cancelled)
+ * lecture at the same time. Repeats are dropped; when two different charts
+ * cover the same days, the one with more students enrolled is kept, so the
+ * graph never jumps between two series. Charts covering different days (a
+ * new chart after an instructor change, say) are all kept.
+ */
+export const combineSectionCharts = (
+  charts: EnrollmentChart[],
+  quarterBegin: DateTime
+): CombinedCharts => {
+  const seen = new Set<string>();
+  const unique = charts.filter((chart) => {
+    const key = JSON.stringify([chart.labels, chart.enrolled, chart.capacity]);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const last = (values: number[]) => values[values.length - 1] ?? 0;
+  const candidates = unique
+    .map((chart) => ({
+      chart,
+      entries: chartToEntries(chart, quarterBegin),
+    }))
+    .sort(
+      (a, b) =>
+        last(b.chart.enrolled) - last(a.chart.enrolled) ||
+        last(b.chart.capacity) - last(a.chart.capacity)
+    );
+
+  const spans: { start: number; end: number }[] = [];
+  const entries: EnrollmentEntry[] = [];
+  let used = 0;
+  let overlapping = 0;
+
+  for (const candidate of candidates) {
+    if (candidate.entries.length === 0) {
+      used++;
+      continue;
+    }
+    const start = candidate.entries[0].startTime.getTime();
+    const end =
+      candidate.entries[candidate.entries.length - 1].endTime.getTime();
+    if (spans.some((span) => start <= span.end && end >= span.start)) {
+      overlapping++;
+      continue;
+    }
+    spans.push({ start, end });
+    entries.push(...candidate.entries);
+    used++;
+  }
+
+  entries.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+  return {
+    entries,
+    used,
+    duplicates: charts.length - unique.length,
+    overlapping,
+  };
+};
+
 const squash = (value: string | undefined) =>
   (value ?? "").replace(/\s+/g, "").toUpperCase();
 
@@ -265,10 +338,50 @@ export const matchChartToSection = (
   lectures: Pick<ISectionItem, "sectionId" | "meetings">[]
 ): string | null => {
   if (lectures.length === 0) return null;
-  if (lectures.length === 1) return lectures[0].sectionId;
 
   const chartLocation = squash(chart.location);
   const chartFamily = squash(chart.instructor?.split(" ")[0]);
+  const teaches = (lecture: (typeof lectures)[number]) =>
+    !!chartFamily &&
+    chartFamily !== "T" &&
+    !!lecture.meetings?.some((m) =>
+      m.instructors?.some(
+        (instructor) => squash(instructor.familyName) === chartFamily
+      )
+    );
+
+  // The only lecture, unless the chart starts at a time none of its
+  // meetings do: then it is another (often cancelled) lecture that our
+  // data doesn't have.
+  if (lectures.length === 1) {
+    const times = (lectures[0].meetings ?? [])
+      .map((meeting) => meeting.startTime)
+      .filter((time): time is string => !!time);
+    const conflicts =
+      !!chart.startTime &&
+      times.length > 0 &&
+      !times.some((time) => time.startsWith(chart.startTime!));
+    return conflicts ? null : lectures[0].sectionId;
+  }
+
+  // Independent study and seminars often have no days, time or room on
+  // either side; then a single lecture taught by the chart's instructor is
+  // enough.
+  const unscheduled =
+    !chart.startTime &&
+    !chart.days.some(Boolean) &&
+    (!chartLocation || chartLocation === "TBA");
+  if (unscheduled) {
+    // "T B A" on the chart: the one section with no instructor, if any.
+    const named = !!chartFamily && chartFamily !== "T";
+    const candidates = named
+      ? lectures.filter(teaches)
+      : lectures.filter(
+          (lecture) =>
+            !lecture.meetings?.some((m) => (m.instructors ?? []).length > 0)
+        );
+    return candidates.length === 1 ? candidates[0].sectionId : null;
+  }
 
   const scored = lectures.map((lecture) => {
     const meeting = lecture.meetings?.[0];
@@ -286,17 +399,7 @@ export const matchChartToSection = (
       squash(meeting?.location) === chartLocation
     )
       score += 2;
-    if (
-      chartFamily &&
-      chartFamily !== "T" &&
-      lecture.meetings?.some((m) =>
-        m.instructors?.some(
-          (instructor) => squash(instructor.familyName) === chartFamily
-        )
-      )
-    ) {
-      score += 1;
-    }
+    if (teaches(lecture)) score += 1;
     return { sectionId: lecture.sectionId, score };
   });
 

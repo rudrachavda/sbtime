@@ -84,8 +84,9 @@ export const buildings: Record<string, Building> = {
   // out over the whole city.
   NCEAS: { name: "NCEAS (1021 Anacapa St, downtown Santa Barbara)" },
   "570": pinned("Building 570", [-119.843491, 34.416476]),
-  // Trailer 942 (Physics) is on UCSB's campus map but not in OpenStreetMap.
-  "942": { name: "Trailer 942" },
+  // Trailer 942 (Physics), west of Broida Hall; not in OpenStreetMap, so
+  // the position comes from the user.
+  "942": pinned("Trailer 942", [-119.843915, 34.413938]),
   "477": pinned("Building 477", [-119.848507, 34.413656]),
 };
 

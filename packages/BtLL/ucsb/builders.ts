@@ -87,6 +87,11 @@ export const firstCoursesUnits = (
   List<Course> ${id}_list ${list(courses)}${matches(id, `${id}_list`)}
   number ${id}_units sum_units(slice(${id}, 0, ${maxCourses}))`;
 
+/** `${id}` is true when any course in the list is planned. */
+export const planned = (id: string, courses: string[]) => `
+  List<Course> ${id}_list ${list(courses)}${matches(`${id}_matches`, `${id}_list`)}
+  boolean ${id} greater_than(length(${id}_matches), 0)`;
+
 /** A requirement the plan cannot check, for the student to tick off. */
 export const byHand = (id: string, description: string) => `
   BooleanRequirement ${id} {false, ${quote(description)}}`;
