@@ -19,6 +19,20 @@ const getTransporter = () => {
   return transporter;
 };
 
+/** The site's public address, for links in emails (set SITE_URL when hosted). */
+const siteUrl = () =>
+  (process.env.SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+
+/** The class's page on SBTime (the regular session). */
+const classPageUrl = (
+  subject: string,
+  courseNumber: string,
+  number: string,
+  semester: string,
+  year: number
+) =>
+  `${siteUrl()}/catalog/${year}/${semester}/${encodeURIComponent(subject)}/${encodeURIComponent(courseNumber)}/${number}/1`;
+
 export const sendSubscribeConfirmation = async (
   to: string,
   name: string,
@@ -47,7 +61,7 @@ export const sendSubscribeConfirmation = async (
         <li>Enrollment drops by at least 5%</li>
         <li>At least 3 spots open up</li>
       </ul>
-      <p>To unsubscribe, go to the class page on <a href="https://berkeleytime.com">Berkeleytime</a> and click the bell icon again.</p>
+      <p>To unsubscribe, go to the <a href="${classPageUrl(subject, courseNumber, sectionNumber, semester, year)}">class page on SBTime</a> and click the bell icon again.</p>
     `,
   });
 };
@@ -75,7 +89,7 @@ export const sendUnsubscribeConfirmation = async (
       <p>Hi ${name},</p>
       <p>You've been unsubscribed from enrollment drop notifications for <strong>${classLabel}</strong>.</p>
       <p>You won't receive any further notifications for this class.</p>
-      <p>You can re-subscribe anytime from the class page on <a href="https://berkeleytime.com">Berkeleytime</a>.</p>
+      <p>You can re-subscribe anytime from the <a href="${classPageUrl(subject, courseNumber, sectionNumber, semester, year)}">class page on SBTime</a>.</p>
     `,
   });
 };
