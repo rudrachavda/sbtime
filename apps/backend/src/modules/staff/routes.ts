@@ -6,7 +6,7 @@ import {
   type Response,
 } from "express";
 import multer from "multer";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 import { config } from "../../../../../packages/common/src/utils/config";
 import { createS3Client } from "../../utils/s3Client";
@@ -134,7 +134,7 @@ export default (app: Application): void => {
 
         // Generate a server-controlled filename and extension based on the
         // file signature, never the client-supplied name or MIME type.
-        const fileName = `${uuidv4()}.${imageType.extension}`;
+        const fileName = `${randomUUID()}.${imageType.extension}`;
 
         // Create S3 client
         const s3Client = createS3Client();
