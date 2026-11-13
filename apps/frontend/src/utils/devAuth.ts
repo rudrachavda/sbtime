@@ -1,6 +1,6 @@
 /**
- * Development-only authentication utilities and constants.
- * This file is only used in development mode.
+ * DEV "Select User" sign-in utilities and constants. Used in local
+ * development and on UAT (uat.ucsbtime.com).
  */
 
 // localStorage keys

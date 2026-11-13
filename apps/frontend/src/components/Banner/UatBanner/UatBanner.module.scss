@@ -1,0 +1,64 @@
+@use "@/mixins" as *;
+
+.root {
+  flex-shrink: 0;
+  min-height: 28px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--amber-100);
+  border-bottom: 1px solid var(--amber-300);
+  color: var(--amber-900);
+
+  @include dark-mode {
+    background-color: var(--amber-900);
+    border-bottom-color: var(--amber-700);
+    color: var(--amber-100);
+  }
+
+  .tag {
+    flex-shrink: 0;
+    font-size: var(--text-12);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: var(--amber-500);
+    color: var(--amber-950);
+  }
+
+  .text {
+    margin: 0;
+    font-size: var(--text-12);
+    line-height: 1.4;
+  }
+
+  .link {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    font-size: var(--text-12);
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.badge {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1000;
+  font-size: var(--text-12);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: var(--amber-500);
+  color: var(--amber-950);
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+}

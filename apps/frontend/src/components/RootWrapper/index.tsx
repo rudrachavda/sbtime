@@ -9,6 +9,7 @@ import {
   useIncrementRouteRedirectClick,
 } from "@/hooks/api/route-redirect";
 import { useTracking } from "@/hooks/api/tracking/useTracking";
+import { IS_UAT } from "@/lib/environment";
 
 // Module-level tracking to prevent duplicate increments
 let lastIncrementedPath: string | null = null;
@@ -63,7 +64,7 @@ export default function RootWrapper() {
   return (
     <>
       <RouteTracker />
-      {import.meta.env.DEV && <DevAuthBanner />}
+      {(import.meta.env.DEV || IS_UAT) && <DevAuthBanner />}
       <ScrollRestoration />
       <Outlet />
     </>

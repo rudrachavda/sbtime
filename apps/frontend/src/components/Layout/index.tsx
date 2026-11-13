@@ -1,12 +1,14 @@
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 
 import { Flex } from "@repo/theme";
 
 import Banner from "@/components/Banner";
+import UatBanner from "@/components/Banner/UatBanner";
 import Footer from "@/components/Footer";
 import NavigationBar from "@/components/NavigationBar";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import useMinWidth from "@/hooks/useMinWidth";
+import { IS_UAT } from "@/lib/environment";
 
 import styles from "./Layout.module.scss";
 
@@ -30,6 +32,7 @@ export default function Layout({
   const { headerRef } = useHeaderHeight();
   const isAbovePhone = useMinWidth(768);
   const showBanner = banner && isAbovePhone;
+  const { pathname } = useLocation();
 
   return (
     <Flex direction="column">
@@ -39,9 +42,15 @@ export default function Layout({
       >
         {(showBanner || header) && (
           <div ref={headerRef} className={styles.stickyHeader}>
+            <UatBanner />
             {showBanner && <Banner showFallback={bannerFallback} />}
             {header && <NavigationBar noBorder={!headerBorder} />}
           </div>
+        )}
+        {/* Full-screen pages (home, schedule editor, GradTrak) have no
+            shared header; home adds its own UAT strip, the rest get a badge. */}
+        {IS_UAT && !showBanner && !header && pathname !== "/" && (
+          <UatBanner compact />
         )}
         <Outlet />
       </Flex>

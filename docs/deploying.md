@@ -99,14 +99,15 @@ stays as of the last refresh.
 3. **Vercel → Settings → Environment Variables**, environment **Preview**,
    branch **uat**:
 
-   | Name                 | Value                                                  |
-   | -------------------- | ------------------------------------------------------ |
-   | `MONGODB_URI`        | the Atlas connection string with database `sbtime-uat` |
-   | `REDIS_URI`          | the UAT Upstash `rediss://...` address                 |
-   | `SESSION_SECRET`     | a new random string (not production's)                 |
-   | `URL`                | `https://uat.ucsbtime.com`                             |
-   | `SITE_URL`           | `https://uat.ucsbtime.com`                             |
-   | `BACKEND_PUBLIC_URL` | `https://uat.ucsbtime.com/api`                         |
+   | Name                 | Value                                                       |
+   | -------------------- | ----------------------------------------------------------- |
+   | `MONGODB_URI`        | the Atlas connection string with database `sbtime-uat`      |
+   | `REDIS_URI`          | the UAT Upstash `rediss://...` address                      |
+   | `SESSION_SECRET`     | a new random string (not production's)                      |
+   | `URL`                | `https://uat.ucsbtime.com`                                  |
+   | `SITE_URL`           | `https://uat.ucsbtime.com`                                  |
+   | `BACKEND_PUBLIC_URL` | `https://uat.ucsbtime.com/api`                              |
+   | `DEV_AUTH_ENABLED`   | `true` (the DEV "Select User" sign-in; never in Production) |
 
    Leave the `SMTP_*` settings unset; without `SMTP_HOST` the backend skips
    email.
@@ -120,6 +121,10 @@ stays as of the last refresh.
    Authentication on for Standard Protection (the default), which covers
    every Preview including uat.ucsbtime.com.
 8. Run `scripts/refresh-uat-db.sh` once to fill `sbtime-uat`.
+
+UAT labels itself: an amber "UAT" strip on every page (a corner badge on
+full-screen pages) and "[UAT]" in the tab title. The code is in `main` but only
+shows on a `uat.` address, so ucsbtime.com never shows it.
 
 Other branches still get Preview deploys, but with no database settings
 their backend won't start; use `uat` for anything that needs data.

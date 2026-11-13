@@ -30,6 +30,8 @@ export interface Config {
   backendPublicUrl: string | undefined;
   graphqlPath: string;
   isDev: boolean;
+  /** UAT only: allow the DEV "Select User" sign-in (DEV_AUTH_ENABLED=true). */
+  devAuthEnabled: boolean;
   semanticSearch: {
     url: string;
   };
@@ -67,6 +69,8 @@ export const config: Config = {
   // Unset counts as production. Hosts such as Vercel should leave it unset:
   // NODE_ENV=production during a build makes npm skip devDependencies.
   isDev: process.env.NODE_ENV === "development",
+  // Set only for the uat branch in Vercel. Never set it for production.
+  devAuthEnabled: process.env.DEV_AUTH_ENABLED === "true",
   semanticSearch: {
     // Not deployed; requests to it fail at once.
     url: envDefault("SEMANTIC_SEARCH_URL", "http://localhost:1"),

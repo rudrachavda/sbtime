@@ -226,17 +226,23 @@ export default async (app: Application, redis: RedisClientType) => {
     )
   );
 
-  // DEV-ONLY: Direct user login without Google OAuth
-  if (config.isDev) {
+  // Direct user login without Google OAuth: local development, and UAT when
+  // DEV_AUTH_ENABLED=true (set only for the uat branch, which Vercel's
+  // deployment protection keeps private).
+  if (config.isDev || config.devAuthEnabled) {
     const DEV_LOGIN_ROUTE = "/dev/login";
     const DEV_USERS_ROUTE = "/dev/users";
 
-    // These routes sign anyone in as any user and list every account, so on
-    // top of NODE_ENV they only answer requests made to localhost. A hosted
-    // copy started with NODE_ENV=development by mistake still refuses them.
+    // These routes sign anyone in as any user and list every account, so they
+    // only answer requests made to localhost, or to a uat. address when
+    // DEV_AUTH_ENABLED is set. A hosted copy started with NODE_ENV=development
+    // by mistake still refuses them.
     const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+    const isAllowedHost = (hostname: string) =>
+      (config.isDev && LOCAL_HOSTS.has(hostname)) ||
+      (config.devAuthEnabled && hostname.startsWith("uat."));
     app.use([DEV_LOGIN_ROUTE, DEV_USERS_ROUTE], (req, res, next) => {
-      if (LOCAL_HOSTS.has(req.hostname)) return next();
+      if (isAllowedHost(req.hostname)) return next();
       res.status(404).end();
     });
 

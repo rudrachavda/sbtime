@@ -4,6 +4,7 @@ import { CombinedGraphQLErrors } from "@apollo/client";
 
 import UserContext from "@/contexts/UserContext";
 import { useReadUser } from "@/hooks/api";
+import { IS_UAT } from "@/lib/environment";
 import {
   DEV_AUTH_LOGIN_ROUTE,
   clearStoredDevUserId,
@@ -25,9 +26,9 @@ export default function UserProvider({ children }: UserProviderProps) {
 
   const autoLoginAttempted = useRef(false);
 
-  // Auto-login in dev mode if we have a saved user ID but no session
+  // Auto-login in dev mode and on UAT if we have a saved user ID but no session
   useEffect(() => {
-    if (!import.meta.env.DEV) return;
+    if (!import.meta.env.DEV && !IS_UAT) return;
     if (loading) return;
     if (user) return;
 

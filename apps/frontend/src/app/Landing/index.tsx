@@ -1,4 +1,5 @@
 import Banner from "@/components/Banner";
+import UatBanner from "@/components/Banner/UatBanner";
 import NavigationBar from "@/components/NavigationBar";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import useMinWidth from "@/hooks/useMinWidth";
@@ -14,6 +15,7 @@ const Home = () => {
   return (
     <div className={styles.root}>
       <div ref={headerRef} className={styles.stickyHeader}>
+        <UatBanner />
         {isAbovePhone && <Banner />}
         <NavigationBar />
       </div>
