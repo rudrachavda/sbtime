@@ -6,7 +6,10 @@
 export const ENROLLMENT_COURSE = "PSY 1";
 export const ENROLLMENT_TITLE = "Introduction to Psychology";
 export const ENROLLMENT_TERM = "Fall 2026";
-export const ENROLLMENT_SECTION = "0100";
+// Lecture 0100 meets in Campbell Hall (about 860 seats), so its 840 seats are
+// real; PSY 1's small discussion sections (0101, 0102, ...) are separate.
+export const ENROLLMENT_SECTION = "Lecture 0100";
+export const ENROLLMENT_LOCATION = "Campbell Hall";
 
 export interface EnrollmentPoint {
   /** YYYY-MM-DD */

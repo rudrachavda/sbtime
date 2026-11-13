@@ -13,6 +13,7 @@ import styles from "./EnrollmentShowcase.module.scss";
 import {
   ENROLLMENT_COURSE,
   ENROLLMENT_HISTORY,
+  ENROLLMENT_LOCATION,
   ENROLLMENT_SECTION,
   ENROLLMENT_TERM,
   ENROLLMENT_TITLE,
@@ -78,7 +79,7 @@ export default function EnrollmentShowcase() {
           {ENROLLMENT_COURSE}
         </FakeSelect>
         <FakeSelect width={130}>{ENROLLMENT_TERM}</FakeSelect>
-        <FakeSelect width={150}>Section {ENROLLMENT_SECTION}</FakeSelect>
+        <FakeSelect width={150}>{ENROLLMENT_SECTION}</FakeSelect>
         <FakeButton>Add class</FakeButton>
         <span className={styles.spacer} />
         <FakeSwitch label="Show phases" />
@@ -94,7 +95,7 @@ export default function EnrollmentShowcase() {
             <CourseCard
               color="blue"
               code={ENROLLMENT_COURSE}
-              detail={`${ENROLLMENT_TERM} · Section ${ENROLLMENT_SECTION}`}
+              detail={`${ENROLLMENT_TERM} · ${ENROLLMENT_SECTION}`}
               value={
                 <>
                   <RollingNumber
@@ -199,7 +200,7 @@ export default function EnrollmentShowcase() {
             color="blue"
             code={ENROLLMENT_COURSE}
             title={ENROLLMENT_TITLE}
-            metadata={`${ENROLLMENT_TERM} · Section ${ENROLLMENT_SECTION}`}
+            metadata={`${ENROLLMENT_TERM} · ${ENROLLMENT_SECTION} · ${ENROLLMENT_LOCATION}`}
             metrics={[
               {
                 label: "Enrolled",

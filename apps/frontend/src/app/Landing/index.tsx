@@ -8,6 +8,7 @@ import Features from "./Features";
 import Hero from "./Hero";
 import styles from "./Landing.module.scss";
 import Organization from "./Organization";
+import Releases from "./Releases";
 
 const Home = () => {
   const { headerRef } = useHeaderHeight();
@@ -22,6 +23,7 @@ const Home = () => {
       </div>
       <Hero />
       <Features />
+      <Releases />
       <Organization />
     </div>
   );
