@@ -246,6 +246,13 @@ export default async (app: Application, redis: RedisClientType) => {
       res.status(404).end();
     });
 
+    // UAT's database is a copy of production, so there the switcher only
+    // offers the test accounts (emails ending in @sbtime.test, created by
+    // scripts/refresh-uat-db.sh), never real people. Locally it lists everyone.
+    const devUserFilter = config.isDev
+      ? {}
+      : { email: { $regex: /@sbtime\.test$/ } };
+
     // GET /dev/login?userId=xxx&redirect_uri=/
     app.get(DEV_LOGIN_ROUTE, async (req, res) => {
       const { userId, redirect_uri: redirectURI } = req.query;
@@ -271,7 +278,7 @@ export default async (app: Application, redis: RedisClientType) => {
         return;
       }
 
-      const user = await UserModel.findById(userId);
+      const user = await UserModel.findOne({ _id: userId, ...devUserFilter });
       if (!user) {
         failDevLogin("user_not_found");
         return;
@@ -295,7 +302,9 @@ export default async (app: Application, redis: RedisClientType) => {
 
     // GET /dev/users - List available users for selection
     app.get(DEV_USERS_ROUTE, async (_req, res) => {
-      const users = await UserModel.find({}).select("_id email name staff");
+      const users = await UserModel.find(devUserFilter).select(
+        "_id email name staff"
+      );
 
       res.json(users);
     });

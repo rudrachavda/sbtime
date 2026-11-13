@@ -5,6 +5,9 @@
 #
 #   scripts/refresh-uat-db.sh
 #
+# Then adds the test accounts dev-student@sbtime.test and
+# dev-staff@sbtime.test, the only users UAT's DEV "Select User" bar offers.
+#
 # Runs mongodump/mongorestore inside the local MongoDB container, so Docker
 # must be running. The connection string is passed in the environment and
 # never printed.
@@ -27,6 +30,23 @@ docker compose exec -T -e ATLAS_URI="$ATLAS_URI" mongodb sh -c '
       --numInsertionWorkersPerCollection 4
   mongosh --quiet "$ATLAS_URI" --eval "
     const p = db.getSiblingDB(\"sbtime\"), u = db.getSiblingDB(\"sbtime-uat\");
+    // Test accounts for UAT'"'"'s DEV Select User bar, which only offers
+    // @sbtime.test emails (never the real people copied from production).
+    const now = new Date();
+    for (const [key, name, staff] of [
+      [\"dev-student\", \"Dev Student\", false],
+      [\"dev-staff\", \"Dev Staff\", true],
+    ]) {
+      u.users.updateOne(
+        { email: key + \"@sbtime.test\" },
+        {
+          \$set: { name, staff, updatedAt: now },
+          \$setOnInsert: { googleId: \"test-\" + key, createdAt: now },
+        },
+        { upsert: true }
+      );
+    }
+    print(\"Test accounts:\", u.users.countDocuments({ email: /@sbtime[.]test$/ }));
     const names = p.getCollectionNames();
     const same = names.filter((c) =>
       p.getCollection(c).estimatedDocumentCount() ===
