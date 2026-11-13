@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import { ArrowRight, Plus } from "iconoir-react";
+import { Plus } from "iconoir-react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -12,9 +12,9 @@ import {
 } from "@repo/theme";
 
 import Footer from "@/components/Footer";
+import GetStartedButton from "@/components/GetStartedButton";
 import { useReadPlans } from "@/hooks/api";
 import useUser from "@/hooks/useUser";
-import { signIn } from "@/lib/api";
 
 import styles from "./GradTrak.module.scss";
 
@@ -77,10 +77,7 @@ export default function GradTrakIndex() {
               Create a GradTrak
             </Button>
           ) : (
-            <Button onClick={() => signIn()}>
-              Sign in
-              <ArrowRight />
-            </Button>
+            <GetStartedButton />
           )}
         </div>
       </Container>

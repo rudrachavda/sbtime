@@ -5,7 +5,9 @@
   // Grows to two lines on narrow screens instead of squeezing the text.
   min-height: 32px;
   background-color: var(--backdrop-color);
-  padding: 4px 12px;
+  // Content sits in the navigation bar's 1200px column (24px side padding);
+  // the background still runs edge to edge.
+  padding: 4px max(24px, calc((100% - 1200px) / 2));
   display: flex;
   align-items: center;
   gap: 12px;

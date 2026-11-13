@@ -1,14 +1,15 @@
 import { useMemo } from "react";
 
-import { ArrowRight, Calendar, Plus } from "iconoir-react";
+import { Calendar, Plus } from "iconoir-react";
 
 import { Box, Button, Container, Flex } from "@repo/theme";
 
 import Footer from "@/components/Footer";
+import GetStartedButton from "@/components/GetStartedButton";
 import ScheduleCard from "@/components/ScheduleCard";
 import { useReadSchedules, useReadTerms } from "@/hooks/api";
 import useUser from "@/hooks/useUser";
-import { IScheduleListSchedule, signIn } from "@/lib/api";
+import { IScheduleListSchedule } from "@/lib/api";
 import { Semester } from "@/lib/generated/graphql";
 
 // import { RecentType, getRecents } from "@/lib/recent";
@@ -84,10 +85,7 @@ export default function Schedules() {
               </Button>
             </CreateScheduleDialog>
           ) : (
-            <Button onClick={() => signIn()}>
-              Sign in
-              <ArrowRight />
-            </Button>
+            <GetStartedButton />
           )}
         </div>
         <Flex direction="column" gap="5">

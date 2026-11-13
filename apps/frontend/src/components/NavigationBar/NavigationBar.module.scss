@@ -295,25 +295,6 @@
     }
   }
 
-  .getStarted {
-    @extend %auth-link;
-    color: var(--heading-color);
-    background-color: var(--foreground-color);
-    // 0.5px hairline outline (drawn as a ring so it can be thinner than a
-    // 1px border) plus a soft shadow underneath.
-    box-shadow:
-      0 0 0 0.5px rgb(0 0 0 / 8%),
-      0 1px 2px rgb(0 0 0 / 6%);
-
-    @include dark-mode {
-      box-shadow: 0 0 0 0.5px rgb(255 255 255 / 8%);
-    }
-
-    &:hover {
-      background-color: var(--button-hover-color);
-    }
-  }
-
   // Keyboard shortcut hint, e.g. the "L" in "Login L": a 16px key with a
   // 0.5px border and a capital letter. Hidden on touch screens
   // (pointer-coarse), which have no keyboard to use it with.

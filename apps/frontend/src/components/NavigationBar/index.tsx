@@ -28,6 +28,7 @@ import {
   useTheme,
 } from "@repo/theme";
 
+import GetStartedButton from "@/components/GetStartedButton";
 import { useAllNavItems } from "@/hooks/api/nav-item";
 import useUser from "@/hooks/useUser";
 import { signOut } from "@/lib/api";
@@ -115,9 +116,8 @@ export default function NavigationBar({
     }));
   }, [navItems, navItemsLoading, navItemsError]);
 
-  // Shortcuts for signed-out visitors: L opens the login page (on every
-  // page, returning here afterwards) and, on the home page, G (get started)
-  // opens the catalog.
+  // Shortcut for signed-out visitors: L opens the login page (on every page,
+  // returning here afterwards). G belongs to the Get started button.
   useEffect(() => {
     if (user) return;
 
@@ -128,12 +128,11 @@ export default function NavigationBar({
 
       const key = event.key.toLowerCase();
       if (key === "l") navigate(loginPath(location));
-      else if (key === "g" && isLandingPage) navigate("/catalog");
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isLandingPage, user, navigate, location]);
+  }, [user, navigate, location]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -388,11 +387,7 @@ export default function NavigationBar({
               <Link to={loginPath(location)} className={styles.loginLink}>
                 Login <kbd className={styles.kbd}>L</kbd>
               </Link>
-              {isLandingPage && (
-                <Link to="/catalog" className={styles.getStarted}>
-                  Get started <kbd className={styles.kbd}>G</kbd>
-                </Link>
-              )}
+              {isLandingPage && <GetStartedButton />}
             </div>
           )}
         </div>
