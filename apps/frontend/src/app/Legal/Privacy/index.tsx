@@ -71,7 +71,7 @@ export default function Privacy() {
             items={[
               "Bookmarked classes and courses, and the folders you put them in.",
               "Schedules you build in the Scheduler.",
-              "GradTrak plans: your majors and minors, planned courses, labels and requirement check-offs.",
+              "GradPath plans: your majors and minors, planned courses, labels and requirement check-offs.",
               "Class ratings you submit.",
               "Classes you watch for seat alerts, and whether alerts are on.",
             ]}
@@ -130,7 +130,7 @@ export default function Privacy() {
           </p>
           <p className={styles.content}>
             SBTime doesn&apos;t have access to your UCSB records. Course data
-            comes from UCSB&apos;s public sources, and your GradTrak plans
+            comes from UCSB&apos;s public sources, and your GradPath plans
             contain only what you enter.
           </p>
         </Section>
@@ -152,7 +152,7 @@ export default function Privacy() {
               <>
                 You can delete your account under{" "}
                 <strong>Profile → Account → Delete Account</strong>. This
-                deletes your account, bookmarks, schedules, GradTrak plans,
+                deletes your account, bookmarks, schedules, GradPath plans,
                 ratings and watched classes. Usage records are kept until they
                 expire, but are no longer linked to you.
               </>,

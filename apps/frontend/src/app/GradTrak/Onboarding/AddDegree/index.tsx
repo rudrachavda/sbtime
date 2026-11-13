@@ -94,7 +94,7 @@ export default function AddDegree({ isMajor, onNext }: AddDegreeProps) {
               <h1>Add {optionType}s</h1>
               <p>
                 Search for your {optionType.toLowerCase()} and add it to
-                Gradtrak to list specific requirements.
+                GradPath to list specific requirements.
               </p>
             </Flex>
 

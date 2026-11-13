@@ -63,9 +63,9 @@ export default function GradTrakIndex() {
     <Box p="5">
       <Container style={{ marginBottom: "80px" }}>
         <div className={styles.header}>
-          <div className={styles.title}>Welcome to SBTime's GradTrak</div>
+          <div className={styles.title}>Welcome to SBTime's GradPath</div>
           <div className={styles.prompt}>
-            Use our GradTrak to build your ideal 4-year plan. Find courses,
+            Use our GradPath to build your ideal 4-year plan. Find courses,
             track requirements, and visualize your academic journey.
           </div>
           {user ? (
@@ -74,7 +74,7 @@ export default function GradTrakIndex() {
               onClick={() => navigate("/gradtrak/onboarding")}
             >
               <Plus />
-              Create a GradTrak
+              Create a GradPath
             </Button>
           ) : (
             <GetStartedButton />

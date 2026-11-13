@@ -1,11 +1,11 @@
-import { Link } from "react-router-dom";
-
+// Used by About Us, hidden below for now
+// import { Link } from "react-router-dom";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  Button,
+  // Button, (About Us, hidden below for now)
   Container,
   Flex,
 } from "@repo/theme";
@@ -19,6 +19,7 @@ export default function Organization() {
   return (
     // pt="9"
     <Flex direction="column" className={styles.root} pt="9">
+      {/* About Us is hidden for now; uncomment to bring it back.
       <Container className={styles.aboutSection}>
         <div className={styles.aboutContent}>
           <h2 className={styles.aboutTitle}>About Us</h2>
@@ -37,6 +38,7 @@ export default function Organization() {
           </Button>
         </div>
       </Container>
+      */}
       {/* <Container className={styles.wrapper}>
         <div className={styles.getInvolvedBox}>
           <div className={styles.getInvolvedTitle}>

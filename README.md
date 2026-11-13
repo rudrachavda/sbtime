@@ -10,7 +10,7 @@ SBTime is an independent student project and is not affiliated with or endorsed 
 - **Scheduler:** build schedules, or generate ones that fit your classes and time preferences.
 - **Grades:** grade distributions by course, quarter and instructor.
 - **Enrollment:** how fast classes filled in past quarters, and seat counts for the current one.
-- **GradTrak:** plan your degree quarter by quarter and check it against requirements (UCSB-wide requirements, College of Engineering GEs and the Engineering majors so far).
+- **GradPath:** plan your degree quarter by quarter and check it against requirements (UCSB-wide requirements, College of Engineering GEs and the Engineering majors so far).
 - **Seat alerts:** an email when a seat opens in a class you're watching.
 
 ## Data sources

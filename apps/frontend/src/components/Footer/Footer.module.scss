@@ -2,10 +2,17 @@
 
 .wrapper {
   padding: 0 40px;
+
+  // Phones: the same 24px side padding as the rest of the site
+  @media (max-width: 768px) {
+    padding: 0 24px;
+  }
 }
 
 .root {
-  padding: 64px 0;
+  // 32px under the links (64px above), so with the bottom row's own 24px
+  // there's 56px before the copyright line
+  padding: 64px 0 32px;
   display: flex;
   flex-wrap: wrap;
   // Same hairline as the navigation bar

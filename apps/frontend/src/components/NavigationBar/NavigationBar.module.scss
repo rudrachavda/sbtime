@@ -165,8 +165,8 @@
     height: 64px;
     padding: 0 max(24px, calc((100% - 1200px) / 2));
     background-color: var(--foreground-color);
-    // Hairline bottom edge: 0.5px and lighter than the default border.
-    border-bottom: 0.5px solid rgb(0 0 0 / 8%);
+    // changed back to 1px, to make it consistent across the platform.
+    border-bottom: 1px solid rgb(0 0 0 / 8%);
 
     @include dark-mode {
       border-bottom-color: rgb(255 255 255 / 8%);

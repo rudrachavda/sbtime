@@ -1,15 +1,16 @@
-// PSY 1 (Introduction to Psychology), Fall 2026, lecture 0100: its daily
-// enrollment history, read from the production enrollmenthistories
-// collection on 2026-11-13. Seats were limited to 205 at first, then raised
-// to 840. The showcase never calls the API; edit this file to change it.
+// MUS 114 (Music and Popular Culture in America), Fall 2026, lecture 0100:
+// its daily enrollment history, read from the production
+// enrollmenthistories collection on 2026-11-13. 120 seats the whole time; it
+// filled across the first two passes, closed on May 23, lost a few seats over
+// the summer and refilled. The showcase never calls the API; edit this file
+// to change it.
 
-export const ENROLLMENT_COURSE = "PSY 1";
-export const ENROLLMENT_TITLE = "Introduction to Psychology";
+export const ENROLLMENT_COURSE = "MUS 114";
+export const ENROLLMENT_TITLE = "Music and Popular Culture in America";
 export const ENROLLMENT_TERM = "Fall 2026";
-// Lecture 0100 meets in Campbell Hall (about 860 seats), so its 840 seats are
-// real; PSY 1's small discussion sections (0101, 0102, ...) are separate.
 export const ENROLLMENT_SECTION = "Lecture 0100";
-export const ENROLLMENT_LOCATION = "Campbell Hall";
+// MUSIC 1145, as the app labels it
+export const ENROLLMENT_LOCATION = "Music Building 1145";
 
 export interface EnrollmentPoint {
   /** YYYY-MM-DD */
@@ -19,29 +20,29 @@ export interface EnrollmentPoint {
 }
 
 export const ENROLLMENT_HISTORY: EnrollmentPoint[] = [
-  { date: "2026-04-27", enrolled: 0, capacity: 205 },
-  { date: "2026-05-12", enrolled: 23, capacity: 205 },
-  { date: "2026-05-13", enrolled: 28, capacity: 205 },
-  { date: "2026-05-14", enrolled: 39, capacity: 205 },
-  { date: "2026-05-15", enrolled: 88, capacity: 205 },
-  { date: "2026-05-16", enrolled: 90, capacity: 205 },
-  { date: "2026-05-18", enrolled: 90, capacity: 205 },
-  { date: "2026-05-20", enrolled: 105, capacity: 205 },
-  { date: "2026-05-21", enrolled: 125, capacity: 205 },
-  { date: "2026-05-23", enrolled: 186, capacity: 205 },
-  { date: "2026-05-26", enrolled: 191, capacity: 205 },
-  { date: "2026-05-28", enrolled: 194, capacity: 205 },
-  { date: "2026-06-02", enrolled: 194, capacity: 205 },
-  { date: "2026-06-05", enrolled: 194, capacity: 205 },
-  { date: "2026-06-10", enrolled: 195, capacity: 205 },
-  { date: "2026-06-15", enrolled: 197, capacity: 205 },
-  { date: "2026-06-20", enrolled: 205, capacity: 205 },
-  { date: "2026-08-20", enrolled: 817, capacity: 840 },
-  { date: "2026-09-10", enrolled: 836, capacity: 840 },
-  { date: "2026-09-12", enrolled: 835, capacity: 840 },
-  { date: "2026-09-22", enrolled: 840, capacity: 840 },
-  { date: "2026-11-11", enrolled: 826, capacity: 840 },
-  { date: "2026-11-13", enrolled: 826, capacity: 840 },
+  { date: "2026-04-27", enrolled: 0, capacity: 120 },
+  { date: "2026-05-12", enrolled: 12, capacity: 120 },
+  { date: "2026-05-13", enrolled: 19, capacity: 120 },
+  { date: "2026-05-14", enrolled: 47, capacity: 120 },
+  { date: "2026-05-15", enrolled: 58, capacity: 120 },
+  { date: "2026-05-16", enrolled: 56, capacity: 120 },
+  { date: "2026-05-18", enrolled: 58, capacity: 120 },
+  { date: "2026-05-20", enrolled: 70, capacity: 120 },
+  { date: "2026-05-21", enrolled: 104, capacity: 120 },
+  { date: "2026-05-23", enrolled: 120, capacity: 120 },
+  { date: "2026-05-26", enrolled: 120, capacity: 120 },
+  { date: "2026-05-28", enrolled: 119, capacity: 120 },
+  { date: "2026-06-02", enrolled: 120, capacity: 120 },
+  { date: "2026-06-05", enrolled: 120, capacity: 120 },
+  { date: "2026-06-10", enrolled: 119, capacity: 120 },
+  { date: "2026-06-15", enrolled: 118, capacity: 120 },
+  { date: "2026-06-20", enrolled: 110, capacity: 120 },
+  { date: "2026-08-20", enrolled: 120, capacity: 120 },
+  { date: "2026-09-10", enrolled: 120, capacity: 120 },
+  { date: "2026-09-12", enrolled: 120, capacity: 120 },
+  { date: "2026-09-22", enrolled: 120, capacity: 120 },
+  { date: "2026-11-11", enrolled: 118, capacity: 120 },
+  { date: "2026-11-13", enrolled: 118, capacity: 120 },
 ];
 
 // Month labels along the bottom of the chart

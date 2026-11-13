@@ -44,7 +44,7 @@ export default function SidePanel({
   const Header = (
     <>
       <div className={styles.headerContainer}>
-        <h1 className={styles.header}>GradTrak</h1>
+        <h1 className={styles.header}>GradPath</h1>
         <button
           className={styles.collapseButton}
           onClick={toggleCollapse}

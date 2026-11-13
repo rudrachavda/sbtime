@@ -58,7 +58,7 @@ export default function SideBar({ children }: SideBarProps) {
               </Link>
               {FEATURES.gradtrak && (
                 <Link className={styles.item} to="/gradtrak">
-                  Gradtrak
+                  GradPath
                 </Link>
               )}
               {/* <Link className={styles.item} to="/plans">

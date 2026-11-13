@@ -114,7 +114,7 @@ export default function Analytics() {
             className={`${styles.tab} ${activeTab === "gradtrak" ? styles.active : ""}`}
             onClick={() => setActiveTab("gradtrak")}
           >
-            GradTrak
+            GradPath
           </button>
           <button
             className={`${styles.tab} ${activeTab === "bookmarks" ? styles.active : ""}`}

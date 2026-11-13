@@ -61,7 +61,7 @@ export default function Terms() {
             date, incomplete or wrong.
           </p>
           <p className={styles.content}>
-            SBTime is a planning aid, not an official record. GradTrak&apos;s
+            SBTime is a planning aid, not an official record. GradPath&apos;s
             requirement checks are not a degree audit. Always confirm classes,
             enrollment and graduation requirements with GOLD, the UCSB General
             Catalog and your academic advisor before making decisions.

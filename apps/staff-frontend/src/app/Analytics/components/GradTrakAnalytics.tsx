@@ -275,7 +275,7 @@ export function TotalGradTraksBlock() {
     return (
       <AnalyticsCard
         title="Total GradTraks"
-        description="Users with a GradTrak"
+        description="Users with a GradPath"
       >
         <div
           style={{
@@ -295,7 +295,7 @@ export function TotalGradTraksBlock() {
     return (
       <AnalyticsCard
         title="Total GradTraks"
-        description="Users with a GradTrak"
+        description="Users with a GradPath"
       >
         <div
           style={{
@@ -618,7 +618,7 @@ export function CourseCountHistogramBlock() {
   if (loading) {
     return (
       <AnalyticsCard
-        title="Courses per GradTrak"
+        title="Courses per GradPath"
         description="Distribution of course counts"
       >
         <div
@@ -638,7 +638,7 @@ export function CourseCountHistogramBlock() {
   if (error) {
     return (
       <AnalyticsCard
-        title="Courses per GradTrak"
+        title="Courses per GradPath"
         description="Distribution of course counts"
       >
         <div
@@ -658,7 +658,7 @@ export function CourseCountHistogramBlock() {
 
   return (
     <AnalyticsCard
-      title="Courses per GradTrak"
+      title="Courses per GradPath"
       description="Distribution of course counts"
       currentValue={maxCourses}
       currentValueLabel="max"
@@ -1135,7 +1135,7 @@ export function TopUsersTableBlock() {
   if (loading) {
     return (
       <AnalyticsCard
-        title="Top GradTrak Users"
+        title="Top GradPath Users"
         description="Users with most courses in their plan"
       >
         <div
@@ -1155,7 +1155,7 @@ export function TopUsersTableBlock() {
   if (error) {
     return (
       <AnalyticsCard
-        title="Top GradTrak Users"
+        title="Top GradPath Users"
         description="Users with most courses in their plan"
       >
         <div
@@ -1175,7 +1175,7 @@ export function TopUsersTableBlock() {
 
   return (
     <AnalyticsCard
-      title="Top GradTrak Users"
+      title="Top GradPath Users"
       description="Top 50 users by course count"
       subtitle={`max ${maxCourses} courses`}
       customControls={

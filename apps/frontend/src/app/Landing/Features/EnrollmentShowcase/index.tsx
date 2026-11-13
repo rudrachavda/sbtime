@@ -1,4 +1,11 @@
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+} from "framer-motion";
 
 import RollingNumber from "../../Hero/SchedulerShowcase/RollingNumber";
 import {
@@ -21,19 +28,23 @@ import {
   PHASES,
 } from "./data";
 
-// A picture of the Enrollment page: PSY 1's real Fall 2026 seat history draws
-// itself day by day against the seat limit (dashed) and the registration
+// A picture of the Enrollment page: MUS 114's real Fall 2026 seat history sweeps
+// across in one smooth draw against the seat limit (dashed) and the registration
 // passes, while the enrolled count follows it. Plays once when scrolled into
 // view; decorative only.
 
 const STEP_MS = 110;
 const EASE = [0.25, 0.1, 0.25, 1] as const;
+// The line's draw: one smooth sweep, easing in and out
+const DRAW_S = 3.2;
+const DRAW_DELAY_S = 0.3;
+const DRAW_EASE = [0.65, 0, 0.35, 1] as const;
 
 // Chart geometry, in SVG units
 const WIDTH = 860;
 const HEIGHT = 360;
-const Y_MAX = 900;
-const Y_TICKS = [900, 600, 300, 0];
+const Y_MAX = 150;
+const Y_TICKS = [150, 100, 50, 0];
 
 const toTime = (date: string) => new Date(`${date}T00:00:00Z`).getTime();
 const START = toTime(ENROLLMENT_HISTORY[0].date);
@@ -60,15 +71,41 @@ const AREA_PATH = `${ENROLLED_PATH} L${WIDTH},${HEIGHT} L0,${HEIGHT} Z`;
 const LAST = POINTS[POINTS.length - 1];
 
 export default function EnrollmentShowcase() {
-  // Steps: the course card, one per day of history, then the details panel
+  // Step 1 shows the course card; then the line draws across the dates at a
+  // steady pace (the history's points are unevenly spaced, so stepping point
+  // by point raced through the long summer gaps), and the details panel
+  // appears when it's done.
   const { ref, step, still } = usePlayOnce<HTMLDivElement>({
-    total: 1 + POINTS.length + 1,
+    total: 1,
     stepMs: STEP_MS,
   });
-  const pointsShown = Math.min(POINTS.length, Math.max(0, step - 1));
+  const revealed = useMotionValue(0);
+  const [pointsShown, setPointsShown] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  // The card's count follows the line: every point the line has reached
+  useMotionValueEvent(revealed, "change", (x) => {
+    setPointsShown(POINTS.filter((p) => p.x <= x + 0.5).length);
+  });
+
+  useEffect(() => {
+    if (still) {
+      revealed.set(WIDTH);
+      setPointsShown(POINTS.length);
+      setFinished(true);
+      return;
+    }
+    if (step < 1) return;
+    const controls = animate(revealed, WIDTH, {
+      duration: DRAW_S,
+      ease: DRAW_EASE,
+      delay: DRAW_DELAY_S,
+      onComplete: () => setFinished(true),
+    });
+    return () => controls.stop();
+  }, [step, still, revealed]);
+
   const current = POINTS[Math.max(0, pointsShown - 1)];
-  const revealedTo = pointsShown === 0 ? 0 : current.x;
-  const finished = step > POINTS.length + 1;
   const enter = still ? false : { opacity: 0, y: 6, filter: "blur(2px)" };
   const shown = { opacity: 1, y: 0, filter: "blur(0px)" };
 
@@ -133,12 +170,7 @@ export default function EnrollmentShowcase() {
                     x={0}
                     y={-4}
                     height={HEIGHT + 8}
-                    initial={false}
-                    animate={{ width: revealedTo }}
-                    transition={{
-                      duration: still ? 0 : STEP_MS / 1000,
-                      ease: "linear",
-                    }}
+                    width={revealed}
                   />
                 </clipPath>
               </defs>

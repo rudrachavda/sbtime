@@ -17,12 +17,12 @@ export default function BetaBanner() {
   return (
     <div className={styles.root}>
       <p className={styles.text}>
-        GradTrak only checks requirements for College of Engineering majors for
+        GradPath only checks requirements for College of Engineering majors for
         now. Letters &amp; Science and Creative Studies are coming later.
       </p>
       <div className={styles.actions}>
         <Link className={styles.link} to="/gradtrak">
-          <div className={styles.text}>Open GradTrak</div>
+          <div className={styles.text}>Open GradPath</div>
           <ArrowRight height={12} width={12} />
         </Link>
         <button

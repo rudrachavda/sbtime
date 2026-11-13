@@ -121,7 +121,7 @@ export default function Footer() {
             </Link>
             {FEATURES.gradtrak && (
               <Link to="/gradtrak" className={styles.link}>
-                Gradtrak
+                GradPath
               </Link>
             )}
             {FEATURES.grades && (

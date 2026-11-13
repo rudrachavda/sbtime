@@ -78,7 +78,7 @@ export default function AddColleges({ onNext }: AddCollegesProps) {
             <Flex direction="column" align="center" gap="16px">
               <h1>Add Schools & Colleges</h1>
               <p>
-                Search for your college and add it to Gradtrak to list specific
+                Search for your college and add it to GradPath to list specific
                 requirements.
               </p>
             </Flex>

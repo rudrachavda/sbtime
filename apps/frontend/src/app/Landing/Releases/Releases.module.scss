@@ -18,11 +18,12 @@ $page-padding: 24px;
     padding: 120px 0; // md:py-30
   }
 
-  // Same column-wide hairline as between the feature sections
-  &::before {
+  // Same column-wide hairline as between the feature sections, above and
+  // below the section
+  &::before,
+  &::after {
     content: "";
     position: absolute;
-    top: 0;
     left: max(#{$page-padding}, calc((100% - #{$content-max}) / 2));
     right: max(#{$page-padding}, calc((100% - #{$content-max}) / 2));
     height: 0.5px;
@@ -31,6 +32,14 @@ $page-padding: 24px;
     @include dark-mode {
       background-color: rgb(255 255 255 / 8%);
     }
+  }
+
+  &::before {
+    top: 0;
+  }
+
+  &::after {
+    bottom: 0;
   }
 }
 

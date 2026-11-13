@@ -33,9 +33,9 @@ export const RELEASES: Release[] = [
     date: "2026-11-13",
     title: "A new home page",
     summary:
-      "The home page now shows what SBTime does, with live previews of the scheduler, GradTrak, grades and enrollment, and a simpler sign-in.",
+      "The home page now shows what SBTime does, with live previews of the scheduler, GradPath, grades and enrollment, and a simpler sign-in.",
     body: [
-      "The home page has been rebuilt around the things you come to SBTime for. Each part of the site gets its own preview, drawn from real UCSB data: a Fall 2024 schedule coming together, a GradTrak plan filling in its requirements, two instructors' grade distributions side by side, and a lecture's seats filling up across registration passes.",
+      "The home page has been rebuilt around the things you come to SBTime for. Each part of the site gets its own preview, drawn from real UCSB data: a Fall 2024 schedule coming together, a GradPath plan filling in its requirements, two instructors' grade distributions side by side, and a lecture's seats filling up across registration passes.",
       "Signing in is simpler too. Enter your UCSB email or continue with Google, and you'll land back on the page you were on.",
     ],
   },
@@ -46,7 +46,7 @@ export const RELEASES: Release[] = [
     summary:
       "SBTime now runs at ucsbtime.com, with seat counts refreshed every 15 minutes and a public status page.",
     body: [
-      "SBTime has a home: ucsbtime.com. Sign in with your UCSB Google account to save schedules, bookmarks and GradTrak plans.",
+      "SBTime has a home: ucsbtime.com. Sign in with your UCSB Google account to save schedules, bookmarks and GradPath plans.",
       "Seat counts are refreshed from UCSB every 15 minutes, so the numbers you see during registration stay close to what GOLD shows. If something looks off, the status page linked in the footer shows whether SBTime is up.",
     ],
   },
@@ -62,13 +62,13 @@ export const RELEASES: Release[] = [
     ],
   },
   {
-    slug: "gradtrak-engineering",
+    slug: "gradpath-engineering",
     date: "2026-11-11",
-    title: "GradTrak for College of Engineering majors",
+    title: "GradPath for College of Engineering majors",
     summary:
       "Plan your degree quarter by quarter and check it against your major's requirements, starting with the College of Engineering.",
     body: [
-      "GradTrak lays out your degree quarter by quarter and checks your plan against your requirements as you go: UCSB's university requirements, General Education, and your major.",
+      "GradPath lays out your degree quarter by quarter and checks your plan against your requirements as you go: UCSB's university requirements, General Education, and your major.",
       "We're starting with the College of Engineering's 2026-27 majors: Computer Science, Artificial Intelligence, Chemical, Computer, Electrical and Mechanical Engineering, including the CS science elective lists. More majors are on the way.",
     ],
   },

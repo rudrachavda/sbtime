@@ -815,7 +815,7 @@ export function DailyActivityBlock() {
       labels: {
         schedulesCreated: "Schedules",
         ratingsSubmitted: "Ratings",
-        gradTraksCreated: "GradTrak",
+        gradTraksCreated: "GradPath",
         bookmarksAdded: "Bookmarks",
         trend: "Trend (7d avg)",
       },
@@ -833,7 +833,7 @@ export function DailyActivityBlock() {
     return (
       <AnalyticsCard
         title="Daily Activity"
-        description="Feature usage across schedules, ratings, GradTrak, bookmarks"
+        description="Feature usage across schedules, ratings, GradPath, bookmarks"
       >
         <div
           style={{
@@ -853,7 +853,7 @@ export function DailyActivityBlock() {
     return (
       <AnalyticsCard
         title="Daily Activity"
-        description="Feature usage across schedules, ratings, GradTrak, bookmarks"
+        description="Feature usage across schedules, ratings, GradPath, bookmarks"
       >
         <div
           style={{
