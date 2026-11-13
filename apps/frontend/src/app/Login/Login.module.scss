@@ -1,0 +1,273 @@
+@import "../../_mixins.scss";
+
+// Sizes follow the design reference (Tailwind spacing: 1 = 4px).
+
+.root {
+  height: 100svh;
+  display: grid;
+  // The "shell" behind the panel: light gray (dark: black).
+  background-color: var(--neutral-100);
+
+  @media (width >= 1024px) {
+    grid-template-columns: 1fr 1fr; // lg:grid-cols-2
+  }
+
+  @include dark-mode {
+    background-color: black;
+  }
+}
+
+// Left column: lg:p-1 around a raised page-colored panel
+.panelColumn {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+
+  @media (width >= 1024px) {
+    padding: 4px;
+  }
+}
+
+.panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px; // p-5
+  background-color: var(--foreground-color);
+
+  @media (width >= 1024px) {
+    padding: 64px 32px 32px 32px; // lg:p-8
+    border-radius: 8px; // lg:rounded-lg
+    box-shadow: 0 0 0 0.5px var(--border-color); // lg:shadow-border
+  }
+
+  @include dark-mode {
+    background-color: var(--neutral-950);
+  }
+}
+
+// Form centered, "Don't have an account?" at the bottom; 360px wide (sm:w-90)
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+
+  @media (width >= 640px) {
+    width: 360px;
+  }
+}
+
+// "← Return" at the top left of the form column
+.header {
+  width: 100%;
+}
+
+.returnLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  color: var(--paragraph-color);
+  text-decoration: none;
+  transition: color 100ms ease;
+
+  &:hover {
+    color: var(--heading-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0a8cff;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px; // gap-8
+  width: 100%;
+}
+
+// font-medium heading, one step down to match the 13px navigation bar
+.title {
+  margin: 0;
+  text-align: center;
+  text-wrap: pretty;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: var(--font-medium);
+  letter-spacing: -0.01em;
+  color: var(--heading-color);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; // gap-3
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// h-10 rounded-lg py-2 ps-3 pe-2.5 text-body-sm, hairline ring + soft shadow
+.input {
+  height: 40px;
+  width: 100%;
+  padding: 8px 10px 8px 12px;
+  border: none;
+  border-radius: 8px; // 4px key radius + 10px gap
+  outline: none;
+  background-color: var(--foreground-color);
+  box-shadow:
+    0 0 0 0.5px var(--border-color),
+    0 1px 2px rgb(0 0 0 / 4%);
+  color: var(--heading-color);
+  caret-color: var(--paragraph-color);
+  font-family: inherit;
+  font-size: 13px;
+  transition:
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+
+  &::placeholder {
+    color: var(--neutral-400);
+  }
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--foreground-color) 97%, #000);
+  }
+
+  &:focus-visible {
+    box-shadow:
+      0 0 0 1px #0a8cff,
+      0 1px 2px rgb(0 0 0 / 4%);
+  }
+
+  @include dark-mode {
+    background-color: rgb(255 255 255 / 4%);
+
+    &:hover {
+      background-color: rgb(255 255 255 / 6%);
+    }
+
+    &::placeholder {
+      color: var(--neutral-500);
+    }
+  }
+}
+
+// int-btn-xl int-btn-brand: 40px, brand blue, 13px medium, text centered
+.continue {
+  position: relative;
+  height: 40px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px; // 4px key radius + 10px gap
+  background-color: #0a8cff;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: background-color 100ms ease-in-out;
+
+  &:hover {
+    background-color: #0079e6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0a8cff;
+    outline-offset: 2px;
+  }
+}
+
+// The "return" key: 20px tall, px-1.5, 0.5px border, lowercase, 11px medium,
+// pinned 10px from the right edge. Hidden on touch screens.
+.kbd {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 6px 1px;
+  border: 0.5px solid rgb(255 255 255 / 2%);
+  border-radius: 4px;
+  background-color: rgb(255 255 255 / 10%);
+  color: currentColor;
+  opacity: 0.9;
+  font-family: inherit;
+  font-feature-settings: "ss02" on;
+  font-size: 11px;
+  font-weight: var(--font-medium);
+  text-transform: lowercase;
+  pointer-events: none;
+
+  @media (pointer: coarse) {
+    display: none;
+  }
+}
+
+// font-medium text-body-sm, light gray with a darker link
+.footer {
+  margin: 0;
+  padding-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  color: var(--neutral-400);
+
+  @include dark-mode {
+    color: var(--neutral-500);
+  }
+}
+
+.footerLink {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--paragraph-color);
+  text-decoration: underline;
+  text-decoration-color: var(--border-color);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition:
+    color 100ms ease,
+    text-decoration-color 100ms ease;
+
+  &:hover {
+    color: var(--heading-color);
+    text-decoration-color: currentColor;
+  }
+}

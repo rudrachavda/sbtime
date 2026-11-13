@@ -20,6 +20,7 @@ import { TrackingProvider } from "@/providers/TrackingProvider";
 import UserProvider from "@/providers/UserProvider";
 
 const Landing = lazy(() => import("@/app/Landing"));
+const Login = lazy(() => import("@/app/Login"));
 const Profile = {
   Root: lazy(() => import("@/app/Profile")),
   Account: lazy(() => import("@/app/Profile/Account")),
@@ -81,6 +82,14 @@ const router = createBrowserRouter([
               </SuspenseBoundary>
             ),
             index: true,
+          },
+          {
+            element: (
+              <SuspenseBoundary key="login">
+                <Login />
+              </SuspenseBoundary>
+            ),
+            path: "login",
           },
           {
             element: (

@@ -16,7 +16,7 @@ import {
   Xmark,
 } from "iconoir-react";
 import { createPortal } from "react-dom";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import {
   Button,
@@ -29,7 +29,7 @@ import {
 
 import { useAllNavItems } from "@/hooks/api/nav-item";
 import useUser from "@/hooks/useUser";
-import { signIn, signOut } from "@/lib/api";
+import { signOut } from "@/lib/api";
 import { BERKELEY_GOGGLES_URL } from "@/lib/berkeley-goggles";
 import { FEATURES } from "@/lib/features";
 import { RecentType, getPageUrl } from "@/lib/recent";
@@ -59,6 +59,17 @@ interface NavigationBarProps {
   accentColor?: string;
   noBorder?: boolean;
 }
+
+// The login page, returning to the current page after Google sign-in.
+const loginPath = (location: { pathname: string; search: string }) =>
+  location.pathname === "/" || location.pathname === "/login"
+    ? "/login"
+    : `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`;
+
+const isTypingTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable ||
+    ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
 
 const ThemeDropdown = ({
   theme,
@@ -138,6 +149,7 @@ export default function NavigationBar({
     error: navItemsError,
   } = useAllNavItems();
   const location = useLocation();
+  const navigate = useNavigate();
   const isLandingPage = location.pathname === "/";
   const savedGradesUrl = getPageUrl(RecentType.GradesPage);
   const gradesPath = savedGradesUrl ? `/grades${savedGradesUrl}` : "/grades";
@@ -158,6 +170,25 @@ export default function NavigationBar({
       href: `/nav-item/click/${navItem.id}`,
     }));
   }, [navItems, navItemsLoading, navItemsError]);
+
+  // Home page shortcuts for signed-out visitors: L opens the login page and
+  // G (get started) opens the catalog.
+  useEffect(() => {
+    if (!isLandingPage || user) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey || event.repeat)
+        return;
+      if (isTypingTarget(event.target)) return;
+
+      const key = event.key.toLowerCase();
+      if (key === "l") navigate("/login");
+      else if (key === "g") navigate("/catalog");
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isLandingPage, user, navigate]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -253,6 +284,7 @@ export default function NavigationBar({
         flexShrink="0"
         gap="3"
         className={classNames(styles.root, {
+          [styles.landing]: isLandingPage,
           [styles.invert]: invert,
           [styles.noBorder]: noBorder || isLandingPage,
         })}
@@ -320,43 +352,49 @@ export default function NavigationBar({
             </MenuItem>
           ))}
         </div>
-        <IconButton
-          className={styles.compactMenuButton}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <motion.div
-            animate={{ rotate: menuOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ display: "flex" }}
+        {/* Right-hand group. On the home page it's the grid's third column;
+            elsewhere it doesn't affect layout (display: contents). */}
+        <div className={styles.actions}>
+          <IconButton
+            className={styles.compactMenuButton}
+            onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <Xmark /> : <Menu />}
-          </motion.div>
-        </IconButton>
-        <ThemeDropdown
-          theme={theme}
-          setTheme={setTheme}
-          forceTheme={invert ? "light" : undefined}
-        />
-        {user ? (
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <Button className={styles.button} style={{ color: accentColor }}>
-                {user.name?.split(" ")[0] ?? "Profile"}
-                <User />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content
-              sideOffset={5}
-              align="end"
-              forceTheme={invert ? "light" : undefined}
-              className={styles.profileDropdown}
+            <motion.div
+              animate={{ rotate: menuOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ display: "flex" }}
             >
-              <DropdownMenu.Item asChild>
-                <Link to="/profile">
-                  <ProfileCircle width={18} height={18} /> Account
-                </Link>
-              </DropdownMenu.Item>
-              {/* <DropdownMenu.Sub>
+              {menuOpen ? <Xmark /> : <Menu />}
+            </motion.div>
+          </IconButton>
+          <ThemeDropdown
+            theme={theme}
+            setTheme={setTheme}
+            forceTheme={invert ? "light" : undefined}
+          />
+          {user ? (
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <Button
+                  className={styles.button}
+                  style={{ color: accentColor }}
+                >
+                  {user.name?.split(" ")[0] ?? "Profile"}
+                  <User />
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content
+                sideOffset={5}
+                align="end"
+                forceTheme={invert ? "light" : undefined}
+                className={styles.profileDropdown}
+              >
+                <DropdownMenu.Item asChild>
+                  <Link to="/profile">
+                    <ProfileCircle width={18} height={18} /> Account
+                  </Link>
+                </DropdownMenu.Item>
+                {/* <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger>
                 <ThemeIcon theme={theme} /> Appearance
               </DropdownMenu.SubTrigger>
@@ -372,37 +410,48 @@ export default function NavigationBar({
                 </DropdownMenu.Item>
               </DropdownMenu.SubContent>
             </DropdownMenu.Sub> */}
-              <DropdownMenu.Item asChild>
-                <Link to="/profile/bookmarks">
-                  <Bookmark width={18} height={18} /> Bookmarks
-                </Link>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item asChild>
-                <Link to="/profile/ratings">
-                  <Star width={18} height={18} /> Ratings
-                </Link>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item asChild>
-                <Link to="/profile/support">
-                  <ChatBubbleQuestion width={18} height={18} /> Support
-                </Link>
-              </DropdownMenu.Item>
-              <DropdownMenu.Separator />
-              <DropdownMenu.Item onSelect={() => signOut()}>
-                <LogOut width={18} height={18} /> Sign Out
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        ) : (
-          <Button
-            onClick={() => signIn()}
-            className={styles.button}
-            style={{ color: accentColor }}
-          >
-            Sign in
-            <ArrowRight />
-          </Button>
-        )}
+                <DropdownMenu.Item asChild>
+                  <Link to="/profile/bookmarks">
+                    <Bookmark width={18} height={18} /> Bookmarks
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item asChild>
+                  <Link to="/profile/ratings">
+                    <Star width={18} height={18} /> Ratings
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item asChild>
+                  <Link to="/profile/support">
+                    <ChatBubbleQuestion width={18} height={18} /> Support
+                  </Link>
+                </DropdownMenu.Item>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item onSelect={() => signOut()}>
+                  <LogOut width={18} height={18} /> Sign Out
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+          ) : isLandingPage ? (
+            <div className={styles.authLinks}>
+              <Link to="/login" className={styles.loginLink}>
+                Login <kbd className={styles.kbd}>L</kbd>
+              </Link>
+              <Link to="/catalog" className={styles.getStarted}>
+                Get started <kbd className={styles.kbd}>G</kbd>
+              </Link>
+            </div>
+          ) : (
+            <Button
+              as={Link}
+              to={loginPath(location)}
+              className={styles.button}
+              style={{ color: accentColor }}
+            >
+              Sign in
+              <ArrowRight />
+            </Button>
+          )}
+        </div>
       </Flex>
     </>
   );

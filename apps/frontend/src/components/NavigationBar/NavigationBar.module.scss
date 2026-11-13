@@ -1,3 +1,5 @@
+@import "../../_mixins.scss";
+
 .menuOverlay {
   position: fixed;
   top: 0;
@@ -20,7 +22,7 @@
 
   a {
     font-size: 24px;
-    font-weight: var(--font-medium);
+    font-weight: var(--font-regular);
     color: var(--heading-color);
     text-decoration: none;
     padding: 12px 0;
@@ -177,6 +179,195 @@
       &:hover {
         background-color: rgb(255 255 255 / 85%);
       }
+    }
+  }
+
+  // Elsewhere the right-hand group is just a wrapper.
+  .actions {
+    display: contents;
+  }
+
+  // Home page (from the design reference): a 1200px column with 22px side
+  // padding (24px on phones), wordmark | links | buttons in a 3-column grid.
+  &.landing:not(.invert) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    column-gap: 16px;
+    height: 64px;
+    padding: 0 max(24px, calc((100% - 1200px) / 2));
+    // Hairline bottom edge: 0.5px and lighter than the default border.
+    border-bottom: 0.5px solid rgb(0 0 0 / 8%);
+
+    @include dark-mode {
+      border-bottom-color: rgb(255 255 255 / 8%);
+    }
+
+    @media (width >= 640px) {
+      padding: 0 max(22px, calc((100% - 1200px) / 2));
+    }
+
+    @media (width >= 1024px) {
+      grid-template-columns:
+        minmax(max-content, 1fr)
+        auto
+        minmax(max-content, 1fr);
+    }
+
+    // Wordmark, centered on the buttons' height
+    .brand {
+      justify-self: start;
+      margin-left: 0;
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .group {
+      justify-self: center;
+      margin-left: 0;
+      height: 28px;
+      gap: 4px;
+
+      @media (width < 1024px) {
+        display: none;
+      }
+    }
+
+    // Links: 28px tall, 8px side padding, 6px corners, weight 450. Text is
+    // 13px, the old navigation bar's size.
+    .item {
+      height: 28px;
+      padding: 0 8px;
+      font-size: 13px;
+      font-weight: 450;
+      line-height: 16px;
+
+      &::after {
+        border-radius: 6px;
+      }
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-self: end;
+    }
+
+    // The theme switch isn't part of the home page design; it stays on
+    // every other page.
+    .themeButton {
+      display: none;
+    }
+
+    // Below 1024px the links move into the menu button, shown last.
+    .compactMenuButton {
+      order: 1;
+      margin-left: 0;
+
+      @media (width < 1024px) {
+        display: inline-grid;
+      }
+    }
+  }
+
+  .authLinks {
+    display: flex;
+    align-items: center;
+    gap: 8px; // gap-2
+  }
+
+  // 30px tall with a 16px key, so the key sits 7px from the top, bottom and
+  // right. Corners follow outer radius = inner radius + gap: 4px key + 7px =
+  // 11px. 11px of space before the text, 7px between the text and key. Text is
+  // 13px (the old navigation bar's size) at medium weight.
+  %auth-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px 0 10px;
+    border-radius: 6px; // 4px key radius + 7px gap
+    font-size: 13px;
+    font-weight: var(--font-regular);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 100ms ease-in-out,
+      color 100ms ease-in-out;
+  }
+
+  .loginLink {
+    @extend %auth-link;
+    color: var(--paragraph-color);
+
+    &:hover {
+      color: var(--heading-color);
+      background-color: var(--button-hover-color);
+
+      .kbd {
+        background-color: rgb(0 0 0 / 7%);
+
+        @include dark-mode {
+          background-color: rgb(255 255 255 / 10%);
+        }
+      }
+    }
+  }
+
+  .getStarted {
+    @extend %auth-link;
+    color: var(--heading-color);
+    background-color: var(--foreground-color);
+    // 0.5px hairline outline (drawn as a ring so it can be thinner than a
+    // 1px border) plus a soft shadow underneath.
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 8%),
+      0 1px 2px rgb(0 0 0 / 6%);
+
+    @include dark-mode {
+      box-shadow: 0 0 0 0.5px rgb(255 255 255 / 8%);
+    }
+
+    &:hover {
+      background-color: var(--button-hover-color);
+    }
+  }
+
+  // Keyboard shortcut hint, e.g. the "L" in "Login L": a 16px key with a
+  // 0.5px border and a capital letter. Hidden on touch screens
+  // (pointer-coarse), which have no keyboard to use it with.
+  .kbd {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border: 0.5px solid rgb(0 0 0 / 14%);
+    border-radius: 4px;
+    background-color: rgb(0 0 0 / 4%);
+    color: var(--neutral-600);
+    font-family: inherit;
+    font-feature-settings: "ss02" on;
+    font-size: 11px;
+    font-weight: var(--font-regular);
+    line-height: 1;
+    text-transform: uppercase;
+    transition: background-color 100ms ease-in-out;
+
+    @include dark-mode {
+      border-color: rgb(255 255 255 / 10%);
+      background-color: rgb(255 255 255 / 6%);
+      color: var(--neutral-400);
+    }
+
+    @media (pointer: coarse) {
+      display: none;
     }
   }
 }

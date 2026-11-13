@@ -1,96 +1,245 @@
 @import "../../../_mixins.scss";
 
-@mixin hero-gradient($accent, $background) {
-  background: linear-gradient(
-    to bottom,
-    #{$background} 0%,
-    color-mix(in srgb, #{$background} 100%, #{$accent}) 5%,
-    color-mix(in srgb, #{$background} 85%, #{$accent}) 12%,
-    color-mix(in srgb, #{$background} 70%, #{$accent}) 22%,
-    color-mix(in srgb, #{$background} 50%, #{$accent}) 35%,
-    color-mix(in srgb, #{$background} 30%, #{$accent}) 48%,
-    color-mix(in srgb, #{$background} 15%, #{$accent}) 60%,
-    color-mix(in srgb, #{$background} 5%, #{$accent}) 72%,
-    #{$accent} 85%,
-    #{$accent} 100%
-  );
-}
+// Layout values follow the design reference (Tailwind spacing: 1 = 4px).
+$content-max: 1200px; // --constrained-max
+$page-padding: 24px; // px-6
+$card-min-width: 1440px; // min-w-360
+
+// Glow behind the card: a wide pill of color, blurred. Placeholder colors
+// from the reference; swap them here (e.g. for UCSB navy and gold).
+$glow-gradient: linear-gradient(
+  90deg,
+  rgb(255 59 0 / 20%) 0%,
+  rgb(246 0 157 / 20%) 38%,
+  rgb(151 62 198 / 20%) 71%,
+  rgb(0 142 255 / 20%) 100%
+);
 
 .root {
-  height: calc(100svh - var(--header-height, 90px) + 16px);
-  display: flex;
-  align-items: flex-end;
-  @include hero-gradient(var(--blue-500), var(--foreground-color));
-  padding: 48px;
-  position: relative;
-  isolation: isolate;
+  // Thin border used in the card's shadow, per theme.
+  --shadow-border-color: rgb(0 0 0 / 8%);
 
   @include dark-mode {
-    @include hero-gradient(var(--blue-800), var(--foreground-color));
+    --shadow-border-color: rgb(255 255 255 / 7%);
   }
 
-  // Noise overlay
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("./noise.svg");
-    background-size: 150px 150px;
-    background-repeat: repeat;
-    filter: contrast(300%);
-    opacity: 0.4;
-    @include dark-mode {
-      opacity: 0;
-    }
-    mix-blend-mode: overlay;
-    pointer-events: none;
-  }
+  background-color: var(--foreground-color);
+  // The card is wider than the page on smaller screens; clip it at the edge
+  // without making the page scroll sideways.
+  overflow-x: clip;
+}
 
-  @media (width <= 992px) {
-    padding: 24px;
-  }
+.container {
+  width: 100%;
+  max-width: calc(#{$content-max} + #{$page-padding} * 2);
+  margin: 0 auto;
+  padding: 0 $page-padding;
+}
 
-  @media (width <= 700px) {
-    height: 40svh;
-    min-height: 220px;
+.headingRow {
+  padding: 48px 0 64px; // pt-12 pb-16
+
+  @media (width >= 1024px) {
+    padding: 144px 0 48px; // lg:pt-36 lg:pb-12
   }
 }
 
 .heading {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  // Same size and weight as the old home page headline (48px, 32px on
+  // phones), now in the heading color on the plain background.
   font-size: 48px;
-  color: white;
   font-weight: 600;
   line-height: 1.1;
-  position: relative;
+  color: var(--heading-color);
 
   @media (width <= 700px) {
     font-size: 32px;
   }
 }
 
-.tabletBreak {
-  display: none;
+.line {
+  display: block;
+  white-space: nowrap;
 
-  @media (width <= 992px) {
-    display: block;
+  @media (width < 480px) {
+    white-space: normal;
   }
 }
 
-.tower {
+// Load-in animation (from the design reference): 800ms, ease, both.
+// Delays are set per element in index.tsx. Nothing else on the site
+// animates in, and it's skipped for people who prefer reduced motion.
+$load-in: 800ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+
+@keyframes word-in {
+  from {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translateY(20%);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+
+@keyframes window-in {
+  from {
+    filter: blur(10px);
+    opacity: 0;
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+// Each word animates on its own; the trailing space stays inside it.
+.word {
+  display: inline-block;
+  white-space: pre-wrap;
+  will-change: transform, filter, opacity;
+  animation: word-in $load-in;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+
+  @media (width >= 1024px) {
+    margin-bottom: 64px; // lg:mb-16
+  }
+
+  // Wide screens: the card is centered instead of starting at the headline.
+  @media (width >= 1536px) {
+    justify-content: center;
+  }
+}
+
+.glow {
   position: absolute;
-  right: 100px;
-  bottom: 0;
-  height: 80%;
+  top: 50%;
+  left: -96px; // -left-24
+  width: 1496px; // w-374
+  height: 640px; // h-160
+  transform: translateY(-50%);
+  border-radius: 300px;
+  background-image: $glow-gradient;
+  filter: blur(50px);
   pointer-events: none;
+  will-change: transform;
 
-  @media (width <= 992px) {
-    right: 24px;
+  @media (width >= 768px) {
+    left: 50%;
+    height: 856px; // md:h-214
+    transform: translate(-50%, -50%);
+  }
+}
+
+// The frosted window
+.preview {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: $card-min-width;
+  height: 640px; // h-160
+  overflow: hidden;
+  border-radius: 16px;
+  background-color: rgb(235 235 235 / 70%);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 0 0 0.5px var(--shadow-border-color),
+    0 149px 199px 0 rgb(0 0 0 / 7%),
+    0 62.249px 83.137px 0 rgb(0 0 0 / 5%),
+    0 33.281px 44.449px 0 rgb(0 0 0 / 4%),
+    0 18.657px 24.918px 0 rgb(0 0 0 / 4%),
+    0 9.909px 13.234px 0 rgb(0 0 0 / 3%),
+    0 4.123px 5.507px 0 rgb(0 0 0 / 2%);
+  user-select: none;
+  pointer-events: none;
+  animation: window-in $load-in;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 
-  @media (width <= 700px) {
-    right: 24px;
-    height: 70%;
+  @media (width >= 768px) {
+    height: 800px; // md:h-200
   }
+
+  @include dark-mode {
+    background-color: rgb(255 255 255 / 5%);
+    outline: 0.5px solid rgb(255 255 255 / 7%);
+  }
+}
+
+// The white panel sits 4px in on every side. Its corners follow outer
+// radius = inner radius + gap: 16px card = 12px panel + 4px.
+.previewInset {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+}
+
+$hairline: 0.5px solid var(--border-color);
+
+.previewPanel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 12px; // 16px card - 4px gap
+  background-color: #fcfcfc;
+  box-shadow:
+    0 0 0 0.5px var(--shadow-border-color),
+    0 1px 2px rgb(0 0 0 / 4%);
+
+  @include dark-mode {
+    background-color: var(--neutral-900);
+  }
+}
+
+.previewToolbar {
+  height: 44px; // h-11
+  flex-shrink: 0;
+  border-bottom: $hairline;
+}
+
+.previewBody {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.previewList {
+  width: 440px; // w-110
+  flex-shrink: 0;
+  border-right: $hairline;
+}
+
+.previewListHeader {
+  height: 24px;
+  border-bottom: $hairline;
+}
+
+.previewDetail {
+  flex: 1;
+}
+
+.previewDetailHeader {
+  height: 16px; // p-2 with nothing inside
+  border-bottom: $hairline;
 }

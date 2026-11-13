@@ -74,12 +74,17 @@ export const DELETE_ACCOUNT = gql`
   }
 `;
 
-export const signIn = (redirectURI?: string) => {
+export const signIn = (redirectURI?: string, email?: string) => {
   redirectURI =
     redirectURI ??
     window.location.origin + window.location.pathname + window.location.search;
 
-  window.location.href = `${window.location.origin}/api/login?redirect_uri=${redirectURI}`;
+  // Optional: an email Google should pre-select (the login page's field).
+  const loginHint = email?.trim()
+    ? `&login_hint=${encodeURIComponent(email.trim())}`
+    : "";
+
+  window.location.href = `${window.location.origin}/api/login?redirect_uri=${redirectURI}${loginHint}`;
 };
 
 export const signOut = async (redirectURI?: string) => {

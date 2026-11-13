@@ -80,9 +80,18 @@ export default async (app: Application, redis: RedisClientType) => {
   app.get(LOGIN_ROUTE, (req, res, next) => {
     const authenticated = req.isAuthenticated();
 
-    const { redirect_uri: redirectURI } = req.query;
+    const { redirect_uri: redirectURI, login_hint: loginHintParam } = req.query;
 
     const parsedRedirectURI = safeRedirect(redirectURI);
+
+    // The email typed on the login page, passed to Google so it pre-selects
+    // that account. Only a plain, reasonably sized address is forwarded.
+    const loginHint =
+      typeof loginHintParam === "string" &&
+      loginHintParam.length <= 254 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginHintParam)
+        ? loginHintParam
+        : undefined;
 
     if (authenticated) {
       res.redirect(parsedRedirectURI ?? SUCCESS_REDIRECT);
@@ -94,6 +103,7 @@ export default async (app: Application, redis: RedisClientType) => {
       scope: SCOPE,
       accessType: "offline",
       prompt: "consent",
+      loginHint,
       state: parsedRedirectURI
         ? Buffer.from(
             JSON.stringify({ redirectURI: parsedRedirectURI })
