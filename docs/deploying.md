@@ -16,52 +16,61 @@ The database is MongoDB Atlas (Flex, AWS Oregon), the cache is Upstash Redis
 - **Framework preset:** Services (Vercel reads `vercel.json`).
 - **Functions region:** Portland, `pdx1` (next to Atlas and Upstash).
 
-## Vercel environment variables (Production)
-
-Real values:
+## Vercel environment variables (Production and Preview)
 
 Don't set `NODE_ENV`: when it's `production` during the build, npm skips
 development packages such as Vite and the build fails. Left unset, SBTime
 runs in production mode.
 
-| Name | Value |
-|---|---|
-| `MONGODB_URI` | the Atlas connection string (database `sbtime`) |
-| `REDIS_URI` | the Upstash `rediss://...` address |
-| `SESSION_SECRET` | a new long random string (not the local one) |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | the Google OAuth client |
-| `BACKEND_PUBLIC_URL` | `https://ucsbtime.com/api` |
-| `SITE_URL` | `https://ucsbtime.com` |
-| `URL` | `https://ucsbtime.com` |
-| `BACKEND_PATH` | `/api` |
-| `GRAPHQL_PATH` | `/graphql` |
-| `PORT` | `5001` (required by the config; Vercel ignores it) |
-| `CACHE_WARMING_PORT` | `8080` (required by the config; unused) |
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USER` | `sbtime.alerts@gmail.com` |
-| `SMTP_PASSWORD` | the Gmail app password |
-| `SMTP_FROM` | `SBTime <sbtime.alerts@gmail.com>` |
+Required (the backend won't start without them):
 
-Required by the shared config but unused by SBTime (Berkeley's SIS and S3
-sources and the semantic-search service). Set each to `unused`:
+| Name                                       | Value                                           |
+| ------------------------------------------ | ----------------------------------------------- |
+| `MONGODB_URI`                              | the Atlas connection string (database `sbtime`) |
+| `REDIS_URI`                                | the Upstash `rediss://...` address              |
+| `SESSION_SECRET`                           | a new long random string (not the local one)    |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | the Google OAuth client                         |
+| `URL`                                      | `https://ucsbtime.com`                          |
 
-`SIS_CLASS_APP_ID`, `SIS_CLASS_APP_KEY`, `SIS_COURSE_APP_ID`,
-`SIS_COURSE_APP_KEY`, `SIS_TERM_APP_ID`, `SIS_TERM_APP_KEY`,
-`S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_ENDPOINT`,
-`S3_IMAGES_ACCESS_URL`, `SEMANTIC_SEARCH_URL`
+Also set:
 
-The frontend needs no variables (the map is switched off).
+| Name                 | Value                                                                        |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `BACKEND_PUBLIC_URL` | `https://ucsbtime.com/api` (Google sign-in's return address)                 |
+| `SITE_URL`           | `https://ucsbtime.com` (links in emails)                                     |
+| `SMTP_HOST`          | `smtp.gmail.com`                                                             |
+| `SMTP_PORT`          | `587`                                                                        |
+| `SMTP_USER`          | `sbtime.alerts@gmail.com`                                                    |
+| `SMTP_PASSWORD`      | the Gmail app password                                                       |
+| `SMTP_FROM`          | `SBTime <sbtime.alerts@gmail.com>` (optional; defaults to the address alone) |
+
+Everything else (`PORT`, `BACKEND_PATH`, `GRAPHQL_PATH`, Berkeley's SIS and
+S3 settings, the semantic-search address) has a default in
+`packages/common/src/utils/config.ts`. The frontend needs no variables (the
+map is switched off).
+
+## How Vercel runs it (lessons from the first deploy)
+
+- Vercel compiles the backend to CommonJS and its loader can't `require()`
+  ES-module-only packages, unlike local Node. Check new backend
+  dependencies with `NODE_OPTIONS=--no-experimental-require-module` (see
+  the commit that replaced `uuid` with `crypto.randomUUID()`).
+- Direct links such as `/catalog` work through the top-level rewrite of
+  every extension-less path to `/index.html` in `vercel.json`. Rewrites with
+  a service `path`, a service's own `routes`, and a `404.html` copy did not
+  work for the static frontend.
+- Runtime crashes show in Vercel's Logs at the **Info** level, not Error;
+  open a row to read the message.
 
 ## GitHub Actions secrets
 
 Repository → Settings → Secrets and variables → Actions → New repository
 secret:
 
-| Name | Value |
-|---|---|
-| `MONGODB_URI` | the Atlas connection string |
-| `UCSB_API_KEY` | the UCSB developer API key |
+| Name                                                                | Value                        |
+| ------------------------------------------------------------------- | ---------------------------- |
+| `MONGODB_URI`                                                       | the Atlas connection string  |
+| `UCSB_API_KEY`                                                      | the UCSB developer API key   |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | as above (seat-alert emails) |
 
 Run any puller by hand from the Actions tab → Data pullers → Run workflow.
