@@ -8,8 +8,8 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260301.1",
-    "typescript": "^5.0.0",
+    "@cloudflare/workers-types": "5.20261028.1",
+    "typescript": "5.9.3",
     "wrangler": "4.155.0"
   }
 }
