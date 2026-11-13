@@ -16,7 +16,12 @@ The database is MongoDB Atlas (Flex, AWS Oregon), the cache is Upstash Redis
 - **Framework preset:** Services (Vercel reads `vercel.json`).
 - **Functions region:** Portland, `pdx1` (next to Atlas and Upstash).
 
-## Vercel environment variables (Production and Preview)
+## Vercel environment variables (Production)
+
+Set these for **Production** only, except `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET`, which Production and Preview share. Keeping the
+rest out of Preview means a preview or UAT build can never reach the live
+database, cache or email account (see [UAT](#uat-uatucsbtimecom)).
 
 Don't set `NODE_ENV`: when it's `production` during the build, npm skips
 development packages such as Vite and the build fails. Left unset, SBTime
@@ -61,6 +66,63 @@ map is switched off).
   work for the static frontend.
 - Runtime crashes show in Vercel's Logs at the **Info** level, not Error;
   open a row to read the message.
+
+## UAT (uat.ucsbtime.com)
+
+UAT is a copy of the site for trying changes before they reach
+ucsbtime.com. It deploys from the `uat` branch as a Vercel Preview, uses its
+own database (`sbtime-uat` on the same Atlas cluster) and its own Upstash
+cache, and sends no email. Vercel's deployment protection keeps it private:
+only people signed in to the Vercel team can open it.
+
+**Day to day:** push a change to `uat`, check it at uat.ucsbtime.com, then
+merge it into `main` for production.
+
+```bash
+git push origin main:uat          # or: git checkout uat && git merge <branch> && git push
+```
+
+**Refresh UAT's data** from production when it gets stale (replaces UAT's
+users, schedules and plans too):
+
+```bash
+scripts/refresh-uat-db.sh
+```
+
+The pullers in GitHub Actions only write to production, so UAT's class data
+stays as of the last refresh.
+
+### Setting it up
+
+1. Push a `uat` branch to GitHub (`git push origin main:uat`).
+2. **Upstash:** create a second Redis database (AWS Oregon, free) for UAT.
+3. **Vercel → Settings → Environment Variables**, environment **Preview**,
+   branch **uat**:
+
+   | Name                 | Value                                                  |
+   | -------------------- | ------------------------------------------------------ |
+   | `MONGODB_URI`        | the Atlas connection string with database `sbtime-uat` |
+   | `REDIS_URI`          | the UAT Upstash `rediss://...` address                 |
+   | `SESSION_SECRET`     | a new random string (not production's)                 |
+   | `URL`                | `https://uat.ucsbtime.com`                             |
+   | `SITE_URL`           | `https://uat.ucsbtime.com`                             |
+   | `BACKEND_PUBLIC_URL` | `https://uat.ucsbtime.com/api`                         |
+
+   Leave the `SMTP_*` settings unset; without `SMTP_HOST` the backend skips
+   email.
+
+4. **Vercel → Settings → Domains:** add `uat.ucsbtime.com` and set its Git
+   branch to `uat`.
+5. **Cloudflare → DNS:** add the CNAME `uat` that Vercel shows, DNS only.
+6. **Google Cloud → OAuth client:** add the origin `https://uat.ucsbtime.com`
+   and the redirect URI `https://uat.ucsbtime.com/api/login/redirect`.
+7. **Vercel → Settings → Deployment Protection:** keep Vercel
+   Authentication on for Standard Protection (the default), which covers
+   every Preview including uat.ucsbtime.com.
+8. Run `scripts/refresh-uat-db.sh` once to fill `sbtime-uat`.
+
+Other branches still get Preview deploys, but with no database settings
+their backend won't start; use `uat` for anything that needs data.
 
 ## GitHub Actions secrets
 
