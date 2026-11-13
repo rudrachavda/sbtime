@@ -119,16 +119,6 @@
     }
   }
 
-  &:not(.invert) {
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--foreground-color);
-    padding: 12px;
-
-    &.noBorder {
-      border-bottom: none;
-    }
-  }
-
   &.invert {
     padding: 12px 12px 0;
 
@@ -182,20 +172,18 @@
     }
   }
 
-  // Elsewhere the right-hand group is just a wrapper.
-  .actions {
-    display: contents;
-  }
-
-  // Home page (from the design reference): a 1200px column with 22px side
-  // padding (24px on phones), wordmark | links | buttons in a 3-column grid.
-  &.landing:not(.invert) {
+  // Every page (from the design reference): wordmark | links | buttons in a
+  // 3-column grid, inside a 1200px column with 24px side padding. One padding
+  // value at every width, so the wordmark never jumps and lines up with the
+  // home page headline.
+  &:not(.invert) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
     column-gap: 16px;
     height: 64px;
     padding: 0 max(24px, calc((100% - 1200px) / 2));
+    background-color: var(--foreground-color);
     // Hairline bottom edge: 0.5px and lighter than the default border.
     border-bottom: 0.5px solid rgb(0 0 0 / 8%);
 
@@ -203,8 +191,8 @@
       border-bottom-color: rgb(255 255 255 / 8%);
     }
 
-    @media (width >= 640px) {
-      padding: 0 max(22px, calc((100% - 1200px) / 2));
+    &.noBorder {
+      border-bottom: none;
     }
 
     @media (width >= 1024px) {
@@ -248,6 +236,14 @@
       &::after {
         border-radius: 6px;
       }
+
+      // The current page's blue underline sits on the bar's bottom edge:
+      // (64px bar - 28px link) / 2 = 18px below the link.
+      &::before {
+        bottom: -18px;
+        left: 8px;
+        width: calc(100% - 16px);
+      }
     }
 
     .actions {
@@ -255,12 +251,6 @@
       align-items: center;
       gap: 8px;
       justify-self: end;
-    }
-
-    // The theme switch isn't part of the home page design; it stays on
-    // every other page.
-    .themeButton {
-      display: none;
     }
 
     // Below 1024px the links move into the menu button, shown last.
@@ -272,6 +262,17 @@
         display: inline-grid;
       }
     }
+  }
+
+  // The inverted bar (unused page) keeps its wrapper out of the layout.
+  &.invert .actions {
+    display: contents;
+  }
+
+  // Home page only: the theme switch isn't part of its design; it stays on
+  // every other page.
+  &.landing .themeButton {
+    display: none;
   }
 
   .authLinks {

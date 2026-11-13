@@ -286,7 +286,7 @@ export default function NavigationBar({
         className={classNames(styles.root, {
           [styles.landing]: isLandingPage,
           [styles.invert]: invert,
-          [styles.noBorder]: noBorder || isLandingPage,
+          [styles.noBorder]: noBorder,
         })}
       >
         <Link className={styles.brand} to="/">

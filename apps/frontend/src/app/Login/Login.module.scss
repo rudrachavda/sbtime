@@ -271,3 +271,71 @@
     text-decoration-color: currentColor;
   }
 }
+
+// Right half (large screens only): the old home page hero's blue gradient
+// with its noise texture and the Storke Tower, edge to edge (no inset,
+// corners or raised edge).
+@mixin tower-gradient($accent, $background) {
+  background: linear-gradient(
+    to bottom,
+    #{$background} 0%,
+    color-mix(in srgb, #{$background} 100%, #{$accent}) 5%,
+    color-mix(in srgb, #{$background} 85%, #{$accent}) 12%,
+    color-mix(in srgb, #{$background} 70%, #{$accent}) 22%,
+    color-mix(in srgb, #{$background} 50%, #{$accent}) 35%,
+    color-mix(in srgb, #{$background} 30%, #{$accent}) 48%,
+    color-mix(in srgb, #{$background} 15%, #{$accent}) 60%,
+    color-mix(in srgb, #{$background} 5%, #{$accent}) 72%,
+    #{$accent} 85%,
+    #{$accent} 100%
+  );
+}
+
+.art {
+  display: none;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  @include tower-gradient(var(--blue-500), var(--foreground-color));
+
+  @include dark-mode {
+    @include tower-gradient(var(--blue-800), var(--neutral-950));
+  }
+
+  @media (width >= 1024px) {
+    display: block;
+  }
+
+  // Noise overlay, as on the old hero
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("./noise.svg");
+    background-size: 150px 150px;
+    background-repeat: repeat;
+    filter: contrast(300%);
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+
+    @include dark-mode {
+      opacity: 0;
+    }
+  }
+}
+
+// Bottom-right corner, sized like the old home page hero: 80% of the panel's
+// height, 100px from the right (48px on narrower screens).
+.tower {
+  position: absolute;
+  right: 100px;
+  bottom: 0;
+  height: 80%;
+  pointer-events: none;
+
+  @media (width < 1280px) {
+    right: 48px;
+  }
+}

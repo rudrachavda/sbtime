@@ -6,7 +6,7 @@ import useUser from "@/hooks/useUser";
 import { signIn } from "@/lib/api";
 
 import styles from "./Login.module.scss";
-import Showcase from "./Showcase";
+import StorkeTower from "./StorkeTower";
 
 // Only same-site paths, so the link can't send people elsewhere after sign-in.
 const safeRedirect = (value: string | null) =>
@@ -113,7 +113,10 @@ export default function Login() {
           </div>
         </main>
       </div>
-      <Showcase />
+      {/* Right half: the Storke Tower on the old home page's gradient */}
+      <div className={styles.art} aria-hidden="true">
+        <StorkeTower className={styles.tower} />
+      </div>
     </div>
   );
 }
