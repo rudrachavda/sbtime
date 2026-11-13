@@ -5,8 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  // Button, (About Us, hidden below for now)
-  Container,
+  // Button, Container, (About Us, hidden below for now)
   Flex,
 } from "@repo/theme";
 
@@ -107,7 +106,7 @@ export default function Organization() {
           </div>
         </div>
       </Container> */}
-      <Container className={styles.wrapper}>
+      <div className={styles.wrapper}>
         <div className={styles.getInvolvedBox}>
           <div className={styles.getInvolvedTitle}>
             <h2 className={styles.heading}>Get Involved</h2>
@@ -157,7 +156,7 @@ export default function Organization() {
             </AccordionItem>
           </Accordion>
         </div>
-      </Container>
+      </div>
       {/* <Container className={styles.sponsorsSection}>
         <div className={styles.sponsorsContent}>
           <h2 className={styles.sponsorsTitle}>

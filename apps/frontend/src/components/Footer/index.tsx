@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { HalfMoon, MacOsWindow, SunLight } from "iconoir-react";
 import { Link } from "react-router-dom";
 
-import { Container, PillSwitcher, useTheme } from "@repo/theme";
+import { PillSwitcher, useTheme } from "@repo/theme";
 
 import { DISCORD_URL, INSTAGRAM_URL } from "@/lib/contact";
 import { FEATURES } from "@/lib/features";
@@ -78,7 +78,7 @@ function StatusBadge() {
 
 export default function Footer() {
   return (
-    <Container className={styles.wrapper}>
+    <div className={styles.wrapper}>
       <div className={styles.root}>
         <div className={styles.group}>
           <div className={styles.brandGroup}>
@@ -156,6 +156,6 @@ export default function Footer() {
         <span>© {new Date().getFullYear()}, SBTime.</span>
         <ThemeSwitcher />
       </div>
-    </Container>
+    </div>
   );
 }

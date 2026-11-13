@@ -76,14 +76,14 @@
   display: block;
   aspect-ratio: 2400 / 1260;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 6px;
   @include hairline;
   box-shadow: 0 0 0 0.5px var(--hairline);
   background-color: var(--foreground-color);
   user-select: none;
 
   @media (width >= 640px) {
-    border-radius: 24px;
+    border-radius: 6px;
   }
 
   img {

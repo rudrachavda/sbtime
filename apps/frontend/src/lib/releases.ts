@@ -25,11 +25,20 @@ export interface Release {
   author?: ReleaseAuthor;
 }
 
-export const SBTIME_AUTHOR: ReleaseAuthor = { name: "SBTime", role: "Team" };
+// The Storke Tower tab icon as the team's avatar
+export const SBTIME_AUTHOR: ReleaseAuthor = {
+  name: "SBTime",
+  role: "Team",
+  avatar: "/favicon.svg",
+};
 
 export const RELEASES: Release[] = [
   {
     slug: "new-home-page",
+    image: {
+      src: "/images/linkpreview.png",
+      alt: "SBTime, UCSB's course discovery platform",
+    },
     date: "2026-11-13",
     title: "A new home page",
     summary:
@@ -41,6 +50,10 @@ export const RELEASES: Release[] = [
   },
   {
     slug: "ucsbtime-launch",
+    image: {
+      src: "/images/changelog/ucsbtime-live.webp",
+      alt: "SBTime's status page showing all systems operational, with 100% uptime for the website and backend",
+    },
     date: "2026-11-12",
     title: "SBTime is live at ucsbtime.com",
     summary:
@@ -52,6 +65,10 @@ export const RELEASES: Release[] = [
   },
   {
     slug: "seat-alerts",
+    image: {
+      src: "/images/changelog/seat-alerts.webp",
+      alt: "A class page for ANTH 135 with the bell's tooltip: Notify me when a seat opens up",
+    },
     date: "2026-11-12",
     title: "Seat alerts",
     summary:
@@ -63,6 +80,10 @@ export const RELEASES: Release[] = [
   },
   {
     slug: "gradpath-engineering",
+    image: {
+      src: "/images/changelog/gradpath.webp",
+      alt: "A GradPath plan for Computer Engineering, with classes laid out by quarter",
+    },
     date: "2026-11-11",
     title: "GradPath for College of Engineering majors",
     summary:
@@ -74,6 +95,10 @@ export const RELEASES: Release[] = [
   },
   {
     slug: "grades-and-enrollment",
+    image: {
+      src: "/images/changelog/grades-enrollment.webp",
+      alt: "The Grades page showing ECE 157A's grade distribution, with an A- course average",
+    },
     date: "2026-11-11",
     title: "Grades and enrollment for UCSB",
     summary:
@@ -85,6 +110,10 @@ export const RELEASES: Release[] = [
   },
   {
     slug: "scheduler",
+    image: {
+      src: "/images/changelog/scheduler.webp",
+      alt: "A Winter 2027 schedule in the Scheduler, with three classes on the weekly calendar",
+    },
     date: "2026-11-11",
     title: "The Scheduler, now for UCSB",
     summary:

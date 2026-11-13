@@ -36,7 +36,7 @@ import {
 const STEP_MS = 110;
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 // The line's draw: one smooth sweep, easing in and out
-const DRAW_S = 3.2;
+const DRAW_S = 5;
 const DRAW_DELAY_S = 0.3;
 const DRAW_EASE = [0.65, 0, 0.35, 1] as const;
 

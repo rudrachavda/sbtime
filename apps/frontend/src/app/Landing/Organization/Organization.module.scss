@@ -52,7 +52,11 @@ $section-spacing: 48px;
 }
 
 .wrapper {
-  padding: 0 40px;
+  // The site's 1200px column with 24px side padding
+  width: 100%;
+  max-width: calc(1200px + 24px * 2);
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 .getInvolvedBox {
