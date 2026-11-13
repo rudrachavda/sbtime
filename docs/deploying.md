@@ -8,7 +8,7 @@ SBTime runs on Vercel (free Hobby plan) as two services defined in
   Vercel runs `apps/backend/src/index.ts`; local Docker runs `main.ts`.
 
 The database is MongoDB Atlas (Flex, AWS Oregon), the cache is Upstash Redis
-(AWS Oregon), and the data pullers run on a schedule in GitHub Actions
+(AWS Oregon), and the data pullers run in GitHub Actions, started on schedule by a Cloudflare Worker
 ([`.github/workflows/pullers.yml`](../.github/workflows/pullers.yml)).
 
 ## Vercel project settings
@@ -141,8 +141,13 @@ secret:
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | as above (seat-alert emails) |
 
 Run any puller by hand from the Actions tab → Data pullers → Run workflow.
-GitHub pauses scheduled workflows in public repositories after 60 days with
-no commits; re-enable them on the Actions tab if that happens.
+
+The schedule itself is a Cloudflare Worker,
+[`infra/cloudflare/puller-trigger`](../infra/cloudflare/puller-trigger/README.md),
+that starts the workflow every 15 minutes (and twice a day and daily for the
+other pullers). GitHub's built-in schedule dropped most runs. The Worker
+needs a GitHub token limited to this repository's Actions; when that token
+expires, the pullers stop until it's replaced.
 
 ## Other services
 

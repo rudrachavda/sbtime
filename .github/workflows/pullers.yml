@@ -7,15 +7,14 @@
 #   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM
 #                   for seat-alert emails (leave SMTP_HOST unset to skip email)
 #
-# Times are UTC and GitHub may start scheduled runs a few minutes late.
+# The schedule lives in a Cloudflare Worker (infra/cloudflare/puller-trigger):
+# GitHub's own `schedule:` trigger dropped most runs, so the Worker starts
+# this workflow through "Run workflow" instead, every 15 minutes for seat
+# counts, twice a day for the catalog and daily for finals (UTC).
 # Use "Run workflow" on the Actions tab to run any puller by hand.
 name: Data pullers
 
 on:
-  schedule:
-    - cron: "*/15 * * * *" # seat counts
-    - cron: "5 3,15 * * *" # catalog and quarter dates, twice a day
-    - cron: "20 10 * * *" # final exams and the UCSBPlat catch-up, daily
   workflow_dispatch:
     inputs:
       puller:
@@ -30,6 +29,11 @@ on:
           - enrollment-current-ucsbplat
           - catalog-details
           - plan-requirements
+      pullers:
+        description: Several pullers to run in order, separated by spaces (set by the Cloudflare Worker; overrides the choice above)
+        required: false
+        type: string
+        default: ""
 
 # One run at a time, like the local scheduler: the catalog job replaces
 # sections that the seat-count job updates.
@@ -83,15 +87,18 @@ jobs:
       - name: Choose pullers
         id: pick
         env:
-          SCHEDULE: ${{ github.event.schedule }}
-          MANUAL: ${{ inputs.puller }}
+          CHOICE: ${{ inputs.puller }}
+          LIST: ${{ inputs.pullers }}
         run: |
-          case "$SCHEDULE" in
-            "*/15 * * * *") pullers="enrollment-active" ;;
-            "5 3,15 * * *") pullers="catalog-active terms-nearby" ;;
-            "20 10 * * *") pullers="finals-active enrollment-current-ucsbplat" ;;
-            *) pullers="$MANUAL" ;;
-          esac
+          pullers="${LIST:-$CHOICE}"
+          # Only known pullers, so the list can't carry anything else.
+          for puller in $pullers; do
+            case "$puller" in
+              enrollment-active | catalog-active | terms-nearby | finals-active | \
+                enrollment-current-ucsbplat | catalog-details | plan-requirements) ;;
+              *) echo "::error::Unknown puller: $puller"; exit 1 ;;
+            esac
+          done
           echo "pullers=$pullers" >> "$GITHUB_OUTPUT"
 
       - name: Run pullers

@@ -1,0 +1,15 @@
+# Starts the data pullers (.github/workflows/pullers.yml) on schedule.
+# Deploy: see README.md.
+name = "sbtime-puller-trigger"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+# No web address: the Worker only runs on its schedule.
+workers_dev = false
+preview_urls = false
+
+[triggers]
+# UTC. Keep in sync with PULLERS_BY_CRON in src/index.ts.
+crons = ["*/15 * * * *", "5 3,15 * * *", "20 10 * * *"]
+
+[observability]
+enabled = true
