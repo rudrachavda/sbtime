@@ -1,0 +1,124 @@
+// The Grades page, drawn: pickers, course cards, a large chart and the
+// details panel. The chart is wide on purpose and may run off the window.
+
+$hairline: 0.5px solid var(--border-color);
+
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--heading-color);
+}
+
+.toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: $hairline;
+}
+
+.cards {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: $hairline;
+}
+
+.cardSlot {
+  width: 250px;
+  height: 52px;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+// Fixed height so the axis labels line up with the gridlines
+.chart {
+  flex: 1;
+  min-width: 0;
+  height: 420px;
+  display: flex;
+  padding: 20px 0 0 16px;
+}
+
+.yAxis {
+  width: 40px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 24px; // room for the x-axis labels
+  color: var(--paragraph-color);
+  font-variant-numeric: tabular-nums;
+
+  span {
+    transform: translateY(-50%);
+  }
+
+  span:last-child {
+    transform: translateY(50%);
+  }
+}
+
+.plotArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 0 12px;
+}
+
+.gridLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 0.5px dashed var(--border-color);
+}
+
+.group {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.bar {
+  width: 20px;
+  border-radius: 4px 4px 1px 1px;
+}
+
+.xAxis {
+  height: 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 0 12px;
+  color: var(--paragraph-color);
+  font-weight: var(--font-medium);
+
+  span {
+    width: 43px; // two 20px bars + a 3px gap
+    text-align: center;
+  }
+}
+
+.sideSlot {
+  display: flex;
+}

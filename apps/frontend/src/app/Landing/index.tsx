@@ -4,6 +4,7 @@ import NavigationBar from "@/components/NavigationBar";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import useMinWidth from "@/hooks/useMinWidth";
 
+import Features from "./Features";
 import Hero from "./Hero";
 import styles from "./Landing.module.scss";
 import Organization from "./Organization";
@@ -20,6 +21,7 @@ const Home = () => {
         <NavigationBar />
       </div>
       <Hero />
+      <Features />
       <Organization />
     </div>
   );

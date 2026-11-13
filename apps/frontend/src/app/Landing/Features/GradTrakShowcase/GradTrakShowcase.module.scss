@@ -1,0 +1,199 @@
+@import "../../../../_mixins.scss";
+
+// GradTrak, drawn small: requirements on the left, two years of quarters on
+// the right. 12-13px text like the Scheduler showcase.
+
+$hairline: 0.5px solid var(--border-color);
+
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--heading-color);
+}
+
+.toolbar {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 16px;
+  border-bottom: $hairline;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: var(--font-medium);
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--paragraph-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+// Requirements
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: $hairline;
+}
+
+.sidebarHeader {
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: $hairline;
+  color: var(--paragraph-color);
+}
+
+.requirement {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: $hairline;
+}
+
+.requirementRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.requirementLabel {
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.requirementCount {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  color: var(--paragraph-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background-color: var(--border-color);
+}
+
+.fill {
+  height: 100%;
+  border-radius: 2px;
+  background-color: var(--blue-500);
+}
+
+// Two years of quarters
+.plan {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+}
+
+.year {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.yearLabel {
+  color: var(--paragraph-color);
+}
+
+.quarters {
+  display: grid;
+  grid-template-columns: repeat(3, 180px);
+  gap: 12px;
+}
+
+// Each quarter has 10px corners and its course cards sit 6px in, so the
+// cards get 10 - 6 = 4px (outer radius = inner radius + gap).
+.quarter {
+  display: flex;
+  flex-direction: column;
+  border: $hairline;
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--foreground-color) 97%, #000);
+
+  @include dark-mode {
+    background-color: color-mix(in srgb, var(--foreground-color) 94%, #fff);
+  }
+}
+
+.quarterHeader {
+  padding: 8px 10px;
+  border-bottom: $hairline;
+  font-weight: var(--font-medium);
+}
+
+.courses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  min-height: 116px;
+}
+
+%card {
+  height: 30px;
+  border-radius: 4px; // 10px quarter - 6px gap
+}
+
+.course {
+  @extend %card;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  background-color: var(--foreground-color);
+  box-shadow:
+    0 0 0 0.5px var(--border-color),
+    0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.placeholder {
+  @extend %card;
+  border: 0.5px dashed var(--border-color);
+}
+
+.courseCode {
+  font-weight: var(--font-medium);
+}
+
+.courseUnits {
+  color: var(--paragraph-color);
+  font-variant-numeric: tabular-nums;
+}

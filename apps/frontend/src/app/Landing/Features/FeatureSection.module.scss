@@ -1,0 +1,208 @@
+@import "../../../_mixins.scss";
+
+// Values follow the design reference (Tailwind spacing: 1 = 4px), in the
+// same 1200px column with 24px side padding as the hero and navigation bar.
+
+$content-max: 1200px;
+$page-padding: 24px;
+$hairline: 0.5px solid var(--border-color);
+
+.root {
+  position: relative;
+  overflow-x: clip;
+  padding: 64px 0; // py-16
+
+  @media (width >= 768px) {
+    padding: 96px 0; // md:py-24
+  }
+
+  // Hairline between consecutive sections, as wide as the 1200px column
+  // (not the page)
+  & + &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: max(#{$page-padding}, calc((100% - #{$content-max}) / 2));
+    right: max(#{$page-padding}, calc((100% - #{$content-max}) / 2));
+    height: 0.5px;
+    background-color: rgb(0 0 0 / 8%);
+
+    @include dark-mode {
+      background-color: rgb(255 255 255 / 8%);
+    }
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: calc(#{$content-max} + #{$page-padding} * 2);
+  margin: 0 auto;
+  padding: 0 $page-padding;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px; // gap-10
+
+  @media (width >= 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// Left: heading, description, TLDR
+.copy {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px; // max-w-120
+
+  @media (width >= 768px) {
+    padding: 48px 0; // md:py-12
+  }
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: var(--font-medium);
+  text-wrap: pretty;
+  color: var(--heading-color);
+}
+
+.description {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: balance;
+  color: var(--paragraph-color);
+}
+
+.tldr {
+  margin: 40px 0 0; // mt-10
+  font-size: 14px;
+  font-weight: var(--font-medium);
+  color: var(--paragraph-color);
+
+  @media (width >= 768px) {
+    margin-top: auto; // pinned to the bottom of the column
+  }
+}
+
+.featureBlock {
+  margin-top: 16px;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.features {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--paragraph-color);
+
+  @media (width >= 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
+// Right: the window, running 200px past the column into the page edge
+.stage {
+  position: relative;
+  min-width: 0;
+  height: 480px; // h-120
+
+  @media (width >= 768px) {
+    height: 640px; // md:h-160
+  }
+}
+
+.bleed {
+  position: absolute;
+  inset: 0 -200px 0 0; // -right-50
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+// w-300, 16px corners, 0.5px border; the panel sits 2px in, so its corners
+// are 16 - 2 = 14px (outer radius = inner radius + gap).
+.window {
+  position: relative;
+  flex-shrink: 0;
+  width: 1200px;
+  height: 100%;
+  overflow: hidden;
+  border: $hairline;
+  border-radius: 16px;
+  background-color: color-mix(in srgb, var(--foreground-color) 96%, #000);
+  user-select: none;
+  pointer-events: none;
+
+  @include dark-mode {
+    background-color: color-mix(in srgb, var(--foreground-color) 92%, #fff);
+  }
+}
+
+.inset {
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+}
+
+.panel {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: $hairline;
+  border-radius: 14px;
+  background-color: var(--foreground-color);
+}
+
+// Diagonal sheen toward the bottom-right corner
+.sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    transparent 50%,
+    color-mix(in srgb, var(--foreground-color) 92%, #000) 95%
+  );
+  opacity: 0.6;
+}
+
+// Fades into the page at the bottom and the right edge
+.fadeBottom {
+  position: absolute;
+  inset: auto 0 0;
+  height: 160px; // h-40
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--foreground-color));
+
+  @media (width >= 768px) {
+    height: 480px; // md:h-120
+  }
+}
+
+.fadeRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 160px; // w-40
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--foreground-color));
+}
