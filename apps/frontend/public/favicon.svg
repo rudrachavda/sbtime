@@ -1,18 +1,22 @@
-<svg fill="#000" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-<rect width="32" height="32" rx="7" fill="#fefefe" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 457 457" fill="currentColor">
+  <!-- Rounded rectangle background -->
+  <rect width="457" height="457" rx="100" fill="#fefefe" />
 
-<g transform="translate(16,16) scale(0.6) translate(-16,-16)">
-    <!-- Top-Left Quarter Circle -->
-    <path d="M 15.2 15.2 H 0.2 A 15 15 0 0 1 15.2 0.2 Z" />
-
-    <!-- Bottom-Left Quarter Circle (decrease this curve radius) -->
-    <path d="M 0.2 16.8 H 15.2 A 15 15 0 0 1 0.2 31.8 Z" />
-
-    <!-- Top-Right Quarter Circle (Unchanged) -->
-    <path d="M 16.8 0.2 H 31.8 A 15 15 0 0 1 16.8 15.2 Z" />
-
-    <!-- Bottom-Right Quarter Circle (Unchanged) -->
-    <path d="M 16.8 16.8 H 31.8 A 15 15 0 0 1 16.8 31.8 Z" />
-</g>
-
+  <!-- Simplified Storke Tower silhouette scaled to 80% and centered -->
+  <path transform="translate(45.7, 45.7) scale(0.8)" fill-rule="evenodd" fill="#1d1d1d" clip-rule="evenodd" d="
+    M160 438V19H297V438Z 
+    M182 137V66 
+      A11 11 0 0 1 204 66 
+      V137Z 
+    M218 137V66 
+      A11 11 0 0 1 240 66 
+      V137Z 
+    M254 137V66 
+      A11 11 0 0 1 276 66 
+      V137Z 
+    M188.5 438V396 
+      C188.5 374 206 356 228.5 356 
+      C251 356 268.5 374 268.5 396 
+      V438Z
+  "/>
 </svg>
