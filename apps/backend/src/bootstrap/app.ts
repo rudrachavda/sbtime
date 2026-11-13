@@ -1,5 +1,6 @@
 import express, { type Application } from "express";
 
+import { config } from "../../../../packages/common/src/utils/config";
 import log from "../lib/logger";
 import loaders from "./loaders";
 
@@ -21,7 +22,7 @@ export const configureApp = (
   // log http requests
   app.use((req, res, next) => {
     if (
-      req.path === "/healthz" ||
+      req.path.endsWith("/healthz") ||
       req.path === "/health" ||
       req.path === "/ready"
     ) {
@@ -44,7 +45,9 @@ export const configureApp = (
     next();
   });
 
-  app.get("/healthz", (_, res) => {
+  // Also under /api: on Vercel only /api/... reaches the backend, so
+  // uptime monitors (Instatus) check https://ucsbtime.com/api/healthz.
+  app.get(["/healthz", `${config.backendPath}/healthz`], (_, res) => {
     res.status(200).send("OK");
   });
 

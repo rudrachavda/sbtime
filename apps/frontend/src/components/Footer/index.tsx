@@ -39,9 +39,8 @@ const STATUS_LABELS: Record<Status, string> = {
   UNDERMAINTENANCE: "Under maintenance",
 };
 
-// SBTime's own status page (an Instatus page, for example). Unset, so no
-// badge is shown; Berkeleytime's page described their servers, not ours.
-const STATUS_PAGE_URL: string | null = null;
+// SBTime's status page on Instatus; the footer badge reads its summary.json.
+const STATUS_PAGE_URL: string | null = "https://sbtime.instatus.com";
 
 // Instagram and Discord don't exist yet; their links open the 404 page.
 const SOCIAL_LINKS: { label: string; href: string }[] = [
