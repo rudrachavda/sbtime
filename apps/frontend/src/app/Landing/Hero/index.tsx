@@ -1,8 +1,7 @@
 import styles from "./Hero.module.scss";
+import SchedulerShowcase from "./SchedulerShowcase";
 
-// A stand-in for the app: a frosted window holding a white panel with a
-// toolbar, a list column on the left and a detail column on the right.
-// Empty on purpose; swap in a real screenshot later if wanted.
+// The frosted window holding the Scheduler showcase.
 function AppPreview() {
   return (
     <div
@@ -12,15 +11,7 @@ function AppPreview() {
     >
       <div className={styles.previewInset}>
         <div className={styles.previewPanel}>
-          <div className={styles.previewToolbar} />
-          <div className={styles.previewBody}>
-            <div className={styles.previewList}>
-              <div className={styles.previewListHeader} />
-            </div>
-            <div className={styles.previewDetail}>
-              <div className={styles.previewDetailHeader} />
-            </div>
-          </div>
+          <SchedulerShowcase />
         </div>
       </div>
     </div>

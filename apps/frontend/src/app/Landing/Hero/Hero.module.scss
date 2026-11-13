@@ -193,8 +193,6 @@ $load-in: 800ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
   padding: 4px;
 }
 
-$hairline: 0.5px solid var(--border-color);
-
 .previewPanel {
   display: flex;
   flex-direction: column;
@@ -210,36 +208,4 @@ $hairline: 0.5px solid var(--border-color);
   @include dark-mode {
     background-color: var(--neutral-900);
   }
-}
-
-.previewToolbar {
-  height: 44px; // h-11
-  flex-shrink: 0;
-  border-bottom: $hairline;
-}
-
-.previewBody {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-}
-
-.previewList {
-  width: 440px; // w-110
-  flex-shrink: 0;
-  border-right: $hairline;
-}
-
-.previewListHeader {
-  height: 24px;
-  border-bottom: $hairline;
-}
-
-.previewDetail {
-  flex: 1;
-}
-
-.previewDetailHeader {
-  height: 16px; // p-2 with nothing inside
-  border-bottom: $hairline;
 }

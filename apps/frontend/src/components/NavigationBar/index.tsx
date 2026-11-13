@@ -3,11 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import classNames from "classnames";
 import { motion } from "framer-motion";
 import {
-  ArrowRight,
   Bookmark,
   ChatBubbleQuestion,
+  Check,
   HalfMoon,
   LogOut,
+  MacOsWindow,
   Menu,
   ProfileCircle,
   Star,
@@ -60,6 +61,13 @@ interface NavigationBarProps {
   noBorder?: boolean;
 }
 
+// Appearance choices in the profile menu (null = follow the system)
+const THEME_OPTIONS = [
+  { value: null, label: "System", Icon: MacOsWindow },
+  { value: "light", label: "Light", Icon: SunLight },
+  { value: "dark", label: "Dark", Icon: HalfMoon },
+] as const;
+
 // The login page, returning to the current page after Google sign-in.
 const loginPath = (location: { pathname: string; search: string }) =>
   location.pathname === "/" || location.pathname === "/login"
@@ -70,70 +78,6 @@ const isTypingTarget = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
   (target.isContentEditable ||
     ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
-
-const ThemeDropdown = ({
-  theme,
-  setTheme,
-  forceTheme,
-}: {
-  theme: "light" | "dark" | null;
-  setTheme: (theme: "light" | "dark" | null) => void;
-  forceTheme?: "light" | "dark";
-}) => {
-  const systemPrefersDark =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  const effectiveTheme =
-    theme === null ? (systemPrefersDark ? "dark" : "light") : theme;
-
-  return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <IconButton className={styles.themeButton} aria-label="Toggle theme">
-          <motion.div
-            key={effectiveTheme}
-            initial={{ rotate: -90, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            style={{ display: "flex" }}
-          >
-            {effectiveTheme === "light" ? (
-              <SunLight width={18} height={18} />
-            ) : (
-              <HalfMoon width={18} height={18} />
-            )}
-          </motion.div>
-        </IconButton>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content
-        sideOffset={5}
-        align="end"
-        className={styles.themeDropdown}
-        forceTheme={forceTheme}
-      >
-        <DropdownMenu.Item
-          className={styles.themeDropdownItem}
-          onSelect={() => setTheme("light")}
-        >
-          Light
-        </DropdownMenu.Item>
-        <DropdownMenu.Item
-          className={styles.themeDropdownItem}
-          onSelect={() => setTheme("dark")}
-        >
-          Dark
-        </DropdownMenu.Item>
-        <DropdownMenu.Item
-          className={styles.themeDropdownItem}
-          onSelect={() => setTheme(null)}
-        >
-          System
-        </DropdownMenu.Item>
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
-  );
-};
 
 export default function NavigationBar({
   invert,
@@ -171,10 +115,11 @@ export default function NavigationBar({
     }));
   }, [navItems, navItemsLoading, navItemsError]);
 
-  // Home page shortcuts for signed-out visitors: L opens the login page and
-  // G (get started) opens the catalog.
+  // Shortcuts for signed-out visitors: L opens the login page (on every
+  // page, returning here afterwards) and, on the home page, G (get started)
+  // opens the catalog.
   useEffect(() => {
-    if (!isLandingPage || user) return;
+    if (user) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || event.repeat)
@@ -182,13 +127,13 @@ export default function NavigationBar({
       if (isTypingTarget(event.target)) return;
 
       const key = event.key.toLowerCase();
-      if (key === "l") navigate("/login");
-      else if (key === "g") navigate("/catalog");
+      if (key === "l") navigate(loginPath(location));
+      else if (key === "g" && isLandingPage) navigate("/catalog");
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isLandingPage, user, navigate]);
+  }, [isLandingPage, user, navigate, location]);
 
   useEffect(() => {
     if (menuOpen) {
@@ -284,7 +229,6 @@ export default function NavigationBar({
         flexShrink="0"
         gap="3"
         className={classNames(styles.root, {
-          [styles.landing]: isLandingPage,
           [styles.invert]: invert,
           [styles.noBorder]: noBorder,
         })}
@@ -352,8 +296,7 @@ export default function NavigationBar({
             </MenuItem>
           ))}
         </div>
-        {/* Right-hand group. On the home page it's the grid's third column;
-            elsewhere it doesn't affect layout (display: contents). */}
+        {/* Right-hand group: the grid's third column */}
         <div className={styles.actions}>
           <IconButton
             className={styles.compactMenuButton}
@@ -367,11 +310,6 @@ export default function NavigationBar({
               {menuOpen ? <Xmark /> : <Menu />}
             </motion.div>
           </IconButton>
-          <ThemeDropdown
-            theme={theme}
-            setTheme={setTheme}
-            forceTheme={invert ? "light" : undefined}
-          />
           {user ? (
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
@@ -394,22 +332,34 @@ export default function NavigationBar({
                     <ProfileCircle width={18} height={18} /> Account
                   </Link>
                 </DropdownMenu.Item>
-                {/* <DropdownMenu.Sub>
-              <DropdownMenu.SubTrigger>
-                <ThemeIcon theme={theme} /> Appearance
-              </DropdownMenu.SubTrigger>
-              <DropdownMenu.SubContent>
-                <DropdownMenu.Item onSelect={() => setTheme(null)}>
-                  <MacOsWindow width={18} height={18} /> System
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onSelect={() => setTheme("dark")}>
-                  <HalfMoon width={18} height={18} /> Dark
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onSelect={() => setTheme("light")}>
-                  <SunLight width={18} height={18} /> Light
-                </DropdownMenu.Item>
-              </DropdownMenu.SubContent>
-            </DropdownMenu.Sub> */}
+                {/* Theme for pages without a footer (Catalog, Scheduler,
+                    GradTrak); same setting as the footer's switch. */}
+                <DropdownMenu.Sub>
+                  <DropdownMenu.SubTrigger>
+                    <MacOsWindow width={18} height={18} /> Appearance
+                  </DropdownMenu.SubTrigger>
+                  <DropdownMenu.SubContent
+                    sideOffset={4}
+                    forceTheme={invert ? "light" : undefined}
+                    className={styles.profileDropdown}
+                  >
+                    {THEME_OPTIONS.map(({ value, label, Icon }) => (
+                      <DropdownMenu.Item
+                        key={label}
+                        onSelect={() => setTheme(value)}
+                      >
+                        <Icon width={18} height={18} /> {label}
+                        {theme === value && (
+                          <Check
+                            width={16}
+                            height={16}
+                            className={styles.checkmark}
+                          />
+                        )}
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu.SubContent>
+                </DropdownMenu.Sub>
                 <DropdownMenu.Item asChild>
                   <Link to="/profile/bookmarks">
                     <Bookmark width={18} height={18} /> Bookmarks
@@ -431,25 +381,19 @@ export default function NavigationBar({
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
-          ) : isLandingPage ? (
+          ) : (
+            // Signed out: Login everywhere (back to this page afterwards);
+            // Get started only on the home page.
             <div className={styles.authLinks}>
-              <Link to="/login" className={styles.loginLink}>
+              <Link to={loginPath(location)} className={styles.loginLink}>
                 Login <kbd className={styles.kbd}>L</kbd>
               </Link>
-              <Link to="/catalog" className={styles.getStarted}>
-                Get started <kbd className={styles.kbd}>G</kbd>
-              </Link>
+              {isLandingPage && (
+                <Link to="/catalog" className={styles.getStarted}>
+                  Get started <kbd className={styles.kbd}>G</kbd>
+                </Link>
+              )}
             </div>
-          ) : (
-            <Button
-              as={Link}
-              to={loginPath(location)}
-              className={styles.button}
-              style={{ color: accentColor }}
-            >
-              Sign in
-              <ArrowRight />
-            </Button>
           )}
         </div>
       </Flex>

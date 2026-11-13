@@ -1,0 +1,19 @@
+// Each digit is a fixed-width slot; when it changes, the old and new glyphs
+// overlap in the same grid cell while one fades out and the other fades in.
+
+.root {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.digit {
+  display: inline-grid;
+  // A tabular digit's width, so the slot never resizes mid-swap
+  width: 1ch;
+}
+
+.glyph {
+  grid-area: 1 / 1;
+  text-align: center;
+}

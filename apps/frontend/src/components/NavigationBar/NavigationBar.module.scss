@@ -61,25 +61,17 @@
   line-height: 1.4;
 }
 
-.themeDropdown {
-  min-width: 100px;
-  z-index: var(--z-nav-dropdown);
-}
-
 .profileDropdown {
   z-index: var(--z-nav-dropdown);
 }
 
-.themeDropdownItem {
-  font-size: 14px;
+// Check next to the current Appearance choice
+.checkmark {
+  margin-left: auto;
+  color: var(--paragraph-color);
 }
 
 .root {
-  .themeButton,
-  .themeButton[data-variant="outline"] {
-    border: none !important;
-  }
-
   .brand {
     margin-left: 10px;
     font-size: 24px;
@@ -121,17 +113,6 @@
 
   &.invert {
     padding: 12px 12px 0;
-
-    .themeButton {
-      color: white;
-
-      &:global([data-variant="outline"]) {
-        &:hover {
-          background-color: unset;
-          color: white;
-        }
-      }
-    }
 
     .brand {
       color: white;
@@ -267,12 +248,6 @@
   // The inverted bar (unused page) keeps its wrapper out of the layout.
   &.invert .actions {
     display: contents;
-  }
-
-  // Home page only: the theme switch isn't part of its design; it stays on
-  // every other page.
-  &.landing .themeButton {
-    display: none;
   }
 
   .authLinks {
