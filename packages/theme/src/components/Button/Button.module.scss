@@ -1,13 +1,13 @@
 .root {
-  height: 32px;
-  border-radius: 4px;
-  padding: 0 12px;
+  height: 28px;
+  border-radius: 6px;
+  padding: 0 10px 0 10px;
   display: inline-flex;
   width: max-content;
   flex-shrink: 0;
   align-items: center;
   font-size: 13px;
-  font-weight: var(--font-medium);
+  font-weight: var(--font-regular);
   line-height: 1;
   cursor: pointer;
   gap: 8px;
