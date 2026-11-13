@@ -46,6 +46,7 @@ const LegacyGradeDistributions = lazy(
 );
 const About = lazy(() => import("@/app/About"));
 const Changelog = lazy(() => import("@/app/Changelog"));
+const ReleasePage = lazy(() => import("@/app/Changelog/ReleasePage"));
 const Apply = lazy(() => import("@/app/Apply"));
 // const Discover = lazy(() => import("@/app/Discover"));
 const CuratedClasses = lazy(() => import("@/app/CuratedClasses"));
@@ -193,6 +194,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseBoundary key="changelog">
                 <Changelog />
+              </SuspenseBoundary>
+            ),
+          },
+          {
+            path: "changelog/:slug",
+            element: (
+              <SuspenseBoundary key="changelog-release">
+                <ReleasePage />
               </SuspenseBoundary>
             ),
           },

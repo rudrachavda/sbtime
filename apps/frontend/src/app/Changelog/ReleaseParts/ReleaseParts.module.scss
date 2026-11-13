@@ -1,0 +1,178 @@
+@import "../../../_mixins.scss";
+
+// Text matches the user's reference: 13px small text, 15px article text.
+// sm = 640px.
+
+.divider {
+  @include hairline;
+  height: 1.2px;
+  background-color: var(--hairline);
+}
+
+.date {
+  font-size: 13px;
+  font-weight: var(--font-normal);
+  color: var(--paragraph-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.copy {
+  // Ghost button like the navigation bar's Login: 28px tall, 6px corners, a
+  // background on hover. Pulled right so its text lines up with the column.
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  margin-right: -8px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  color: var(--paragraph-color);
+  cursor: pointer;
+  transition:
+    background-color 100ms ease-in-out,
+    color 100ms ease-in-out;
+
+  &:hover {
+    color: var(--heading-color);
+    background-color: var(--button-hover-color);
+  }
+}
+
+// The copy and check icons stack here so they can crossfade
+.copyIcon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.copyIconLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Read out by screen readers only ("Link copied")
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.media {
+  display: block;
+  aspect-ratio: 2400 / 1260;
+  overflow: hidden;
+  border-radius: 16px;
+  @include hairline;
+  box-shadow: 0 0 0 0.5px var(--hairline);
+  background-color: var(--foreground-color);
+  user-select: none;
+
+  @media (width >= 640px) {
+    border-radius: 24px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+// Shown until an entry has its own image
+.placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 20px;
+  font-weight: var(--font-medium);
+  color: var(--paragraph-color);
+  background-image: radial-gradient(
+    120% 90% at 100% 100%,
+    rgb(59 130 246 / 10%),
+    transparent 60%
+  );
+}
+
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 24px;
+    font-weight: var(--font-normal);
+    color: var(--heading-color);
+    text-wrap: pretty;
+  }
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  padding: 4px 12px 4px 8px;
+  margin-left: -8px;
+  border-radius: 8px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  outline: 0.5px solid rgb(0 0 0 / 8%);
+  outline-offset: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--foreground-color);
+  font-size: 12px;
+  font-weight: var(--font-medium);
+  color: var(--heading-color);
+
+  @include dark-mode {
+    outline-color: rgb(255 255 255 / 10%);
+  }
+}
+
+.authorText {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.authorName {
+  font-weight: var(--font-medium);
+  color: var(--heading-color);
+}
+
+.authorRole {
+  font-weight: 450;
+  color: var(--paragraph-color);
+}

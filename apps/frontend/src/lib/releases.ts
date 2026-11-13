@@ -1,7 +1,7 @@
 // The release log: "The Latest" on the home page shows the first three,
-// /changelog shows them all. Newest first. Add an entry at the top to publish
-// a release; the slug becomes its link (/changelog#slug), so don't change it
-// once it's out.
+// /changelog shows them all, and each has its own page at /changelog/<slug>.
+// Newest first. Add an entry at the top to publish a release; don't change a
+// slug once it's out, since links to it would break.
 
 export interface ReleaseAuthor {
   name: string;
@@ -104,4 +104,4 @@ export const formatReleaseDate = (date: string) =>
     year: "numeric",
   });
 
-export const releaseLink = (slug: string) => `/changelog#${slug}`;
+export const releaseLink = (slug: string) => `/changelog/${slug}`;

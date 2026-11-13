@@ -19,3 +19,14 @@
     }
   }
 }
+
+/// The site's hairline color (navigation bar, section dividers): 8% black,
+/// 8% white in dark mode. Sets --hairline on the element; use it as
+/// `border-top: 0.5px solid var(--hairline)` or in a box-shadow.
+@mixin hairline {
+  --hairline: rgb(0 0 0 / 8%);
+
+  @include dark-mode {
+    --hairline: rgb(255 255 255 / 8%);
+  }
+}

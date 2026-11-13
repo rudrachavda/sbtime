@@ -1,3 +1,5 @@
+@import "../../_mixins.scss";
+
 .wrapper {
   padding: 0 40px;
 }
@@ -6,7 +8,9 @@
   padding: 64px 0;
   display: flex;
   flex-wrap: wrap;
-  border-top: 1px solid var(--border-color);
+  // Same hairline as the navigation bar
+  @include hairline;
+  border-top: 0.5px solid var(--hairline);
   gap: 64px;
 
   .columns {
