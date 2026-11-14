@@ -23,16 +23,20 @@ export default function EnrollmentDisplay({
 }: EnrollmentDisplayProps) {
   const formattedTime = useMemo(() => {
     if (!time) return null;
-    return moment(time).fromNow();
+    const updated = moment(time);
+    return updated.isValid() ? updated.fromNow() : null;
   }, [time]);
 
   const hasData = enrolledCount != null && maxEnroll != null;
 
   if (!hasData) return null;
 
+  // Never show a negative count, even if one slips into the data
+  const enrolled = Math.max(0, enrolledCount);
+
   const percentage =
-    maxEnroll === 0 ? 0 : Math.round((enrolledCount / maxEnroll) * 100);
-  const color = getEnrollmentColor(enrolledCount, maxEnroll);
+    maxEnroll === 0 ? 0 : Math.round((enrolled / maxEnroll) * 100);
+  const color = getEnrollmentColor(enrolled, maxEnroll);
 
   // Waitlist numbers are hidden on SBTime.
   const content = (
@@ -46,11 +50,16 @@ export default function EnrollmentDisplay({
       description={
         <>
           <span style={{ color }}>
-            {enrolledCount}/{maxEnroll}
+            {enrolled}/{maxEnroll}
           </span>{" "}
           students are enrolled in this class for this quarter.
-          <br />
-          <i>Updated {formattedTime}.</i>
+          {/* Older classes have no seat-count time; leave the line out */}
+          {formattedTime && (
+            <>
+              <br />
+              <i>Updated {formattedTime}.</i>
+            </>
+          )}
         </>
       }
     />

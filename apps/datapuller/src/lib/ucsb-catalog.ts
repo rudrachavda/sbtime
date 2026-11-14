@@ -735,7 +735,8 @@ export const mapQuarter = (
             : undefined,
         });
 
-        const enrolledCount = section.enrolledTotal ?? 0;
+        // UCSB sometimes reports -1 or -2 enrolled (seen on emptied sections)
+        const enrolledCount = Math.max(0, section.enrolledTotal ?? 0);
         const maxEnroll = section.maxEnroll ?? 0;
         const closed =
           trim(section.classClosed) === "Y" ||
