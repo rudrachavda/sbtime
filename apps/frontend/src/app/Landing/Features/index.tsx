@@ -9,6 +9,7 @@ export default function Features() {
   return (
     <>
       <FeatureSection
+        tag="01"
         title="Visualize your 4 year plan"
         description="SBTime will check your courses that you have taken against your major sheet, and UC requirements."
         features={[
@@ -20,6 +21,7 @@ export default function Features() {
         showcase={<GradTrakShowcase />}
       />
       <FeatureSection
+        tag="02"
         title="See how classes are graded"
         description="Grade distributions for every class, across quarters and instructors, so you know what to expect before you enroll."
         features={[
@@ -31,6 +33,7 @@ export default function Features() {
         showcase={<GradesShowcase />}
       />
       <FeatureSection
+        tag="03"
         title="Track every seat"
         description="See how fast classes fill, with seat counts updated every 15 minutes and an email when a spot opens."
         features={[

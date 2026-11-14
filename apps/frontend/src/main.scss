@@ -1,3 +1,14 @@
+/* Departure Mono by Helena Zhang (SIL Open Font License; the license is next
+   to the font in public/fonts). A pixel font: sharpest at 11px or multiples
+   of it. Used through --font-mono. */
+@font-face {
+  font-family: "Departure Mono";
+  src: url("/fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --header-height: 90px; /* Default, overridden by JS */
 

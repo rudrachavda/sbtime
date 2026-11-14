@@ -313,6 +313,13 @@
   --font-semibold: 600;
   --font-bold: 700;
 
+  // The site's serif: Newsreader (free, SIL Open Font License), loaded in the
+  // frontend's main.tsx. The rest only show while it loads.
+  --font-serif: "Newsreader Variable", ui-serif, "New York", Georgia, serif;
+  // The site's mono, for small labels and counters: Departure Mono, loaded in
+  // the frontend's main.scss
+  --font-mono: "Departure Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
   // Semantic text tokens
   --heading-large: var(--font-bold) var(--text-28);
   --heading-medium: var(--font-medium) var(--text-18);

@@ -34,6 +34,17 @@ export const SBTIME_AUTHOR: ReleaseAuthor = {
 
 export const RELEASES: Release[] = [
   {
+    slug: "about-page",
+    date: "2026-11-14",
+    title: "Meet the team",
+    summary:
+      "The About page has been redesigned to introduce the students behind SBTime, with team photos and a way to join.",
+    body: [
+      "The About page now introduces the people who build SBTime: everyone on the team with their role, a stack of photos from along the way that you can flip through, and each member's signature.",
+      "SBTime is built by UCSB students, for UCSB students. If you'd like to help, whether that's writing code, designing, or spreading the word, use Join the team at the bottom of the page.",
+    ],
+  },
+  {
     slug: "new-home-page",
     image: {
       src: "/images/linkpreview.png",

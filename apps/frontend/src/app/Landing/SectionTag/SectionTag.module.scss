@@ -1,0 +1,11 @@
+// Departure Mono at its native 11px (about Tailwind's text-xs), where the
+// pixels stay sharp
+.tag {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 12px;
+  font-weight: 400;
+  color: var(--label-color);
+  user-select: none;
+}

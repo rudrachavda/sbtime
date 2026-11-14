@@ -68,9 +68,9 @@ $sm: 640px;
   mask: var(--signature) center / contain no-repeat;
 }
 
-// Until there's a signature: the name in the caption serif, in italics
+// Until there's a signature: the name in the site serif, in italics
 .placeholder {
-  font-family: ui-serif, "New York", Georgia, serif;
+  font-family: var(--font-serif);
   font-style: italic;
   font-size: 17px;
   line-height: 1;

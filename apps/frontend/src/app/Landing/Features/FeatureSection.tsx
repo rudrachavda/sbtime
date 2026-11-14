@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import SectionTag from "../SectionTag";
 import styles from "./FeatureSection.module.scss";
 
 // One home page feature section (from the design reference): heading,
@@ -7,6 +8,8 @@ import styles from "./FeatureSection.module.scss";
 // that runs off the page's right edge and fades out. Used once per feature.
 
 interface FeatureSectionProps {
+  /** The section number shown above the title, e.g. "01" */
+  tag: string;
   title: string;
   description: string;
   features: string[];
@@ -15,6 +18,7 @@ interface FeatureSectionProps {
 }
 
 export default function FeatureSection({
+  tag,
   title,
   description,
   features,
@@ -25,6 +29,7 @@ export default function FeatureSection({
       <div className={styles.container}>
         <div className={styles.copy}>
           <div className={styles.intro}>
+            <SectionTag>{tag}</SectionTag>
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.description}>{description}</p>
           </div>

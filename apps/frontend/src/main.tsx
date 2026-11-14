@@ -1,3 +1,7 @@
+// The site serif (--font-serif), self-hosted. Browsers only download it on
+// pages that use it.
+import "@fontsource-variable/newsreader/wght-italic.css";
+import "@fontsource-variable/newsreader/wght.css";
 import { createRoot } from "react-dom/client";
 
 import App from "./App";

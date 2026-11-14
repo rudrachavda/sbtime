@@ -5,6 +5,7 @@ import { Link } from "react-router";
 
 import { RELEASES, type Release, releaseLink } from "@/lib/releases";
 
+import SectionTag from "../SectionTag";
 import styles from "./Releases.module.scss";
 
 // "The Latest": the three newest entries from lib/releases.ts. A 3-column
@@ -70,7 +71,10 @@ export default function Releases() {
   return (
     <section className={styles.root}>
       <div className={styles.container}>
-        <h2 className={styles.heading}>The Latest</h2>
+        <div className={styles.headingBlock}>
+          <SectionTag>04</SectionTag>
+          <h2 className={styles.heading}>The Latest</h2>
+        </div>
 
         <ul ref={listRef} className={styles.list} onScroll={update}>
           {LATEST.map((release) => (

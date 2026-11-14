@@ -182,13 +182,12 @@ $sm: 640px;
   }
 }
 
-// The reference sets captions in Heldane, a paid font; this uses the
-// system's serif (New York on Apple devices) instead
+// Captions use the site serif (Heldane Text, like the reference)
 .captionTitle,
 .captionDate {
   margin: 0;
   max-width: 288px;
-  font-family: ui-serif, "New York", Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 15px;
   line-height: 22px;
   font-weight: 400;
