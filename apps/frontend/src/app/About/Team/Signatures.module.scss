@@ -18,7 +18,7 @@ $sm: 640px;
   row-gap: 40px;
 
   @media (width >= $sm) {
-    margin-top: 64px;
+    margin-top: 32px;
     column-gap: 64px;
   }
 }
