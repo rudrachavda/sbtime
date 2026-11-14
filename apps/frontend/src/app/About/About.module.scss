@@ -1,5 +1,11 @@
 @import "../../_mixins.scss";
 
+// Clips the glow at the window's edges so the page never scrolls sideways
+.page {
+  width: 100%;
+  overflow-x: clip;
+}
+
 .root {
   // No top padding: "Our Team" starts right under the navigation bar
   // The site's 1200px column with 24px side padding, so the page lines up
@@ -23,4 +29,39 @@
   border-bottom: 1px solid var(--hairline);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+// Experimental (SHOW_GLOW in index.tsx): a soft halo of UCSB navy and gold all
+// the way around the frame, in the hero glow's colors. It sits on a wrapper
+// behind the frame, whose solid background keeps the color past its edges.
+.glow {
+  position: relative;
+  isolation: isolate;
+
+  .teamFrame {
+    position: relative;
+    background-color: var(--foreground-color);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    z-index: -1;
+    border-radius: 24px;
+    background-image: conic-gradient(
+      from 210deg,
+      rgb(0 54 96 / 20%),
+      rgb(254 188 17 / 20%),
+      rgb(0 54 96 / 20%),
+      rgb(254 188 17 / 20%),
+      rgb(0 54 96 / 20%)
+    );
+    filter: blur(40px);
+    pointer-events: none;
+
+    @include dark-mode {
+      opacity: 0.8;
+    }
+  }
 }

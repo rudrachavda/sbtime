@@ -2,15 +2,16 @@ import { useState } from "react";
 
 import {
   AnimatePresence,
-  motion,
   TargetAndTransition,
+  motion,
   useReducedMotion,
 } from "framer-motion";
 import { NavArrowLeft, NavArrowRight } from "iconoir-react";
 import { Link } from "react-router";
 
-import { JOIN_TEAM_LINK, TEAM_PHOTOS } from "./data";
 import styles from "./PhotoDeck.module.scss";
+import Signatures from "./Signatures";
+import { JOIN_TEAM_LINK, TEAM_PHOTOS } from "./data";
 
 // The team photos as a deck of prints: the current one on top, the rest
 // fanned out underneath. Next drops the top print forward and fades it out as
@@ -130,6 +131,8 @@ export default function PhotoDeck() {
           </AnimatePresence>
         </div>
       </div>
+
+      <Signatures />
 
       <Link to={JOIN_TEAM_LINK} className={styles.join}>
         Join the team

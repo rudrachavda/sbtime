@@ -1,7 +1,7 @@
 import { User } from "iconoir-react";
 
-import { FEATURED_MEMBERS, MEMBERS, TeamMember } from "./data";
 import styles from "./TeamGrid.module.scss";
+import { FEATURED_MEMBERS, MEMBERS, TeamMember } from "./data";
 
 // "Our Team": four large cards on the left, then the rest of the team in two
 // columns of compact rows on the right. One column on phones.

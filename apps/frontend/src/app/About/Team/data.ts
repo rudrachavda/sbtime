@@ -33,6 +33,49 @@ export const MEMBERS: TeamMember[] = [
   { name: "Team member", role: "Outreach" },
 ];
 
+export interface TeamSignature {
+  name: string;
+  /** Personal site, LinkedIn or X; shows the name on hover either way */
+  link?: string;
+  /**
+   * The signature as an SVG under /public, e.g. "/images/signatures/alex.svg",
+   * with its viewBox width and height. Drawn in the text color, so any single
+   * colour works. Without one, the name shows in italics instead.
+   */
+  signature?: { src: string; width: number; height: number };
+  /** Drawn height on desktop in px (default 56); phones use about 3/4 of it */
+  height?: number;
+}
+
+/** The signatures under the photos, three to a row (two on phones). Dummy
+ * signatures for now */
+export const SIGNATURES: TeamSignature[] = [
+  {
+    name: "Joseph",
+    signature: { src: "/images/signatures/joseph.svg", width: 75, height: 51 },
+  },
+  {
+    name: "Ethan",
+    signature: { src: "/images/signatures/ethan.svg", width: 85, height: 51 },
+  },
+  {
+    name: "Riley",
+    signature: { src: "/images/signatures/riley.svg", width: 81.5, height: 51 },
+  },
+  {
+    name: "John",
+    signature: { src: "/images/signatures/john.svg", width: 65.5, height: 51 },
+  },
+  {
+    name: "Jane",
+    signature: { src: "/images/signatures/jane.svg", width: 63, height: 51 },
+  },
+  {
+    name: "Rudra",
+    signature: { src: "/images/signatures/rudra.svg", width: 93.2, height: 51 },
+  },
+];
+
 /** Where "Join the team" goes. No page there yet, so it shows the 404 page */
 export const JOIN_TEAM_LINK = "/join";
 

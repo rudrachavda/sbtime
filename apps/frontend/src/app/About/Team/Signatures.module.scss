@@ -1,0 +1,82 @@
+// From the user's team-page reference (Tailwind spacing: 1 = 4px). sm = 640px.
+
+$sm: 640px;
+
+// Two to a row with a 40px gap on phones; three with a 64px gap from sm up,
+// 680px wide at most
+.list {
+  width: 100%;
+  max-width: 680px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 40px;
+  row-gap: 40px;
+
+  @media (width >= $sm) {
+    margin-top: 64px;
+    column-gap: 64px;
+  }
+}
+
+.item {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  flex-basis: calc((100% - 40px) / 2);
+  // Each signature's height comes from the data (--height); phones use 3/4
+  height: calc(var(--height) * 0.75);
+
+  @media (width >= $sm) {
+    flex-basis: calc((100% - 128px) / 3);
+    height: var(--height);
+  }
+}
+
+.signature {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: var(--paragraph-color);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 200ms ease-out;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--heading-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--blue-500);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+
+// The SVG, filled with the text color through a mask
+.mark {
+  display: block;
+  height: 100%;
+  // A wide signature shrinks to fit its slot instead of overflowing
+  max-width: 100%;
+  background-color: currentColor;
+  mask: var(--signature) center / contain no-repeat;
+}
+
+// Until there's a signature: the name in the caption serif, in italics
+.placeholder {
+  font-family: ui-serif, "New York", Georgia, serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1;
+  white-space: nowrap;
+
+  @media (width >= $sm) {
+    font-size: 20px;
+  }
+}
