@@ -49,7 +49,7 @@
 
   @media (width >= 1024px) {
     position: sticky;
-    top: calc(var(--header-height, 57px) + 64px);
+    top: calc(var(--header-height, 57px) + 32px);
     align-self: start;
   }
 }
