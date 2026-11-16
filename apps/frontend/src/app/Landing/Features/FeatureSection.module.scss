@@ -24,12 +24,9 @@ $hairline: 0.5px solid var(--border-color);
     top: 0;
     left: max(#{$page-padding}, calc((100% - #{$content-max}) / 2));
     right: max(#{$page-padding}, calc((100% - #{$content-max}) / 2));
-    height: 0.5px;
-    background-color: rgb(0 0 0 / 8%);
-
-    @include dark-mode {
-      background-color: rgb(255 255 255 / 8%);
-    }
+    // Same as the line under "TLDR": 1px in the theme's border color
+    height: 1px;
+    background-color: var(--border-color);
   }
 }
 

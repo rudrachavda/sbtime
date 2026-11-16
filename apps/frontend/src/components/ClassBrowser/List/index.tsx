@@ -3,10 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { EmptyPage } from "iconoir-react";
 
+import { Tooltip } from "@repo/theme";
+
 import ClassCard from "@/components/ClassCard";
 import ClassCardSkeleton from "@/components/ClassCard/Skeleton";
+import Time from "@/components/Time";
 import { useTracking } from "@/hooks/api/tracking/useTracking";
 import { ICatalogClassServer } from "@/lib/api/catalog";
+import { formatClassNumber } from "@/lib/classNumber";
+import { formatSubject } from "@/lib/subject";
 
 import Header from "../Header";
 import { useLayoutContext } from "../context/LayoutContext";
@@ -56,6 +61,30 @@ const adaptForClassCard = (_class: ICatalogClassServer) => {
     },
   };
 };
+
+// Each distinct meeting on its own line, e.g. "MW, 9:30 - 10:45 AM".
+function MeetingTimes({ meetings }: Pick<ICatalogClassServer, "meetings">) {
+  const unique = (meetings ?? []).filter(
+    (meeting, index, all) =>
+      all.findIndex(
+        (other) =>
+          other.startTime === meeting.startTime &&
+          other.endTime === meeting.endTime &&
+          other.days?.join() === meeting.days?.join()
+      ) === index
+  );
+
+  if (unique.length === 0) return <Time />;
+
+  return unique.map((meeting, index) => (
+    <Time
+      key={index}
+      days={meeting.days}
+      startTime={meeting.startTime}
+      endTime={meeting.endTime}
+    />
+  ));
+}
 
 interface ListProps {
   onSelect: (
@@ -172,13 +201,22 @@ export default function List({ onSelect }: ListProps) {
               {items.map(({ key, index }) => {
                 const _class = classes[index];
 
+                // Sections of one course look alike apart from their number,
+                // so hovering shows when this one meets.
                 return (
-                  <ClassCard
-                    class={adaptForClassCard(_class)}
-                    data-index={index}
+                  <Tooltip
                     key={key}
-                    ref={virtualizer.measureElement}
-                    onClick={() => handleClassClick(index)}
+                    trigger={
+                      <ClassCard
+                        class={adaptForClassCard(_class)}
+                        data-index={index}
+                        ref={virtualizer.measureElement}
+                        onClick={() => handleClassClick(index)}
+                      />
+                    }
+                    side="right"
+                    title={`${formatSubject(_class.subject)} ${_class.courseNumber} #${formatClassNumber(_class.number)}`}
+                    description={<MeetingTimes meetings={_class.meetings} />}
                   />
                 );
               })}
