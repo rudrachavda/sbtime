@@ -42,5 +42,25 @@
     gap: 12px;
     padding: 0 12px;
     z-index: 1;
+
+    // Drag a class to reorder the list, as in GradPath
+    .draggable[draggable="true"]:hover {
+      cursor: grab;
+    }
+
+    .draggable[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    .dragging {
+      opacity: 0.4;
+    }
+
+    .placeholder {
+      flex-shrink: 0;
+      border-radius: 8px;
+      border: 1px dashed var(--border-color);
+      background-color: var(--foreground-color);
+    }
   }
 }

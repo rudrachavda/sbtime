@@ -258,11 +258,10 @@ export default function Editor() {
   );
 
   const handleSortEnd = useCallback(
+    // Indices are positions in schedule.classes
     (previousIndex: number, currentIndex: number) => {
-      previousIndex -= schedule.events.length;
-      currentIndex -= schedule.events.length;
-
       if (previousIndex < 0 || currentIndex < 0) return;
+      if (previousIndex === currentIndex) return;
 
       // Clone the schedule for immutability
       const _schedule = structuredClone(schedule);
@@ -270,6 +269,16 @@ export default function Editor() {
       const [removed] = _schedule.classes.splice(previousIndex, 1);
 
       _schedule.classes.splice(currentIndex, 0, removed);
+
+      // Keep each class open or closed as it was
+      setExpanded((expandedClasses) => {
+        const _expandedClasses = schedule.classes.map(
+          (_, index) => expandedClasses[index] ?? false
+        );
+        const [wasExpanded] = _expandedClasses.splice(previousIndex, 1);
+        _expandedClasses.splice(currentIndex, 0, wasExpanded);
+        return _expandedClasses;
+      });
 
       // Update the schedule
       updateSchedule(

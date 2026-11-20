@@ -25,11 +25,11 @@ export interface Release {
   author?: ReleaseAuthor;
 }
 
-// The Storke Tower tab icon as the team's avatar
+// The Storke Tower tab icon, in blue, as the team's avatar
 export const SBTIME_AUTHOR: ReleaseAuthor = {
   name: "SBTime",
   role: "Team",
-  avatar: "/favicon.svg",
+  avatar: "/team-avatar.svg",
 };
 
 export const RELEASES: Release[] = [
